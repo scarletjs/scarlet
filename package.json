@@ -22,7 +22,7 @@
   "engines": {
     "node": ">= 0.2.0"
   },
-  "main": "./lib/scarlet.js",
+  "main": "./index.js",
   "directories": {
     "test": "tests",
     "lib": "lib"

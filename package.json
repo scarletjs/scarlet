@@ -1,0 +1,36 @@
+{
+  "name": "scarlet",
+  "description": "A Javascript interceptor",
+  "version": "0.0.6",
+  "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tjchaplin/scarlet.git"
+  },
+  "homepage": "https://github.com/tjchaplin/scarlet.git",
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-release": "~0.3.3"
+  },
+  "browserDependencies": {},
+  "dependencies": {
+  },
+  "keywords": [
+  ],
+  "engines": {
+    "node": ">= 0.2.0"
+  },
+  "main": "./lib/scarlet.js",
+  "directories": {
+    "test": "tests",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha tests/*"
+  },
+  "license": "MIT"
+}

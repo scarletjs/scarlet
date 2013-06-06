@@ -5,6 +5,7 @@ var Interceptor = require("../lib/interceptor.js");
 function add1Interceptor() { };
 add1Interceptor.prototype = Object.create(Interceptor.prototype);
 add1Interceptor.prototype.functionInvocation = function(targetMethod, paramaters){
+
 	var self = this;
 	var result = self.proceed(targetMethod,paramaters);
 	return result+1;
@@ -36,9 +37,7 @@ describe('Given an Interceptor Container',function(){
 			var result = object.return1();
 			result.should.be.eql(2);
 			Scarlet.reset(object);
-			console.log(object);
 			var result = object.return1();
-			console.log(result);
 			result.should.be.eql(1);
 			onComplete();
 		});

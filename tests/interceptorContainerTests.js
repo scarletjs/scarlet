@@ -95,47 +95,21 @@ describe('Given an Interceptor Container',function(){
 				
 			});
 		 });
-		describe('When registering two interceptors for the same object',function(){
-			Scarlet.reset();
-
-			it("should throw",function(onComplete){
-				Scarlet.reset();
-				function function1(){};
-				function function2(){};
-
-				try{
-					Scarlet.register(new add1Interceptor()).forObject(function1);
-					Scarlet.register(new add1Interceptor()).forObject(function1);
-				}catch(exception){
-					onComplete();
-				}
-				
-			});
-		 });
-
-		describe('When registering a single interceptor for an object',function(){
-			it("should not throw",function(onComplete){
-				Scarlet.reset();
-				function function1(){};
-				Scarlet.register(new add1Interceptor()).forObject(function1);
-				onComplete();				
-			});
-		 });
 
 
 		describe('When registering an interceptor for an object instance',function(){
 
-			it("should throw",function(onComplete){
+			it("should apply interceptor",function(onComplete){
 				Scarlet.reset();
-				function function1(){};
+				function function1(){
+					this.return1 = function(){return 1;}
+				};
+				var f1 = new function1();
+				Scarlet.register(new add1Interceptor()).forObject(f1);
+				var result = f1.return1();
+				result.should.be.eql(2);
 
-				try{
-					Scarlet.register(new add1Interceptor()).forObject(new function1());
-				}catch(exception){
-					onComplete();
-				}
-
-				
+				onComplete();
 			});
 		 });
 });

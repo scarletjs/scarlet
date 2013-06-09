@@ -2,14 +2,12 @@ var should = require('should');
 var Interceptor = require("../lib/interceptor.js");
 var PrototypeProxy = require("../lib/prototype-proxy.js");
 
-function add1Interceptor() { };
-add1Interceptor.prototype = Object.create(Interceptor.prototype);
-add1Interceptor.prototype.functionInvocation = function(targetMethod, paramaters){
-
+function add1Interceptor() { 
 	var self = this;
-	var result = self.proceed(targetMethod,paramaters);
+	var result = self.proceed(arguments);
 	return result+1;
 };
+
 
 describe('When using a prototype proxy',function(){
 	var proxy = new PrototypeProxy();
@@ -18,7 +16,7 @@ describe('When using a prototype proxy',function(){
 		var PrototypeObject = function(){};
 		PrototypeObject.prototype.return1 = function(){return 1;};
 
-		var returnedProxyObject =  proxy.create(PrototypeObject,new add1Interceptor());		
+		var returnedProxyObject =  proxy.create(PrototypeObject,add1Interceptor);		
 
 		it("should update the proxied object with an interceptor",function(onComplete){
 			var updatedPrototyeObject = new PrototypeObject();

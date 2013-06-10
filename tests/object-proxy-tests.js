@@ -2,9 +2,9 @@ var should = require('should');
 var Interceptor = require("../lib/interceptor.js");
 var ObjectProxy = require("../lib/object-proxy.js");
 
-function add1Interceptor() { 
+function add1Interceptor(invocation) { 
 	var self = this;
-	var result = self.proceed(arguments);
+	var result = invocation.proceed();
 	return result+1;
 };
 

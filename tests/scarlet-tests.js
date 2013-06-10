@@ -2,9 +2,9 @@ var should = require('should');
 var Scarlet = require("../lib/scarlet.js");
 var Interceptor = require("../lib/interceptor.js");
 
-function add1Interceptor() { 
+function add1Interceptor(invocation) { 
 	var self = this;
-	var result = self.proceed(arguments);
+	var result = invocation.proceed();
 	return result+1;
 };
 

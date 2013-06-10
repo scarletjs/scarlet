@@ -60,16 +60,16 @@ describe('Given an Interceptor',function(){
 		it('should call all functions',function(onComplete){
 			var interceptor = new Interceptor();
 			var numberOfCalls = 0;
-			var firstFunction = function(){
+			var interceptorFunction = function(invocation){
 				numberOfCalls+=1;
-				this.proceed(arguments);
+				invocation.proceed();
 			};
-			var lastFunction = function(){
+			var functionToIntercept = function(){
 				numberOfCalls+=1;
 				numberOfCalls.should.be.eql(2);
 				onComplete();
 			};
-			interceptor.intercept(lastFunction).by(firstFunction).proceed();
+			interceptor.intercept(functionToIntercept).by(interceptorFunction).proceed();
 
 		});
 	});

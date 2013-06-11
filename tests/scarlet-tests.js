@@ -7,6 +7,15 @@ function add1Interceptor(invocation) {
 	var result = invocation.proceed();
 	return result+1;
 };
+i = function(){
+
+};
+i.prototype.add2Interceptor = function (invocation) { 
+	var self = this;
+	console.log(invocation);
+	var result = invocation.proceed();
+	return result+1;
+};
 
 describe('Given an Interceptor Container',function(){
 
@@ -17,8 +26,8 @@ describe('Given an Interceptor Container',function(){
 				function1.prototype.return1 = function(){
 					return 1;
 				}
-
-				Scarlet.register(add1Interceptor).forObject(function1);
+				var j = new i();
+				Scarlet.register(j.add2Interceptor).forObject(function1);
 				var f1 = new function1();
 				var result = f1.return1();
 				result.should.be.eql(2);

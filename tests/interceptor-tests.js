@@ -73,4 +73,69 @@ describe('Given an Interceptor',function(){
 
 		});
 	});
+	describe('When creating an interceptor with a defined context',function(){
+		it('should create the defined context',function(onComplete){
+			var interceptorFunction = function(invocation){
+				numberOfCalls+=1;
+				invocation.proceed();
+			};
+
+			var context = Interceptor.createInterceptorContext(interceptorFunction);
+			context.name.should.not.be.eql(undefined);
+			onComplete();	
+
+		});
+	});
+	describe('When explicitily creating an interceptor context',function(){
+		it('should create the defined context',function(onComplete){
+			var interceptorFunction = function(invocation){
+				numberOfCalls+=1;
+				invocation.proceed();
+			};
+
+			var context = Interceptor.createInterceptorContext(interceptorFunction);
+			context.name.should.not.be.eql(undefined);
+			context.thisContext.should.not.be.eql(undefined);
+			context.interceptorMethod.should.not.be.eql(undefined);
+			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
+			onComplete();	
+
+		});
+	});
+	describe('When creating an interceptor with a defined context',function(){
+		it('should create the defined context',function(onComplete){
+			var interceptorFunction = function(invocation){
+				numberOfCalls+=1;
+				invocation.proceed();
+			};
+
+			var interceptor = new Interceptor()
+			var contextToPassIn = Interceptor.createInterceptorContext(interceptorFunction);
+			var context = interceptor.by(contextToPassIn).interceptors[0];
+
+			context.name.should.not.be.eql(undefined);
+			context.thisContext.should.not.be.eql(undefined);
+			context.interceptorMethod.should.not.be.eql(undefined);
+			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
+			onComplete();	
+
+		});
+	});
+	describe('When creating an interceptor without a defined context',function(){
+		it('should create the defined context',function(onComplete){
+			var interceptorFunction = function(invocation){
+				numberOfCalls+=1;
+				invocation.proceed();
+			};
+			var interceptor = new Interceptor()
+			var context = interceptor.by(interceptorFunction).interceptors[0];
+
+			context.name.should.not.be.eql(undefined);
+			context.thisContext.should.not.be.eql(undefined);
+			context.interceptorMethod.should.not.be.eql(undefined);
+			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
+			onComplete();	
+
+		});
+	});
 });

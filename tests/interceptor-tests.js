@@ -95,8 +95,8 @@ describe('Given an Interceptor',function(){
 
 			var context = Interceptor.createInterceptorContext(interceptorFunction);
 			context.name.should.not.be.eql(undefined);
-			context.thisContext.should.not.be.eql(undefined);
-			context.interceptorMethod.should.not.be.eql(undefined);
+			context.target.should.not.be.eql(undefined);
+			context.method.should.not.be.eql(undefined);
 			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
 			onComplete();	
 
@@ -114,8 +114,8 @@ describe('Given an Interceptor',function(){
 			var context = interceptor.by(contextToPassIn).interceptors[0];
 
 			context.name.should.not.be.eql(undefined);
-			context.thisContext.should.not.be.eql(undefined);
-			context.interceptorMethod.should.not.be.eql(undefined);
+			context.target.should.not.be.eql(undefined);
+			context.method.should.not.be.eql(undefined);
 			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
 			onComplete();	
 
@@ -131,8 +131,8 @@ describe('Given an Interceptor',function(){
 			var context = interceptor.by(interceptorFunction).interceptors[0];
 
 			context.name.should.not.be.eql(undefined);
-			context.thisContext.should.not.be.eql(undefined);
-			context.interceptorMethod.should.not.be.eql(undefined);
+			context.target.should.not.be.eql(undefined);
+			context.method.should.not.be.eql(undefined);
 			context.should.be.an.instanceOf(Interceptor.InterceptorContext);
 			onComplete();	
 

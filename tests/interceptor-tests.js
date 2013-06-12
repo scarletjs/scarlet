@@ -37,12 +37,11 @@ describe('Given an Interceptor',function(){
 			var testParamater = Object.create(arguments);
 			testParamater[0] = 1;
 
-			var target = function(paramater){
-				paramater.should.be.eql(testParamater);
+			var target = function(paramaters){
+				paramaters.should.be.eql(testParamater[0]);
 				onComplete();
 			};
-			
-			interceptor.intercept(target).proceed(testParamater);
+			interceptor.intercept(target).beginInvoke(target,testParamater);
 		});
 	});
 	describe('When target to invoke doesnt have paramaters',function(){

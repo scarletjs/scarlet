@@ -32,7 +32,6 @@ describe('When using a object proxy',function(){
 			onComplete();
 		});
 	});
-
 	describe('When copying object functions',function(){
 		var object = {
 			return1 : function(){return 1;}

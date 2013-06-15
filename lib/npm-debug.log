@@ -1,0 +1,20 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'test' ]
+2 info using npm@1.2.25
+3 info using node@v0.10.10
+4 verbose node symlink /usr/bin/node
+5 verbose read json /usr/local/src/node/scarlet/lib/package.json
+6 error Error: ENOENT, open '/usr/local/src/node/scarlet/lib/package.json'
+7 error If you need help, you may report this log at:
+7 error     <http://github.com/isaacs/npm/issues>
+7 error or email it to:
+7 error     <npm-@googlegroups.com>
+8 error System Linux 3.5.0-32-generic
+9 error command "/usr/bin/node" "/usr/bin/npm" "test"
+10 error cwd /usr/local/src/node/scarlet/lib
+11 error node -v v0.10.10
+12 error npm -v 1.2.25
+13 error path /usr/local/src/node/scarlet/lib/package.json
+14 error code ENOENT
+15 error errno 34
+16 verbose exit [ 34, true ]

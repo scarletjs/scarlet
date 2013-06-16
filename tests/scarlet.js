@@ -16,6 +16,7 @@ describe("Given we are intercepting", function() {
 	function interceptor(invocation) {
 		invocation.proceed();
 		methodWasCalled = true;
+		return invocation.result;
 	};
 
 	beforeEach(function() {
@@ -35,6 +36,15 @@ describe("Given we are intercepting", function() {
 
 			instance.method();
 			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept method with return value", function() {
+
+			var result = instance.methodWithReturn();
+			
+			assert(methodWasCalled);
+			assert(result);
 
 		});
 

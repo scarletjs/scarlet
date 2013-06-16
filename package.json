@@ -28,7 +28,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha tests/*"
+    "test": "./node_modules/mocha/bin/mocha tests/* --reporter spec"
   },
   "license": "MIT"
 }

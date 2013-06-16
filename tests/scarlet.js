@@ -2,12 +2,12 @@ var l = console.log;
 var i = require("util").inspect;
 var assert = require("assert");
 
-var scarlet = require("../../lib/rewrite/scarlet");
+var scarlet = require("../lib/rewrite/scarlet");
 
-ObjectLiteral = require("../dummies/object-literal");
-NamedFunction = require("../dummies/named-function");
-UnnamedFunction = require("../dummies/unnamed-function");
-PrototypeFunction = require("../dummies/prototype-function");
+ObjectLiteral = require("./dummies/object-literal");
+NamedFunction = require("./dummies/named-function");
+UnnamedFunction = require("./dummies/unnamed-function");
+PrototypeFunction = require("./dummies/prototype-function");
 
 describe("Given we are intercepting", function() {
 
@@ -128,7 +128,7 @@ describe("Given we are intercepting", function() {
 	describe("When we have a prototype function type", function() {
 
 		PrototypeFunction = scarlet.intercept(PrototypeFunction)
-			.asInstance().using(interceptor);
+			.asType().using(interceptor);
 
 		var instance = new PrototypeFunction();
 

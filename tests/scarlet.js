@@ -2,7 +2,7 @@ var l = console.log;
 var i = require("util").inspect;
 var assert = require("assert");
 
-var scarlet = require("../lib/scarlet");
+var scarlet = require("../lib");
 
 ObjectLiteral = require("./dummies/object-literal");
 NamedFunction = require("./dummies/named-function");

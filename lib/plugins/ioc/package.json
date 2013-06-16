@@ -1,0 +1,42 @@
+{
+  "name": "scarlet-contrib-plugins",
+  "description": "A Javascript inversion of control container",
+  "version": "0.0.1",
+  "author": "fir3pho3nixx <fir3pho3nixx@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fir3pho3nixx/scarlet-contrib-ioc.git"
+  },
+  "homepage": "https://github.com/fir3pho3nixx/scarlet-contrib-ioc.git",
+  "dependencies": {
+    "string": "1.4.x",
+    "string-format": "0.2.x"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*",
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-watch": "~0.4.0",
+    "grunt-release": "~0.3.3"
+  },
+  "browserDependencies": {},
+  "keywords": [
+    "scarlet", 
+    "plugin",
+    "plugin-contrib", 
+    "plugin-contrib-ioc"
+  ],
+  "engines": {
+    "node": ">= 0.2.0"
+  },
+  "main": "./index.js",
+  "directories": {
+    "test": "tests",
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha tests/* --reporter spec"
+  },
+  "license": "MIT"
+}

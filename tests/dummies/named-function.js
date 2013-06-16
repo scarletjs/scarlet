@@ -1,7 +1,7 @@
 function NamedFunction(){
 	
 	this.property = "";
-	
+
 	this.method = function(){
 	};
 	

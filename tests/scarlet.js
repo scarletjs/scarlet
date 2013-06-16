@@ -42,7 +42,6 @@ describe("Given we are intercepting", function() {
 		it("Then should be able to intercept method with return value", function() {
 
 			var result = instance.methodWithReturn();
-			
 			assert(methodWasCalled);
 			assert(result);
 
@@ -66,6 +65,14 @@ describe("Given we are intercepting", function() {
 
 		});
 
+		it("Then should be able to intercept method with return value", function() {
+
+			var result = instance.methodWithReturn();
+			assert(methodWasCalled);
+			assert(result);
+
+		});
+
 	});
 
 	describe("When we have a named function type", function() {
@@ -73,11 +80,20 @@ describe("Given we are intercepting", function() {
 		NamedFunction = scarlet.intercept(NamedFunction)
 			.asType().using(interceptor);
 
+		var instance = new NamedFunction();
+
 		it("Then should be able to intercept method", function() {
 
-			var instance = new NamedFunction();
 			instance.method();
 			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept method with return value", function() {
+
+			var result = instance.methodWithReturn();
+			assert(methodWasCalled);
+			assert(result);
 
 		});
 
@@ -99,6 +115,14 @@ describe("Given we are intercepting", function() {
 
 		});
 
+		it("Then should be able to intercept method with return value", function() {
+
+			var result = instance.methodWithReturn();
+			assert(methodWasCalled);
+			assert(result);
+
+		});
+
 	});
 
 	describe("When we have an unnamed function type", function() {
@@ -112,6 +136,14 @@ describe("Given we are intercepting", function() {
 
 			instance.method();
 			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept method with return value", function() {
+
+			var result = instance.methodWithReturn();
+			assert(methodWasCalled);
+			assert(result);
 
 		});
 

@@ -8,6 +8,10 @@
     "url": "https://github.com/tjchaplin/scarlet.git"
   },
   "homepage": "https://github.com/tjchaplin/scarlet.git",
+  "dependencies": {
+    "string": "1.4.x",
+    "string-format": "0.2.x"
+  },
   "devDependencies": {
     "mocha": "*",
     "should": "*",
@@ -17,7 +21,6 @@
     "grunt-release": "~0.3.3"
   },
   "browserDependencies": {},
-  "dependencies": {},
   "keywords": [],
   "engines": {
     "node": ">= 0.2.0"

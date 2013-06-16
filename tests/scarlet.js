@@ -14,9 +14,9 @@ describe("Given we are intercepting", function() {
 	var methodWasCalled = false;
 
 	function interceptor(invocation) {
-		invocation.proceed();
+		var result = invocation.proceed();
 		methodWasCalled = true;
-		return invocation.result;
+		return result;
 	};
 
 	beforeEach(function() {

@@ -23,6 +23,7 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
+
 	describe("When we have an object literal instance", function() {
 
 		var instance = ObjectLiteral;
@@ -175,6 +176,47 @@ describe("Given we are intercepting", function() {
 			instance.method();
 			assert(methodWasCalled);
 
+		});
+
+	});
+
+
+	describe("When we have a prototype function instance", function() {
+		describe("When intercepted method uses an instance property", function() {
+
+			PrototypeFunction = scarlet.interceptType(PrototypeFunction)
+				.using(interceptor);
+
+			var instance = new PrototypeFunction();
+
+			it("Then should be able to use it", function() {
+
+				var result = instance.methodUsingInstanceProperty();
+
+				assert.equal(result,instance.anyInstanceProperty);
+				assert.notEqual(result,undefined);
+			});
+		});
+
+	});
+
+
+
+	describe("When we have a prototype function instance", function() {
+		describe("When intercepted method uses an instance property", function() {
+			
+			var instance = new PrototypeFunction();
+
+			PrototypeFunction = scarlet.interceptObject(instance)
+				.using(interceptor);
+
+			it("Then should be able to use it", function() {
+
+				var result = instance.methodUsingInstanceProperty();
+
+				assert.equal(result,instance.anyInstanceProperty);
+				assert.notEqual(result,undefined);
+			});
 		});
 
 	});

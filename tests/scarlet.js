@@ -23,7 +23,6 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-
 	describe("When we have an object literal instance", function() {
 
 		var instance = ObjectLiteral;
@@ -31,6 +30,20 @@ describe("Given we are intercepting", function() {
 		scarlet
 			.interceptObject(instance)
 			.using(interceptor);
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
 
 		it("Then should be able to intercept method", function() {
 
@@ -57,6 +70,20 @@ describe("Given we are intercepting", function() {
 			.interceptObject(instance)
 			.using(interceptor);
 
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
 		it("Then should be able to intercept method", function() {
 
 			instance.method();
@@ -80,6 +107,20 @@ describe("Given we are intercepting", function() {
 			.using(interceptor);
 
 		var instance = new NamedFunction();
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
 
 		it("Then should be able to intercept method", function() {
 
@@ -106,6 +147,20 @@ describe("Given we are intercepting", function() {
 			.interceptObject(instance)
 			.using(interceptor);
 
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
 		it("Then should be able to intercept method", function() {
 
 			instance.method();
@@ -129,6 +184,20 @@ describe("Given we are intercepting", function() {
 			.using(interceptor);
 
 		var instance = new UnnamedFunction();
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
+
+		it("Then should be able to intercept the property getter", function() {
+
+			var result = instance.property;
+			assert(methodWasCalled);
+
+		});
 
 		it("Then should be able to intercept method", function() {
 

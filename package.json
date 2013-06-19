@@ -1,7 +1,7 @@
 {
   "name": "scarlet",
   "description": "A Javascript interceptor",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "mocha": "*",
     "should": "*",
+    "prompt": "~0.2.9",
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.4.3",
     "grunt-contrib-watch": "~0.4.0",

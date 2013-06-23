@@ -9,8 +9,6 @@
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
   "dependencies": {
-    "string": "1.4.x",
-    "string-format": "0.2.x"
   },
   "devDependencies": {
     "mocha": "*",

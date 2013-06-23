@@ -1,6 +1,6 @@
 assert = require("assert");
 
-Enumerable = require("../lib/enumerable");
+Enumerable = require("../lib/extensions/enumerable");
 
 ObjectLiteral = require("./dummies/object-literal");
 NamedFunction = require("./dummies/named-function");

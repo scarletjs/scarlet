@@ -28,7 +28,7 @@ describe("Given we are intercepting", function() {
 		var instance = ObjectLiteral;
 
 		scarlet
-			.interceptObject(instance)
+			.intercept(instance)
 			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
@@ -67,7 +67,7 @@ describe("Given we are intercepting", function() {
 		var instance = new NamedFunction();
 
 		scarlet
-			.interceptObject(instance)
+			.intercept(instance)
 			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
@@ -103,7 +103,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a named function type", function() {
 
-		NamedFunction = scarlet.interceptType(NamedFunction)
+		NamedFunction = scarlet.intercept(NamedFunction)
 			.using(interceptor);
 
 		var instance = new NamedFunction();
@@ -144,7 +144,7 @@ describe("Given we are intercepting", function() {
 		var instance = new UnnamedFunction();
 
 		scarlet
-			.interceptObject(instance)
+			.intercept(instance)
 			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
@@ -180,7 +180,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have an unnamed function type", function() {
 
-		UnnamedFunction = scarlet.interceptType(UnnamedFunction)
+		UnnamedFunction = scarlet.intercept(UnnamedFunction)
 			.using(interceptor);
 
 		var instance = new UnnamedFunction();
@@ -221,7 +221,7 @@ describe("Given we are intercepting", function() {
 		var instance = new PrototypeFunction();
 
 		scarlet
-			.interceptObject(instance)
+			.intercept(instance)
 			.using(interceptor);
 
 		it("Then should be able to intercept method", function() {
@@ -235,7 +235,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a prototype function type", function() {
 
-		PrototypeFunction = scarlet.interceptType(PrototypeFunction)
+		PrototypeFunction = scarlet.intercept(PrototypeFunction)
 			.using(interceptor);
 
 		var instance = new PrototypeFunction();
@@ -253,7 +253,7 @@ describe("Given we are intercepting", function() {
 	describe("When we have a prototype function instance", function() {
 		describe("When intercepted method uses an instance property", function() {
 
-			PrototypeFunction = scarlet.interceptType(PrototypeFunction)
+			PrototypeFunction = scarlet.intercept(PrototypeFunction)
 				.using(interceptor);
 
 			var instance = new PrototypeFunction();
@@ -276,7 +276,7 @@ describe("Given we are intercepting", function() {
 			
 			var instance = new PrototypeFunction();
 
-			PrototypeFunction = scarlet.interceptObject(instance)
+			PrototypeFunction = scarlet.intercept(instance)
 				.using(interceptor);
 
 			it("Then should be able to use it", function() {
@@ -310,7 +310,7 @@ describe("Given we are intercepting", function() {
 					};
 				};
 
-				AnyObject = scarlet.interceptType(AnyObject)
+				AnyObject = scarlet.intercept(AnyObject)
 					.using(interceptor);
 
 				var anyObject = new AnyObject();

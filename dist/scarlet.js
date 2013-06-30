@@ -3,7 +3,57 @@ return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require
 module.exports = require("./lib/scarlet.js");
 module.exports.Interceptor = require("./lib/interceptor.js");
 
-},{"./lib/scarlet.js":2,"./lib/interceptor.js":3}],3:[function(require,module,exports){
+},{"./lib/scarlet.js":2,"./lib/interceptor.js":3}],2:[function(require,module,exports){
+var assert = require("assert");
+
+function Scarlet() {
+
+	"use strict";
+
+	var self = this;
+
+	self.lib = require("./index");
+
+	self.plugins = {};
+
+	var interceptType = function(typeOrInstance) {
+
+		assert(typeOrInstance, "Cannot have null type or instance");
+
+		var _interceptor = new self.lib.Interceptor(typeOrInstance);
+
+		return new _interceptor.asType();
+	};
+
+	var interceptObject = function(typeOrInstance) {
+
+		assert(typeOrInstance, "Cannot have null type or instance");
+
+		var _interceptor = new self.lib.Interceptor(typeOrInstance);
+
+		return _interceptor.asObject();
+	};
+
+	self.loadPlugin = function(pluginPath) {
+		self.lib.Plugins.loadPlugin(self, pluginPath);
+	};
+
+	self.intercept = function(typeOrInstance) {
+
+		assert(typeOrInstance, "Cannot have null type or instance");
+
+		var self = this;
+
+		if (typeOrInstance.prototype)
+			return interceptType(typeOrInstance);
+
+		return interceptObject(typeOrInstance);
+	};
+
+}
+
+module.exports = new Scarlet();
+},{"assert":4,"./index":5}],3:[function(require,module,exports){
 var assert = require("assert");
 var invocation = require("./invocation");
 var proxyInstance = require("./proxy-instance");
@@ -54,57 +104,31 @@ function Interceptor(typeOrInstance) {
 }
 
 module.exports = Interceptor;
-},{"assert":4,"./invocation":5,"./proxy-instance":6,"./proxy-prototype":7}],2:[function(require,module,exports){
+},{"assert":4,"./invocation":6,"./proxy-prototype":7,"./proxy-instance":8}],6:[function(require,module,exports){
 var assert = require("assert");
 
-function Scarlet() {
+function Invocation(object, method, args) {
 
-	"use strict";
+	assert(object, "Scarlet::Invocation::object == null");
+	assert(method, "Scarlet::Invocation::method == null");
+	assert(args, "Scarlet::Invocation::args == null");
 
 	var self = this;
 
-	self.lib = require("./index");
+	self.args = args;
+	self.object = object;
+	self.method = method;
+	self.result = null;
 
-	self.plugins = {};
-
-	var interceptType = function(typeOrInstance) {
-
-		assert(typeOrInstance, "Cannot have null type or instance");
-
-		var _interceptor = new self.lib.Interceptor(typeOrInstance);
-
-		return new _interceptor.asType();
+	self.proceed = function() {
+		var parameters = Array.prototype.slice.call(args);
+		self.result = self.method.apply(self.object, parameters);
+		return self.result;
 	};
-
-	var interceptObject = function(typeOrInstance) {
-
-		assert(typeOrInstance, "Cannot have null type or instance");
-
-		var _interceptor = new self.lib.Interceptor(typeOrInstance);
-
-		return _interceptor.asObject();
-	};
-
-	self.loadPlugin = function(pluginPath) {
-		self.lib.Plugins.loadPlugin(self, pluginPath);
-	};
-
-	self.intercept = function(typeOrInstance) {
-
-		assert(typeOrInstance, "Cannot have null type or instance");
-
-		var self = this;
-
-		if (typeOrInstance.prototype)
-			return interceptType(typeOrInstance);
-
-		return interceptObject(typeOrInstance);
-	};
-
 }
 
-module.exports = new Scarlet();
-},{"assert":4,"./index":8}],4:[function(require,module,exports){
+module.exports = Invocation;
+},{"assert":4}],4:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -774,31 +798,153 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":11}],5:[function(require,module,exports){
-var assert = require("assert");
+},{"events":11}],8:[function(require,module,exports){
+var enumerable = require("./extensions/enumerable");
 
-function Invocation(object, method, args) {
-
-	assert(object, "Scarlet::Invocation::object == null");
-	assert(method, "Scarlet::Invocation::method == null");
-	assert(args, "Scarlet::Invocation::args == null");
+function ProxyInstance(interceptor, callback) {
 
 	var self = this;
 
-	self.args = args;
-	self.object = object;
-	self.method = method;
-	self.result = null;
+	self.interceptor = interceptor;
 
-	self.proceed = function() {
-		var parameters = Array.prototype.slice.call(args);
-		self.result = self.method.apply(self.object, parameters);
-		return self.result;
+	self.whenCalled = function(target) {
+
+		if (!interceptor.instance.__scarlet) {
+
+			interceptor.instance.__scarlet = {};
+
+			enumerable.forEach(interceptor.instance, function(member, memberName) {
+
+				self.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];
+
+				createPropertyProxy(member, memberName, target);
+
+				createFunctionProxy(member, memberName, target);
+
+			});
+		}
+
+		return interceptor.instance;
 	};
+
+	var createPropertyProxy = function(member,memberName,target){
+		if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet")) {
+
+			self.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {
+
+				configurable: true,
+
+				get: function(){
+					return target(function(){
+						return self.interceptor.instance.__scarlet[memberName];
+					}, self.interceptor.instance.__scarlet[memberName]);
+				},
+				
+				set: function(value){
+					target(function(){
+						self.interceptor.instance.__scarlet[memberName] = value;	
+					}, value);
+				}
+				
+			});
+		}
+	};
+
+	var createFunctionProxy = function(member,memberName,target){
+		if (member instanceof(Function)) {
+			
+			var originalMethod = self.interceptor.instance.__scarlet[memberName];
+			
+			self.interceptor.instance[memberName] = function() {
+				return target(originalMethod, arguments);
+			};
+
+		}
+	};
+
+	self.unwrap = function() {
+
+		if (interceptor.instance.__scarlet) {
+
+			enumerable.forEach(interceptor.instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = interceptor.instance.__scarlet[memberName];
+					interceptor.instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
 }
 
-module.exports = Invocation;
-},{"assert":4}],12:[function(require,module,exports){
+module.exports = ProxyInstance;
+},{"./extensions/enumerable":12}],7:[function(require,module,exports){
+var assert = require("assert");
+var ProxyInstance = require("./proxy-instance");
+var inherits = require("./extensions/inherits");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyPrototype(interceptor, callback) {
+
+	var self = this;
+
+	self.inheritedType = null;
+	self.interceptor = interceptor;
+
+	self.whenCalled = function(target) {
+
+		assert(interceptor.type, "Scarlet::Interceptor::type == null");
+		assert(interceptor.type.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
+
+		self.inheritedType = function(){
+
+			var self = this;
+
+			(function() {
+
+				var interceptorTypeConstructor = function(){
+					
+					var parameters = Array.prototype.slice.call(arguments);
+					interceptor.type.apply(self,parameters);
+
+					interceptor.instance = self;
+
+					var proxy = new ProxyInstance(interceptor);
+					proxy.whenCalled(target);
+				};
+
+				return target(interceptorTypeConstructor,arguments)
+			}());
+
+		};
+
+		inherits(self.inheritedType, interceptor.type);
+		return self.inheritedType;
+		
+	};
+
+	self.unwrap = function() {};
+
+}
+
+module.exports = ProxyPrototype;
+},{"assert":4,"./proxy-instance":8,"./extensions/inherits":13,"./extensions/enumerable":12}],5:[function(require,module,exports){
+module.exports = {
+	Util: require("util"),
+	Assert: require("assert"),
+	Plugins: require("./plugins"),
+	Invocation: require("./invocation"),
+	Interceptor: require("./interceptor"),
+	ProxyInstance: require("./proxy-instance"),
+	ProxyPrototype: require("./proxy-prototype"),
+	Enumerable: require("./extensions/enumerable")
+};
+
+
+},{"util":9,"assert":4,"./invocation":6,"./proxy-instance":8,"./proxy-prototype":7,"./interceptor":3,"./extensions/enumerable":12,"./plugins":14}],15:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1038,153 +1184,19 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":12}],6:[function(require,module,exports){
-var enumerable = require("./extensions/enumerable");
-
-function ProxyInstance(interceptor, callback) {
-
-	var self = this;
-
-	self.interceptor = interceptor;
-
-	self.whenCalled = function(target) {
-
-		if (!interceptor.instance.__scarlet) {
-
-			interceptor.instance.__scarlet = {};
-
-			enumerable.forEach(interceptor.instance, function(member, memberName) {
-
-				self.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];
-
-				createPropertyProxy(member, memberName, target);
-
-				createFunctionProxy(member, memberName, target);
-
-			});
+},{"__browserify_process":15}],13:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
 		}
-
-		return interceptor.instance;
-	};
-
-	var createPropertyProxy = function(member,memberName,target){
-		if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet")) {
-
-			self.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {
-
-				configurable: true,
-
-				get: function(){
-					return target(function(){
-						return self.interceptor.instance.__scarlet[memberName];
-					}, self.interceptor.instance.__scarlet[memberName]);
-				},
-				
-				set: function(value){
-					target(function(){
-						self.interceptor.instance.__scarlet[memberName] = value;	
-					}, value);
-				}
-				
-			});
-		}
-	};
-
-	var createFunctionProxy = function(member,memberName,target){
-		if (member instanceof(Function)) {
-			
-			var originalMethod = self.interceptor.instance.__scarlet[memberName];
-			
-			self.interceptor.instance[memberName] = function() {
-				return target(originalMethod, arguments);
-			};
-
-		}
-	};
-
-	self.unwrap = function() {
-
-		if (interceptor.instance.__scarlet) {
-
-			enumerable.forEach(interceptor.instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = interceptor.instance.__scarlet[memberName];
-					interceptor.instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-}
-
-module.exports = ProxyInstance;
-},{"./extensions/enumerable":13}],7:[function(require,module,exports){
-var assert = require("assert");
-var ProxyInstance = require("./proxy-instance");
-var inherits = require("./extensions/inherits");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyPrototype(interceptor, callback) {
-
-	var self = this;
-
-	self.inheritedType = null;
-	self.interceptor = interceptor;
-
-	self.whenCalled = function(target) {
-
-		assert(interceptor.type, "Scarlet::Interceptor::type == null");
-		assert(interceptor.type.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
-
-		self.inheritedType = function(){
-
-			var self = this;
-
-			(function() {
-
-				var interceptorTypeConstructor = function(){
-					
-					var parameters = Array.prototype.slice.call(arguments);
-					interceptor.type.apply(self,parameters);
-
-					interceptor.instance = self;
-
-					var proxy = new ProxyInstance(interceptor);
-					proxy.whenCalled(target);
-				};
-
-				return target(interceptorTypeConstructor,arguments)
-			}());
-
-		};
-
-		inherits(self.inheritedType, interceptor.type);
-		return self.inheritedType;
-		
-	};
-
-	self.unwrap = function() {};
-
-}
-
-module.exports = ProxyPrototype;
-},{"assert":4,"./proxy-instance":6,"./extensions/inherits":14,"./extensions/enumerable":13}],8:[function(require,module,exports){
-module.exports = {
-	Util: require("util"),
-	Assert: require("assert"),
-	Plugins: require("./plugins"),
-	Invocation: require("./invocation"),
-	Interceptor: require("./interceptor"),
-	ProxyInstance: require("./proxy-instance"),
-	ProxyPrototype: require("./proxy-prototype"),
-	Enumerable: require("./extensions/enumerable")
+	});
 };
-
-
-},{"util":9,"assert":4,"./plugins":15,"./invocation":5,"./interceptor":3,"./proxy-instance":6,"./proxy-prototype":7,"./extensions/enumerable":13}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 function Enumerable() {
 
 	var self = this;
@@ -1231,18 +1243,31 @@ function Enumerable() {
 
 module.exports = new Enumerable();
 },{}],14:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],16:[function(require,module,exports){
+(function(__dirname){var path = require("path");
+var assert = require("assert");
+
+function Plugins() {
+
+	var self = this;
+	
+	self.loadPlugin = function($scarlet, pluginPath) {
+
+		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
+		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+
+		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
+		var plugin = require(fullPath);
+
+		pluginObject = new plugin($scarlet);
+		pluginObject.initialize();
+
+	};
+
+}
+
+module.exports = new Plugins();
+})("/lib")
+},{"path":16,"assert":4}],17:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1328,32 +1353,185 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],15:[function(require,module,exports){
-(function(__dirname){var path = require("path");
-var assert = require("assert");
-
-function Plugins() {
-
-	var self = this;
-	
-	self.loadPlugin = function($scarlet, pluginPath) {
-
-		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
-		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
-
-		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
-
-		pluginObject = new plugin($scarlet);
-		pluginObject.initialize();
-
-	};
-
+},{}],16:[function(require,module,exports){
+(function(process){function filter (xs, fn) {
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (fn(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
 }
 
-module.exports = new Plugins();
-})("/lib")
-},{"path":17,"assert":4}],10:[function(require,module,exports){
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length; i >= 0; i--) {
+    var last = parts[i];
+    if (last == '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Regex to split a filename into [*, dir, basename, ext]
+// posix version
+var splitPathRe = /^(.+\/(?!$)|\/)?((?:.+?)?(\.[^.]*)?)$/;
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+var resolvedPath = '',
+    resolvedAbsolute = false;
+
+for (var i = arguments.length; i >= -1 && !resolvedAbsolute; i--) {
+  var path = (i >= 0)
+      ? arguments[i]
+      : process.cwd();
+
+  // Skip empty and invalid entries
+  if (typeof path !== 'string' || !path) {
+    continue;
+  }
+
+  resolvedPath = path + '/' + resolvedPath;
+  resolvedAbsolute = path.charAt(0) === '/';
+}
+
+// At this point the path should be resolved to a full absolute path, but
+// handle relative paths to be safe (might happen when process.cwd() fails)
+
+// Normalize the path
+resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+var isAbsolute = path.charAt(0) === '/',
+    trailingSlash = path.slice(-1) === '/';
+
+// Normalize the path
+path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+  
+  return (isAbsolute ? '/' : '') + path;
+};
+
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    return p && typeof p === 'string';
+  }).join('/'));
+};
+
+
+exports.dirname = function(path) {
+  var dir = splitPathRe.exec(path)[1] || '';
+  var isWindows = false;
+  if (!dir) {
+    // No dirname
+    return '.';
+  } else if (dir.length === 1 ||
+      (isWindows && dir.length <= 3 && dir.charAt(1) === ':')) {
+    // It is just a slash or a drive letter with a slash
+    return dir;
+  } else {
+    // It is a full dirname, strip trailing slash
+    return dir.substring(0, dir.length - 1);
+  }
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPathRe.exec(path)[2] || '';
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPathRe.exec(path)[3] || '';
+};
+
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+})(require("__browserify_process"))
+},{"__browserify_process":15}],10:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -2437,185 +2615,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"assert":4,"./buffer_ieee754":16,"base64-js":18}],17:[function(require,module,exports){
-(function(process){function filter (xs, fn) {
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (fn(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length; i >= 0; i--) {
-    var last = parts[i];
-    if (last == '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Regex to split a filename into [*, dir, basename, ext]
-// posix version
-var splitPathRe = /^(.+\/(?!$)|\/)?((?:.+?)?(\.[^.]*)?)$/;
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-var resolvedPath = '',
-    resolvedAbsolute = false;
-
-for (var i = arguments.length; i >= -1 && !resolvedAbsolute; i--) {
-  var path = (i >= 0)
-      ? arguments[i]
-      : process.cwd();
-
-  // Skip empty and invalid entries
-  if (typeof path !== 'string' || !path) {
-    continue;
-  }
-
-  resolvedPath = path + '/' + resolvedPath;
-  resolvedAbsolute = path.charAt(0) === '/';
-}
-
-// At this point the path should be resolved to a full absolute path, but
-// handle relative paths to be safe (might happen when process.cwd() fails)
-
-// Normalize the path
-resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-var isAbsolute = path.charAt(0) === '/',
-    trailingSlash = path.slice(-1) === '/';
-
-// Normalize the path
-path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-  
-  return (isAbsolute ? '/' : '') + path;
-};
-
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    return p && typeof p === 'string';
-  }).join('/'));
-};
-
-
-exports.dirname = function(path) {
-  var dir = splitPathRe.exec(path)[1] || '';
-  var isWindows = false;
-  if (!dir) {
-    // No dirname
-    return '.';
-  } else if (dir.length === 1 ||
-      (isWindows && dir.length <= 3 && dir.charAt(1) === ':')) {
-    // It is just a slash or a drive letter with a slash
-    return dir;
-  } else {
-    // It is a full dirname, strip trailing slash
-    return dir.substring(0, dir.length - 1);
-  }
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPathRe.exec(path)[2] || '';
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPathRe.exec(path)[3] || '';
-};
-
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-})(require("__browserify_process"))
-},{"__browserify_process":12}],18:[function(require,module,exports){
+},{"assert":4,"./buffer_ieee754":17,"base64-js":18}],18:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 

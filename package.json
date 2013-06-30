@@ -1,7 +1,7 @@
 {
   "name": "scarlet",
   "description": "A Javascript interceptor",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
     "type": "git",

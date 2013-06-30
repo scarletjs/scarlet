@@ -1,59 +1,35 @@
 var l = console.log;
-var scarlet = require("../lib/scarlet");
 var Benchmark = require('benchmark');
+var hooksBenchMark = require('./hooksBenchMark');
+var scarletBenchMark = require('./scarletBenchMark');
 
-var suite = new Benchmark.Suite;
+var suites = [];
 
-function inter(invocation){
-	invocation.proceed();
-};
-
-
-function NamedFunction(){
-	
-	this.property = "";
-
-	this.method = function(){
-	};
-	
-	this.methodWithReturn = function(){
-		return "any";
-	};
-};
-
-var instance = function(){};
-
-var noInterceptor = new Benchmark('Scarlet#NoInterceptor', function(){
-	instance.method();
-},{
-	'onStart' : function(){
-		instance = new NamedFunction();
-
+Benchmark.extend(Benchmark.Suite.options, {
+    'onStart': function() {
+      console.log('\n' + this.name + ':');
+    },
+    'onCycle': function(event) {
+      console.log(String(event.target));
+    },
+	'onComplete': function() {
+	  console.log('Fastest is ' + this.filter('fastest').pluck('name'));
 	}
 });
 
-var interceptor = new Benchmark('Scarlet#Interceptor', function(){
-	instance.method();
-},{
-	'onStart' : function(){
-		instance = new NamedFunction();
+suites.push(
+	function(){
+		var self = this;
 
-		scarlet
-			.intercept(instance)
-			.using(inter);
+		var s = Benchmark.Suite("Intercepting an Instance of a NamedFunction");
+		s.push(hooksBenchMark.namedFunctionInstance);
+		s.push(scarletBenchMark.namedFunctionInstance);
+
+		 return s.run();
 
 	}
-});
+);
 
-suite.push(noInterceptor);
-suite.push(interceptor);
-
-suite.on('cycle', function(event) {
-  console.log(String(event.target));
-})
-
-suite.on('complete', function() {
-  console.log('Fastest is ' + this.filter('fastest').pluck('name'));
-});
-
-suite.run();
+for (var i = 0; i < suites.length; i++) {
+	suites[i]();
+};

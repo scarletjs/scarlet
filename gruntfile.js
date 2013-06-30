@@ -29,15 +29,25 @@ module.exports = function(grunt) {
     watch: {
       files: ["<%= jshint.files %>"],
       tasks: ["jshint"]
+    },
+    browserify: {
+      basic: {
+        src: ['./index.js'],
+        dest: './dist/scarlet.js'
+      },
+      options: {
+        standalone:'scarlet'
+      }
     }
   });
 
   grunt.loadNpmTasks("grunt-release");
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
 
   grunt.registerTask("default", ["jshint"]);
-  grunt.registerTask("deploy", ["release", "scarlet-bump"]);
+  grunt.registerTask("deploy", ["browserify","release", "scarlet-bump"]);
 
   grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function(){
 

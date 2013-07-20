@@ -13,8 +13,8 @@ describe("Given we are intercepting", function() {
 
 	var methodWasCalled = false;
 
-	function interceptor(invocation) {
-		var result = invocation.proceed();
+	function interceptor(proceed) {
+		var result = proceed();
 		methodWasCalled = true;
 		return result;
 	};
@@ -314,9 +314,9 @@ describe("Given we are intercepting", function() {
 
 			it("Should intercept correctly", function() {
 
-				var interceptor = function(invocation) {
+				var interceptor = function(proceed) {
 
-					invocation.proceed();
+					proceed();
 
 				};
 

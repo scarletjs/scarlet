@@ -1,7 +1,7 @@
 {
   "name": "scarlet",
   "description": "A Javascript interceptor",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
     "type": "git",
@@ -9,8 +9,8 @@
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
   "dependencies": {
-   "async":"0.2.9"
- },
+    "async": "0.2.9"
+  },
   "devDependencies": {
     "mocha": "*",
     "should": "*",

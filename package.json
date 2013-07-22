@@ -8,7 +8,9 @@
     "url": "https://github.com/scarletjs/scarlet.git"
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
-  "dependencies": {},
+  "dependencies": {
+   "async":"0.2.9"
+ },
   "devDependencies": {
     "mocha": "*",
     "should": "*",

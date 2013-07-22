@@ -21,9 +21,9 @@ Here is a sample page.
     <head>
         <script type="text/javascript" src="js/scarlet.js"></script> 
         <script type="text/javascript">
-            function interceptor(invocation){
+            function interceptor(proceed){
                 console.log("In interceptor");
-                invocation.proceed();
+                proceed();
             };
             function doStuff () {
                 console.log("In doStuff");

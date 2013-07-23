@@ -11,7 +11,7 @@ suites.push(
 		var self = this;
 
 		var s = Benchmark.Suite("Intercepting an Instance of a Named Function");
-    s.push(scarletBenchMark.namedFunctionInstance);
+    	s.push(scarletBenchMark.namedFunctionInstance);
 		s.push(hooksBenchMark.namedFunctionInstance);
 
 
@@ -25,7 +25,7 @@ suites.push(
 		var self = this;
 
 		var s = Benchmark.Suite("Intercepting a Prototype Function");
-    s.push(scarletBenchMark.prototypeFunction);
+    	s.push(scarletBenchMark.prototypeFunction);
 		s.push(hooksBenchMark.prototypeFunction);
 
 
@@ -40,7 +40,7 @@ suites.push(
 		var self = this;
 
 		var s = Benchmark.Suite("Intercepting a Un-Named Function");
-    s.push(scarletBenchMark.unnamedFunctionInstance);
+    	s.push(scarletBenchMark.unnamedFunctionInstance);
 		s.push(hooksBenchMark.unnamedFunctionInstance);
 
 
@@ -54,7 +54,7 @@ suites.push(
 		var self = this;
 
 		var s = Benchmark.Suite("Intercepting a Object Literal");
-    s.push(scarletBenchMark.objectLiteral);
+    	s.push(scarletBenchMark.objectLiteral);
 		s.push(hooksBenchMark.objectLiteral);
 
 

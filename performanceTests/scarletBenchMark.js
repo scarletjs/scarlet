@@ -2,8 +2,8 @@ var l = console.log;
 var Benchmark = require('benchmark');
 var Scarlet = require("../lib/scarlet");
 
-function interceptor(invocation){
-	invocation.proceed();
+function interceptor(proceed){
+	proceed();
 };
 
 var instance = function(){};
@@ -60,7 +60,8 @@ module.exports.prototypeFunction = new Benchmark('scarlet', function(){
 
 			PrototypeFunction = scarlet
 							.intercept(PrototypeFunction)
-							.using(interceptor);
+							.using(interceptor)
+							.resolve();
 
 			instance = new PrototypeFunction();
 		}

@@ -21,7 +21,7 @@ describe("Given we are intercepting", function() {
 
 	var method2WasCalled = false;
 
-	function interceptor2(proceed, invok) {
+	function interceptor2(proceed, invocation) {
 		var result = proceed();
 		method2WasCalled = true;
 		return result;
@@ -41,7 +41,7 @@ describe("Given we are intercepting", function() {
 			.using(interceptor)
 			.using(interceptor2);
 
-		it("Then should be able to intercept the property getter", function() {
+		it("Then should be able to intercept", function() {
 			var result = instance.method();
 			assert(methodWasCalled);
 			assert(method2WasCalled);

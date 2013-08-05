@@ -63,4 +63,56 @@ suites.push(
 	}
 );
 
+suites.push(
+	function(){
+		var self = this;
+
+		var s = Benchmark.Suite("Multiple Interception using a Named Function");
+    	s.push(scarletBenchMark.multipleInterceptorNamedFunctionInstance);
+		s.push(hooksBenchMark.multipleInterceptorNamedFunctionInstance);
+
+		 return s.run();
+
+	}
+);
+
+suites.push(
+	function(){
+		var self = this;
+
+		var s = Benchmark.Suite("Multiple Interception using a Object Literal");
+    	s.push(scarletBenchMark.multipleInterceptorObjectLiteral);
+		s.push(hooksBenchMark.multipleInterceptorObjectLiteral);
+
+		 return s.run();
+
+	}
+);
+
+suites.push(
+	function(){
+		var self = this;
+
+		var s = Benchmark.Suite("Multiple Interception using a Prototype Function");
+    	s.push(scarletBenchMark.multipleInterceptorPrototypeFunction);
+		s.push(hooksBenchMark.multipleInterceptorPrototypeFunction);
+
+		 return s.run();
+
+	}
+);
+
+suites.push(
+	function(){
+		var self = this;
+
+		var s = Benchmark.Suite("Multiple Interception using a Un-Named Function");
+    	s.push(scarletBenchMark.multipleInterceptorUnnamedFunctionInstance);
+		s.push(hooksBenchMark.multipleInterceptorUnnamedFunctionInstance);
+
+		 return s.run();
+
+	}
+);
+
 benchmarkRunner.run(suites);

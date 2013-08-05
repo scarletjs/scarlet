@@ -9,7 +9,6 @@
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
   "dependencies": {
-    "async": "0.2.9"
   },
   "devDependencies": {
     "mocha": "*",

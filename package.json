@@ -20,7 +20,9 @@
     "grunt-contrib-watch": "~0.4.0",
     "grunt-release": "~0.3.3",
     "grunt-browserify": "~1.2.0",
-    "hooks": "~0.3.0"
+    "hooks": "~0.3.0",
+    "html-md": "~2.1.1",
+    "grunt-mox": "0.0.1"
   },
   "browserDependencies": {},
   "keywords": [],

@@ -38,16 +38,28 @@ module.exports = function(grunt) {
       options: {
         standalone:'scarlet'
       }
+    },
+    mox: {
+      documentationByCategoryTag: {
+        sourceFiles : ['./lib/'],
+        options: {
+          template:"category",
+          outputFile : "doc/scarlet.md",
+          moxFile :"doc/mox.json"
+        }
+      }
     }
   });
 
+  grunt.loadNpmTasks("grunt-mox");
   grunt.loadNpmTasks("grunt-release");
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
 
-  grunt.registerTask("default", ["jshint"]);
-  grunt.registerTask("deploy", ["browserify","release", "scarlet-bump"]);
+  grunt.registerTask("doc", ["mox"]);
+  grunt.registerTask("default", ["jshint","mox"]);
+  grunt.registerTask("deploy", ["mox","browserify","release", "scarlet-bump"]);
 
   grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function(){
 

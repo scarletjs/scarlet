@@ -34,7 +34,6 @@ Runner.prototype.run = function(suites){
      * Computes the geometric mean (log-average) of an array of values.
      * See http://en.wikipedia.org/wiki/Geometric_mean#Relationship_with_arithmetic_mean_of_logarithms.
      *
-     * @private
      * @param {Array} array The array of values.
      * @returns {Number} The geometric mean.
      */
@@ -52,7 +51,6 @@ Runner.prototype.run = function(suites){
      * Gets the Hz, i.e. operations per second, of `bench` adjusted for the
      * margin of error.
      *
-     * @private
      * @param {Object} bench The benchmark object.
      * @returns {Number} Returns the adjusted Hz.
      */
@@ -66,7 +64,6 @@ Runner.prototype.run = function(suites){
      * data type. The objects we are concerned with usually return non-primitive
      * types of "object", "function", or "unknown".
      *
-     * @private
      * @param {Mixed} object The owner of the property.
      * @param {String} property The property to check.
      * @returns {Boolean} Returns `true` if the property value is a non-primitive, else `false`.
@@ -82,7 +79,6 @@ Runner.prototype.run = function(suites){
     /**
      * Logs text to the console.
      *
-     * @private
      * @param {String} text The text to log.
      */
     function log(text) {
@@ -96,7 +92,6 @@ Runner.prototype.run = function(suites){
   /**
    * Runs all benchmark suites.
    *
-   * @private (@public in the browser)
    */
   function run() {
     fbPanel = (fbPanel = window.document && document.getElementById('FirebugUI')) &&

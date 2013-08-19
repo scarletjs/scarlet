@@ -19,90 +19,19 @@
             "fileName": "lib/index.js"
         },
         {
-            "tags": [
-                {
-                    "type": "category",
-                    "string": "Interception Methods"
-                },
-                {
-                    "type": "method",
-                    "string": "using"
-                },
-                {
-                    "type": "param",
-                    "types": [
-                        "Function"
-                    ],
-                    "name": "targetMethod",
-                    "description": "the method to call when the type or instance is intercepted"
-                },
-                {
-                    "type": "param",
-                    "types": [
-                        "Function"
-                    ],
-                    "name": "targetThisContext",
-                    "description": "the reference to self/this to be used when calling the intercepotr"
-                },
-                {
-                    "type": "chainable",
-                    "string": ""
-                },
-                {
-                    "type": "return",
-                    "types": [
-                        "Function"
-                    ],
-                    "description": "A reference to the current interceptor(self)"
-                }
-            ],
+            "tags": [],
             "description": {
-                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
-                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+                "full": "",
+                "summary": "",
+                "body": ""
             },
             "isPrivate": false,
-            "ignore": false,
-            "code": "self.using = function(targetMethod,targetThisContext) {\n\t\tassert(targetMethod, \"Cannot have null target for interceptor\");\n\n\t\tif(!targetThisContext)\n\t\t\ttargetThisContext = self;\n\n\t\taddTarget(targetMethod,targetThisContext);\n\n\t\treturn self;\n\t};\n\n\tvar addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};",
+            "code": "var assert = require(\"assert\");\nvar Invocation = require(\"./invocation\");\nvar ProxyInstance = require(\"./proxy-instance\");\nvar ProxyPrototype = require(\"./proxy-prototype\");\n\nfunction Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.targets = [];\n\tself.proxy = null;\n\tself.currentTarget = 0;\n\tself.type = typeOrInstance;\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\n\tself.asType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.asObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(method, args) {\n\n\t\t\tvar _invocation = new Invocation(self.instance, method, args);\n\n\t\t\tvar next = function(error, result){\n\n\t\t\t\tif(self.currentTarget >= self.targets.length){\n\t\t\t\t\tself.currentTarget = 0;\t\n\t\t\t\t\treturn _invocation.proceed();\n\t\t\t\t}\n\n\t\t\t\tvar targetMethod = self.targets[self.currentTarget];\n\t\t\t\tself.currentTarget++;\n\t\t\t\ttargetCall(targetMethod);\n\n\t\t\t\treturn _invocation.result;\n\t\t\t};\n\n\t\t\tvar targetCall = function(target){\n\t\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,_invocation]);\n\t\t\t};\n\n\t\t\tnext();\n\n\t\t\treturn _invocation.result;\n\n\t\t});\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n}\n\nmodule.exports = Interceptor;",
             "ctx": {
-                "type": "method",
-                "receiver": "self",
-                "name": "using",
-                "string": "self.using()"
-            },
-            "fileName": "lib/interceptor.js"
-        },
-        {
-            "tags": [
-                {
-                    "type": "category",
-                    "string": "Interception Methods"
-                },
-                {
-                    "type": "method",
-                    "string": "resolve"
-                },
-                {
-                    "type": "return",
-                    "types": [
-                        "Function"
-                    ],
-                    "description": "A reference to the function being intercepted"
-                }
-            ],
-            "description": {
-                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
-                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
-            },
-            "isPrivate": false,
-            "ignore": false,
-            "code": "self.resolve = function(){\n\t\treturn self.proxiedInstance;\n\t};\n\n\tself.release = function() {\n\t\tproxy.unwrap();\n\t\treturn self;\n\t};\n\n}\n\nmodule.exports = Interceptor;",
-            "ctx": {
-                "type": "method",
-                "receiver": "self",
-                "name": "resolve",
-                "string": "self.resolve()"
+                "type": "declaration",
+                "name": "assert",
+                "value": "require(\"assert\")",
+                "string": "assert"
             },
             "fileName": "lib/interceptor.js"
         },
@@ -336,17 +265,148 @@
                 }
             ],
             "description": {
-                "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>",
                 "summary": "<p>Creates a Scarlet Instance</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>"
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\n\tself.lib = require(\"./index\");\n\n\tself.plugins = {};\n\n\tvar interceptType = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asType();\n\t};\n\n\tvar interceptObject = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asObject();\n\t};",
+            "code": "function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\tself.plugins = {};\n\tself.interceptor = {};\n\tself.lib = require(\"./index\");\n\n\tvar interceptType = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asType();\n\t};\n\n\tvar interceptObject = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asObject();\n\t};",
             "ctx": {
                 "type": "function",
                 "name": "Scarlet",
                 "string": "Scarlet()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Interception Methods"
+                },
+                {
+                    "type": "method",
+                    "string": "intercept"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "An interceptor object"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
+                "summary": "<p>Creates a Scarlet interceptor</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.intercept = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tif (typeOrInstance.prototype)\n\t\t\tself.interceptor =  interceptType(typeOrInstance);\n\t\telse\n\t\t\tself.interceptor = interceptObject(typeOrInstance);\n\n\t\treturn self;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "intercept",
+                "string": "self.intercept()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Interception Methods"
+                },
+                {
+                    "type": "method",
+                    "string": "using"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetMethod",
+                    "description": "the method to call when the type or instance is intercepted"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetThisContext",
+                    "description": "the reference to self/this to be used when calling the intercepotr"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the current interceptor(self)"
+                }
+            ],
+            "description": {
+                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.using = function(targetMethod,targetThisContext) {\n\t\tassert(targetMethod, \"Cannot have null target for interceptor\");\n\n\t\tif(!targetThisContext)\n\t\t\ttargetThisContext = self.interceptor;\n\n\t\tself.interceptor.addTarget(targetMethod,targetThisContext);\n\n\t\treturn self;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "using",
+                "string": "self.using()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Interception Methods"
+                },
+                {
+                    "type": "method",
+                    "string": "resolve"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the function being intercepted"
+                }
+            ],
+            "description": {
+                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.resolve = function(){\n\t\treturn self.interceptor.proxiedInstance;\n\t};\n\n\tself.release = function() {\n\t\tself.interceptor.proxy.unwrap();\n\t\treturn self;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "resolve",
+                "string": "self.resolve()"
             },
             "fileName": "lib/scarlet.js"
         },
@@ -382,61 +442,18 @@
                 }
             ],
             "description": {
-                "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
+                "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>",
                 "summary": "<p>loads a plugin</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>"
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "self.loadPlugin = function(pluginPath) {\n\t\tself.lib.Plugins.loadPlugin(self, pluginPath);\n\t\treturn self;\n\t};",
+            "code": "self.loadPlugin = function(pluginPath) {\n\t\tself.lib.Plugins.loadPlugin(self, pluginPath);\n\t\treturn self;\n\t};\n\n\tif(pluginArr){\n\t\tif (pluginArr.length) {\n\t\t\tpluginArr.forEach(function(plugin){\n\t\t\t\tself.loadPlugin(plugin);\n\t\t\t});\n\t\t}\t\t\n\t}\n\n}\n\nmodule.exports = Scarlet;",
             "ctx": {
                 "type": "method",
                 "receiver": "self",
                 "name": "loadPlugin",
                 "string": "self.loadPlugin()"
-            },
-            "fileName": "lib/scarlet.js"
-        },
-        {
-            "tags": [
-                {
-                    "type": "category",
-                    "string": "Interception Methods"
-                },
-                {
-                    "type": "method",
-                    "string": "intercept"
-                },
-                {
-                    "type": "param",
-                    "types": [
-                        "Function",
-                        "Object"
-                    ],
-                    "name": "typeOrInstance",
-                    "description": "the type or instance to be intercepted"
-                },
-                {
-                    "type": "return",
-                    "types": [
-                        "Function"
-                    ],
-                    "description": "An interceptor object"
-                }
-            ],
-            "description": {
-                "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
-                "summary": "<p>Creates a Scarlet interceptor</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
-            },
-            "isPrivate": false,
-            "ignore": false,
-            "code": "self.intercept = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tif (typeOrInstance.prototype)\n\t\t\treturn interceptType(typeOrInstance);\n\n\t\treturn interceptObject(typeOrInstance);\n\t};\n\n\tif(pluginArr){\n\t\tif (pluginArr.length) {\n\t\t\tpluginArr.forEach(function(plugin){\n\t\t\t\tself.loadPlugin(plugin);\n\t\t\t});\n\t\t}\t\t\n\t}\n\n}\n\nmodule.exports = Scarlet;",
-            "ctx": {
-                "type": "method",
-                "receiver": "self",
-                "name": "intercept",
-                "string": "self.intercept()"
             },
             "fileName": "lib/scarlet.js"
         },
@@ -519,57 +536,14 @@
             }
         },
         {
-            "params": [
-                {
-                    "types": [
-                        "Function"
-                    ],
-                    "name": "targetMethod",
-                    "description": "the method to call when the type or instance is intercepted"
-                },
-                {
-                    "types": [
-                        "Function"
-                    ],
-                    "name": "targetThisContext",
-                    "description": "the reference to self/this to be used when calling the intercepotr"
-                }
-            ],
-            "name": "using",
-            "type": "method",
-            "fileName": "lib/interceptor.js",
-            "description": {
-                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
-                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
-            },
-            "category": "Interception Methods",
-            "method": "using",
-            "chainable": true,
-            "return": {
-                "types": [
-                    "Function"
-                ],
-                "description": "A reference to the current interceptor(self)"
-            }
-        },
-        {
             "params": [],
-            "name": "resolve",
-            "type": "method",
+            "name": "assert",
+            "type": "declaration",
             "fileName": "lib/interceptor.js",
             "description": {
-                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
-                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
-            },
-            "category": "Interception Methods",
-            "method": "resolve",
-            "return": {
-                "types": [
-                    "Function"
-                ],
-                "description": "A reference to the function being intercepted"
+                "full": "",
+                "summary": "",
+                "body": ""
             }
         },
         {
@@ -703,42 +677,13 @@
             "type": "function",
             "fileName": "lib/scarlet.js",
             "description": {
-                "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>",
                 "summary": "<p>Creates a Scarlet Instance</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>"
             },
             "category": "Interception Methods",
             "class": "Scarlet",
             "constructor": true
-        },
-        {
-            "params": [
-                {
-                    "types": [
-                        "Function",
-                        "Object"
-                    ],
-                    "name": "pluginPath",
-                    "description": "the plugin to be loaded"
-                }
-            ],
-            "name": "loadPlugin",
-            "type": "method",
-            "fileName": "lib/scarlet.js",
-            "description": {
-                "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
-                "summary": "<p>loads a plugin</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
-            },
-            "category": "Interception Methods",
-            "method": "loadPlugin",
-            "return": {
-                "types": [
-                    "Function"
-                ],
-                "description": "A reference to scarlet(self)"
-            },
-            "chainable": true
         },
         {
             "params": [
@@ -755,9 +700,9 @@
             "type": "method",
             "fileName": "lib/scarlet.js",
             "description": {
-                "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
                 "summary": "<p>Creates a Scarlet interceptor</p>",
-                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
             },
             "category": "Interception Methods",
             "method": "intercept",
@@ -767,6 +712,89 @@
                 ],
                 "description": "An interceptor object"
             }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetMethod",
+                    "description": "the method to call when the type or instance is intercepted"
+                },
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetThisContext",
+                    "description": "the reference to self/this to be used when calling the intercepotr"
+                }
+            ],
+            "name": "using",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+            },
+            "category": "Interception Methods",
+            "method": "using",
+            "chainable": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the current interceptor(self)"
+            }
+        },
+        {
+            "params": [],
+            "name": "resolve",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+            },
+            "category": "Interception Methods",
+            "method": "resolve",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the function being intercepted"
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "pluginPath",
+                    "description": "the plugin to be loaded"
+                }
+            ],
+            "name": "loadPlugin",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>",
+                "summary": "<p>loads a plugin</p>",
+                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>"
+            },
+            "category": "Interception Methods",
+            "method": "loadPlugin",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to scarlet(self)"
+            },
+            "chainable": true
         },
         {
             "params": [],
@@ -814,144 +842,6 @@
         }
     ],
     "categories": [
-        {
-            "tag": "Interception Methods",
-            "moxComments": [
-                {
-                    "params": [
-                        {
-                            "types": [
-                                "Function"
-                            ],
-                            "name": "targetMethod",
-                            "description": "the method to call when the type or instance is intercepted"
-                        },
-                        {
-                            "types": [
-                                "Function"
-                            ],
-                            "name": "targetThisContext",
-                            "description": "the reference to self/this to be used when calling the intercepotr"
-                        }
-                    ],
-                    "name": "using",
-                    "type": "method",
-                    "fileName": "lib/interceptor.js",
-                    "description": {
-                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
-                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
-                    },
-                    "category": "Interception Methods",
-                    "method": "using",
-                    "chainable": true,
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to the current interceptor(self)"
-                    }
-                },
-                {
-                    "params": [],
-                    "name": "resolve",
-                    "type": "method",
-                    "fileName": "lib/interceptor.js",
-                    "description": {
-                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
-                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
-                    },
-                    "category": "Interception Methods",
-                    "method": "resolve",
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to the function being intercepted"
-                    }
-                },
-                {
-                    "params": [
-                        {
-                            "types": [
-                                "Array"
-                            ],
-                            "name": "pluginArr",
-                            "description": "- optional array of plugins to load"
-                        }
-                    ],
-                    "name": "Scarlet",
-                    "type": "function",
-                    "fileName": "lib/scarlet.js",
-                    "description": {
-                        "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
-                        "summary": "<p>Creates a Scarlet Instance</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
-                    },
-                    "category": "Interception Methods",
-                    "class": "Scarlet",
-                    "constructor": true
-                },
-                {
-                    "params": [
-                        {
-                            "types": [
-                                "Function",
-                                "Object"
-                            ],
-                            "name": "pluginPath",
-                            "description": "the plugin to be loaded"
-                        }
-                    ],
-                    "name": "loadPlugin",
-                    "type": "method",
-                    "fileName": "lib/scarlet.js",
-                    "description": {
-                        "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
-                        "summary": "<p>loads a plugin</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
-                    },
-                    "category": "Interception Methods",
-                    "method": "loadPlugin",
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to scarlet(self)"
-                    },
-                    "chainable": true
-                },
-                {
-                    "params": [
-                        {
-                            "types": [
-                                "Function",
-                                "Object"
-                            ],
-                            "name": "typeOrInstance",
-                            "description": "the type or instance to be intercepted"
-                        }
-                    ],
-                    "name": "intercept",
-                    "type": "method",
-                    "fileName": "lib/scarlet.js",
-                    "description": {
-                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
-                        "summary": "<p>Creates a Scarlet interceptor</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
-                    },
-                    "category": "Interception Methods",
-                    "method": "intercept",
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "An interceptor object"
-                    }
-                }
-            ]
-        },
         {
             "tag": "Invocation Attributes",
             "moxComments": [
@@ -1040,6 +930,144 @@
                     }
                 }
             ]
+        },
+        {
+            "tag": "Interception Methods",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Array"
+                            ],
+                            "name": "pluginArr",
+                            "description": "- optional array of plugins to load"
+                        }
+                    ],
+                    "name": "Scarlet",
+                    "type": "function",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Scarlet Instance</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "class": "Scarlet",
+                    "constructor": true
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "intercept",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Scarlet interceptor</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "An interceptor object"
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetMethod",
+                            "description": "the method to call when the type or instance is intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetThisContext",
+                            "description": "the reference to self/this to be used when calling the intercepotr"
+                        }
+                    ],
+                    "name": "using",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+                    },
+                    "category": "Interception Methods",
+                    "method": "using",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "resolve",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+                    },
+                    "category": "Interception Methods",
+                    "method": "resolve",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the function being intercepted"
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "pluginPath",
+                            "description": "the plugin to be loaded"
+                        }
+                    ],
+                    "name": "loadPlugin",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>",
+                        "summary": "<p>loads a plugin</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "loadPlugin",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to scarlet(self)"
+                    },
+                    "chainable": true
+                }
+            ]
         }
     ],
     "files": [
@@ -1063,57 +1091,14 @@
             "tag": "lib/interceptor.js",
             "moxComments": [
                 {
-                    "params": [
-                        {
-                            "types": [
-                                "Function"
-                            ],
-                            "name": "targetMethod",
-                            "description": "the method to call when the type or instance is intercepted"
-                        },
-                        {
-                            "types": [
-                                "Function"
-                            ],
-                            "name": "targetThisContext",
-                            "description": "the reference to self/this to be used when calling the intercepotr"
-                        }
-                    ],
-                    "name": "using",
-                    "type": "method",
-                    "fileName": "lib/interceptor.js",
-                    "description": {
-                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
-                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
-                    },
-                    "category": "Interception Methods",
-                    "method": "using",
-                    "chainable": true,
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to the current interceptor(self)"
-                    }
-                },
-                {
                     "params": [],
-                    "name": "resolve",
-                    "type": "method",
+                    "name": "assert",
+                    "type": "declaration",
                     "fileName": "lib/interceptor.js",
                     "description": {
-                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
-                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
-                    },
-                    "category": "Interception Methods",
-                    "method": "resolve",
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to the function being intercepted"
+                        "full": "",
+                        "summary": "",
+                        "body": ""
                     }
                 }
             ]
@@ -1272,42 +1257,13 @@
                     "type": "function",
                     "fileName": "lib/scarlet.js",
                     "description": {
-                        "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                        "full": "<p>Creates a Scarlet Instance</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>",
                         "summary": "<p>Creates a Scarlet Instance</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n</pre></div>"
                     },
                     "category": "Interception Methods",
                     "class": "Scarlet",
                     "constructor": true
-                },
-                {
-                    "params": [
-                        {
-                            "types": [
-                                "Function",
-                                "Object"
-                            ],
-                            "name": "pluginPath",
-                            "description": "the plugin to be loaded"
-                        }
-                    ],
-                    "name": "loadPlugin",
-                    "type": "method",
-                    "fileName": "lib/scarlet.js",
-                    "description": {
-                        "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
-                        "summary": "<p>loads a plugin</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
-                    },
-                    "category": "Interception Methods",
-                    "method": "loadPlugin",
-                    "return": {
-                        "types": [
-                            "Function"
-                        ],
-                        "description": "A reference to scarlet(self)"
-                    },
-                    "chainable": true
                 },
                 {
                     "params": [
@@ -1324,9 +1280,9 @@
                     "type": "method",
                     "fileName": "lib/scarlet.js",
                     "description": {
-                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
                         "summary": "<p>Creates a Scarlet interceptor</p>",
-                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
                     },
                     "category": "Interception Methods",
                     "method": "intercept",
@@ -1336,6 +1292,89 @@
                         ],
                         "description": "An interceptor object"
                     }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetMethod",
+                            "description": "the method to call when the type or instance is intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetThisContext",
+                            "description": "the reference to self/this to be used when calling the intercepotr"
+                        }
+                    ],
+                    "name": "using",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n        .using(interceptor1) //->indicates the first interceptor to be called\n        .using(interceptor2); //->indicates the second interceptor to be called\n\n//-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+                    },
+                    "category": "Interception Methods",
+                    "method": "using",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "resolve",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\n\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+                    },
+                    "category": "Interception Methods",
+                    "method": "resolve",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the function being intercepted"
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "pluginPath",
+                            "description": "the plugin to be loaded"
+                        }
+                    ],
+                    "name": "loadPlugin",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>loads a plugin</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>",
+                        "summary": "<p>loads a plugin</p>",
+                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "loadPlugin",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to scarlet(self)"
+                    },
+                    "chainable": true
                 }
             ]
         },

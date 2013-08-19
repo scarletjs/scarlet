@@ -43,8 +43,10 @@ module.exports = function(grunt) {
       documentationByCategoryTag: {
         sourceFiles : ['./lib/'],
         options: {
+          name : "Scarlet",
+          version:"v0.0.40",
           template:"category",
-          outputFile : "doc/scarlet.md",
+          outputFile : "doc/README.md",
           moxFile :"doc/mox.json"
         }
       }

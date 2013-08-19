@@ -22,7 +22,7 @@
     "grunt-browserify": "~1.2.0",
     "hooks": "~0.3.0",
     "html-md": "~2.1.1",
-    "grunt-mox": "0.0.1"
+    "grunt-mox": "0.0.2"
   },
   "browserDependencies": {},
   "keywords": [],

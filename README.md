@@ -5,13 +5,17 @@ scarlet
 
 A Javascript interceptor
 
-#Installation
+##Installation
 
     npm install scarlet
 
-#Examples
+#Api Reference
 
-##Using in the browser
+For all api information see the [docs](https://github.com/scarletjs/scarlet/tree/master/doc).
+
+##Examples
+
+###Using in the browser
 Grab scarlet.js from the dist/scarlet.js.  Place it in your web pages javascript directory(js/) and start using.
 
 Here is a sample page.

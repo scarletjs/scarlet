@@ -1,3 +1,5 @@
+# Scarlet - v0.0.40
+
 ## Scarlet
 
 * [using][0]
@@ -10,10 +12,6 @@
 
 * [Invocation][5]
 * [proceed][6]
-
-## Proxy
-
-* [ProxyInstance][7]
 
 ## Scarlet
 
@@ -52,8 +50,6 @@ Example:
                         .resolve();
     //-> AnyObject will contain the **interceptor**
     
-
-#### Arguments
 
 #### Returns  
   
@@ -106,11 +102,12 @@ Example:
 
 ### Invocation
 
-Maintains the following properties for the object or function being intercepted:  
-\* args (Object) - The original args passed into the function being intercepted  
-\* object (Function|Object) - The original object or function  
-\* method (Function|Object) - The method being intercepted  
-\* result (Function|Object) - The result of the method being intercepted
+Maintains the following properties for the object or function being intercepted:
+
+* args (Object) - The original args passed into the function being intercepted
+* object (Function|Object) - The original object or function
+* method (Function|Object) - The method being intercepted
+* result (Function|Object) - The result of the method being intercepted
 
 #### Arguments
 
@@ -120,35 +117,11 @@ Maintains the following properties for the object or function being intercepted:
 
 ### proceed
 
-#### Arguments
+Allows the intercepted method to be called
 
 #### Returns  
   
 (Function | Object) - of the result of the original method call
-
-## Proxy
-
-### ProxyInstance
-
-Example:
-
-    //init a scarlet interceptor
-    var interceptor = new Interceptor(someInstance);
-    
-    //create the ProxyInstance with the scarlet interceptor
-    var proxy = new ProxyInstance(interceptor);
-    
-    //Set the proxied method to call when the instance gets called
-    proxy.whenCalled(function(method,args){
-            //-->Do stuff with the method and args of the proxied object
-    });        
-    //--> someInance will now call the proxy when it's called
-    
-
-#### Arguments
-
-1. interceptor (Function | Object) - the scarlet interceptor to apply
-
 
 
 [0]: #using
@@ -158,4 +131,3 @@ Example:
 [4]: #intercept
 [5]: #invocation
 [6]: #proceed
-[7]: #proxyinstance

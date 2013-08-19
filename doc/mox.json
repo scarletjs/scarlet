@@ -1,1 +1,2414 @@
-{"comments":[{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"module.exports = {\n\tUtil: require(\"util\"),\n\tAssert: require(\"assert\"),\n\tPlugins: require(\"./plugins\"),\n\tInvocation: require(\"./invocation\"),\n\tInterceptor: require(\"./interceptor\"),\n\tProxyInstance: require(\"./proxy-instance\"),\n\tProxyPrototype: require(\"./proxy-prototype\"),\n\tEnumerable: require(\"./extensions/enumerable\")\n};","ctx":{"type":"property","receiver":"module","name":"exports","value":"{","string":"module.exports"},"fileName":"lib/index.js"},{"tags":[{"type":"class","string":"Interceptor"},{"type":"constructor","string":""},{"type":"param","types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"description":{"full":"<p>Creates an Interceptor for an Object or Function</p>","summary":"<p>Creates an Interceptor for an Object or Function</p>","body":""},"isPrivate":false,"ignore":false,"code":"function Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;","ctx":{"type":"function","name":"Interceptor","string":"Interceptor()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"targets"},{"type":"type","types":["Array"]}],"description":{"full":"<p>Target interceptors</p>","summary":"<p>Target interceptors</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.targets = [];","ctx":{"type":"property","receiver":"self","name":"targets","value":"[]","string":"self.targets"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"proxy"},{"type":"type","types":["Function"]}],"description":{"full":"<p>Proxy of the object</p>","summary":"<p>Proxy of the object</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.proxy = null;","ctx":{"type":"property","receiver":"self","name":"proxy","value":"null","string":"self.proxy"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"currentTarget"},{"type":"type","types":["Number"]}],"description":{"full":"<p>reference to the current target reference</p>","summary":"<p>reference to the current target reference</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.currentTarget = 0;","ctx":{"type":"property","receiver":"self","name":"currentTarget","value":"0","string":"self.currentTarget"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"type "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The type or instance to be intercepted</p>","summary":"<p>The type or instance to be intercepted</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.type = typeOrInstance;","ctx":{"type":"property","receiver":"self","name":"type","value":"typeOrInstance","string":"self.type"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"proxiedInstance "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.proxiedInstance = null;","ctx":{"type":"property","receiver":"self","name":"proxiedInstance","value":"null","string":"self.proxiedInstance"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"property","string":"proxiedInstance "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.instance = typeOrInstance;","ctx":{"type":"property","receiver":"self","name":"instance","value":"typeOrInstance","string":"self.instance"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"method","string":"asType"},{"type":"chainable","string":""},{"type":"return","types":["Function"],"description":"A reference to the current interceptor(self)"}],"description":{"full":"<p>Create an interceptor for a function object</p>","summary":"<p>Create an interceptor for a function object</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.asType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};","ctx":{"type":"method","receiver":"self","name":"asType","string":"self.asType()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"method","string":"asObject"},{"type":"chainable","string":""},{"type":"return","types":["Function"],"description":"A reference to the current interceptor(self)"}],"description":{"full":"<p>Create an interceptor for an object literal</p>","summary":"<p>Create an interceptor for an object literal</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.asObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(method, args) {\n\n\t\t\tvar _invocation = new Invocation(self.instance, method, args);\n\n\t\t\tvar next = function(error, result){\n\n\t\t\t\tif(self.currentTarget >= self.targets.length){\n\t\t\t\t\tself.currentTarget = 0;\t\n\t\t\t\t\treturn _invocation.proceed();\n\t\t\t\t}\n\n\t\t\t\tvar targetMethod = self.targets[self.currentTarget];\n\t\t\t\tself.currentTarget++;\n\t\t\t\ttargetCall(targetMethod);\n\n\t\t\t\treturn _invocation.result;\n\t\t\t};\n\n\t\t\tvar targetCall = function(target){\n\t\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,_invocation]);\n\t\t\t};\n\n\t\t\tnext();\n\n\t\t\treturn _invocation.result;\n\n\t\t});\n\t};","ctx":{"type":"method","receiver":"self","name":"asObject","string":"self.asObject()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"category","string":"Scarlet"},{"type":"method","string":"using"},{"type":"param","types":["Function"],"name":"targetMethod","description":"the method to call when the type or instance is intercepted"},{"type":"param","types":["Function"],"name":"targetThisContext","description":"the reference to self/this to be used when calling the intercepotr"},{"type":"chainable","string":""},{"type":"return","types":["Function"],"description":"A reference to the current interceptor(self)"}],"description":{"full":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ","summary":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "},"isPrivate":false,"ignore":false,"code":"self.using = function(targetMethod,targetThisContext) {\n\t\tassert(targetMethod, \"Cannot have null target for interceptor\");\n\n\t\tif(!targetThisContext)\n\t\t\ttargetThisContext = self;\n\n\t\taddTarget(targetMethod,targetThisContext);\n\n\t\treturn self;\n\t};\n\n\tvar addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};","ctx":{"type":"method","receiver":"self","name":"using","string":"self.using()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"category","string":"Scarlet"},{"type":"method","string":"resolve"},{"type":"return","types":["Function"],"description":"A reference to the function being intercepted"}],"description":{"full":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ","summary":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "},"isPrivate":false,"ignore":false,"code":"self.resolve = function(){\n\t\treturn self.proxiedInstance;\n\t};","ctx":{"type":"method","receiver":"self","name":"resolve","string":"self.resolve()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"method","string":"release"},{"type":"chainable","string":""},{"type":"return","types":["Function"],"description":"A reference to the current interceptor(self)"}],"description":{"full":"<p>Remove all interceptors from the intercepted object</p>","summary":"<p>Remove all interceptors from the intercepted object</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.release = function() {\n\t\tproxy.unwrap();\n\t\treturn self;\n\t};\n\n}\n\nmodule.exports = Interceptor;","ctx":{"type":"method","receiver":"self","name":"release","string":"self.release()"},"fileName":"lib/interceptor.js"},{"tags":[{"type":"category","string":"Invocation"},{"type":"class","string":"Invocation"},{"type":"constructor","string":""},{"type":"param","types":["Function","Object"],"name":"object","description":"the original object or function"},{"type":"param","types":["Function","Object"],"name":"method","description":"the method being intercepted"},{"type":"param","types":["Function","Object"],"name":"args","description":"the original args passed into the function being intercepted"}],"description":{"full":"<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>","summary":"<p>The object or function that has been intercepted</p>","body":"<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>"},"isPrivate":false,"ignore":false,"code":"function Invocation(object, method, args) {\n\n\tassert(args, \"Scarlet::Invocation::args == null\");\n\tassert(object, \"Scarlet::Invocation::object == null\");\n\tassert(method, \"Scarlet::Invocation::method == null\");\n\n\tvar self = this;\n\n\tself.args = args;\n\n\tself.object = object;\n\tself.method = method;\n\tself.result = null;","ctx":{"type":"function","name":"Invocation","string":"Invocation()"},"fileName":"lib/invocation.js"},{"tags":[{"type":"category","string":"Invocation"},{"type":"method","string":"proceed"},{"type":"return","types":["Function","Object"],"description":"of the result of the original method call"}],"description":{"full":"<p>Allows the intercepted method to be called</p>","summary":"<p>Allows the intercepted method to be called</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.proceed = function() {\n\t\tvar parameters = Array.prototype.slice.call(args);\n\t\tself.result = self.method.apply(self.object, parameters);\n\t\treturn self.result;\n\t};\n}\n\nmodule.exports = Invocation;","ctx":{"type":"method","receiver":"self","name":"proceed","string":"self.proceed()"},"fileName":"lib/invocation.js"},{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"var path = require(\"path\");\nvar assert = require(\"assert\");\n\nfunction Plugins() {\n\n\tvar self = this;\n\t\n\tself.loadPlugin = function($scarlet, pluginPath) {\n\n\t\tassert($scarlet, \"Scarlet::Plugins::loadPlugin::$scarlet == null\");\n\t\tassert(pluginPath, \"Scarlet::Plugins::loadPlugin::pluginPath == null\");\n\n\t\tfullPath = path.normalize(__dirname + \"/../../\" + pluginPath);\n\t\tvar plugin = require(fullPath);\n\n\t\tpluginObject = new plugin($scarlet);\n\t\tpluginObject.initialize();\n\n\t};\n\n}\n\nmodule.exports = new Plugins();","ctx":{"type":"declaration","name":"path","value":"require(\"path\")","string":"path"},"fileName":"lib/plugins.js"},{"tags":[{"type":"category","string":"Proxy"},{"type":"class","string":"ProxyInstance"},{"type":"constructor","string":""},{"type":"param","types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"description":{"full":"<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>","summary":"<p>Creates an Proxy for an instance or object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"},"isPrivate":false,"ignore":false,"code":"function ProxyInstance(interceptor) {\n\n\tvar self = this;","ctx":{"type":"function","name":"ProxyInstance","string":"ProxyInstance()"},"fileName":"lib/proxy-instance.js"},{"tags":[{"type":"property","string":"interceptor "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.interceptor = interceptor;","ctx":{"type":"property","receiver":"self","name":"interceptor","value":"interceptor","string":"self.interceptor"},"fileName":"lib/proxy-instance.js"},{"tags":[{"type":"method","string":"whenCalled"},{"type":"param","types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"},{"type":"required","string":""},{"type":"return","types":["Function"],"description":"the type being intercepted with the proxy attached to the instance"}],"description":{"full":"<p>Creates an Proxy for a instance</p>","summary":"<p>Creates an Proxy for a instance</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.whenCalled = function(target) {\n\t\tif (!interceptor.instance.__scarlet) {\n\n\t\t\tinterceptor.instance.__scarlet = {};\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tself.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];\n\n\t\t\t\tcreatePropertyProxy(member, memberName, target);\n\n\t\t\t\tcreateFunctionProxy(member, memberName, target);\n\n\t\t\t});\n\t\t}\n\n\t\treturn interceptor.instance;\n\t};\n\n\tvar createPropertyProxy = function(member,memberName,target){\n\t\tif (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== \"__scarlet\") && (memberName !== \"__typename\")) {\n\n\t\t\tself.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {\n\n\t\t\t\tconfigurable: true,\n\n\t\t\t\tget: function(){\n\t\t\t\t\treturn target(function(){\n\t\t\t\t\t\treturn self.interceptor.instance.__scarlet[memberName];\n\t\t\t\t\t}, self.interceptor.instance.__scarlet[memberName]);\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tset: function(value){\n\t\t\t\t\ttarget(function(){\n\t\t\t\t\t\tself.interceptor.instance.__scarlet[memberName] = value;\t\n\t\t\t\t\t}, value);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t});\n\t\t} else if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === \"__typename\")) {\n\t\t\tself.interceptor.instance.__typename = self.interceptor.instance.__scarlet.__typename;\n\t\t}\n\t};\n\n\tvar createFunctionProxy = function(member,memberName,target){\n\t\tif (member instanceof(Function)) {\n\t\t\tvar originalMethod = self.interceptor.instance.__scarlet[memberName];\n\t\t\t\n\t\t\tself.interceptor.instance[memberName] = function() {\n\t\t\t\treturn target(originalMethod, arguments);\n\t\t\t};\n\n\t\t}\n\t};\n\n\tself.unwrap = function() {\n\n\t\tif (interceptor.instance.__scarlet) {\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tif (member instanceof Function) {\n\t\t\t\t\tvar originalMethod = interceptor.instance.__scarlet[memberName];\n\t\t\t\t\tinterceptor.instance[memberName] = originalMethod;\n\t\t\t\t}\n\n\t\t\t});\n\t\t}\n\n\t};\n\n}\n\nmodule.exports = ProxyInstance;","ctx":{"type":"method","receiver":"self","name":"whenCalled","string":"self.whenCalled()"},"fileName":"lib/proxy-instance.js"},{"tags":[{"type":"class","string":"ProxyPrototype"},{"type":"constructor","string":""},{"type":"param","types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"},"isPrivate":false,"ignore":false,"code":"function ProxyPrototype(interceptor) {\n\n\tvar self = this;","ctx":{"type":"function","name":"ProxyPrototype","string":"ProxyPrototype()"},"fileName":"lib/proxy-prototype.js"},{"tags":[{"type":"property","string":"inheritedType "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.inheritedType = null;","ctx":{"type":"property","receiver":"self","name":"inheritedType","value":"null","string":"self.inheritedType"},"fileName":"lib/proxy-prototype.js"},{"tags":[{"type":"property","string":"interceptor "},{"type":"type","types":["Function","Object"]}],"description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.interceptor = interceptor;","ctx":{"type":"property","receiver":"self","name":"interceptor","value":"interceptor","string":"self.interceptor"},"fileName":"lib/proxy-prototype.js"},{"tags":[{"type":"method","string":"whenCalled"},{"type":"param","types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"},{"type":"required","string":""},{"type":"return","types":["Function"],"description":"the type being intercepted with the proxy attached to the prototype"}],"description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":""},"isPrivate":false,"ignore":false,"code":"self.whenCalled = function(target) {\n\n\t\tassert(interceptor.type, \"Scarlet::Interceptor::type == null\");\n\t\tassert(interceptor.type.prototype, \"Cannot use 'asType()' for this object because it does not have a prototype\");\n\n\t\tself.inheritedType = function(){\n\n\t\t\tvar self = this;\n\n\t\t\t(function() {\n\t\t\t\tvar interceptorTypeConstructor = function(){\n\t\t\t\t\tvar parameters = Array.prototype.slice.call(arguments);\n\t\t\t\t\tinterceptor.type.apply(self,parameters);\n\n\t\t\t\t\tinterceptor.instance = self;\n\n\t\t\t\t\tvar proxy = new ProxyInstance(interceptor);\n\t\t\t\t\tproxy.whenCalled(target);\n\t\t\t\t};\n\n\t\t\t\treturn target(interceptorTypeConstructor,arguments);\n\t\t\t}());\n\n\t\t};\n\n\t\tinherits(self.inheritedType, interceptor.type);\n\t\treturn self.inheritedType;\n\t\t\n\t};\n\n\tself.unwrap = function() {};\n\n}\n\nmodule.exports = ProxyPrototype;","ctx":{"type":"method","receiver":"self","name":"whenCalled","string":"self.whenCalled()"},"fileName":"lib/proxy-prototype.js"},{"tags":[{"type":"category","string":"Scarlet"},{"type":"class","string":"Scarlet"},{"type":"constructor","string":""},{"type":"param","types":["Array"],"name":"pluginArr","description":"the array of plugins to load"}],"description":{"full":"<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet Instance</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"},"isPrivate":false,"ignore":false,"code":"function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\n\tself.lib = require(\"./index\");\n\n\tself.plugins = {};\n\n\tvar interceptType = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asType();\n\t};\n\n\tvar interceptObject = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asObject();\n\t};","ctx":{"type":"function","name":"Scarlet","string":"Scarlet()"},"fileName":"lib/scarlet.js"},{"tags":[{"type":"category","string":"Scarlet"},{"type":"method","string":"loadPlugin"},{"type":"param","types":["Function","Object"],"name":"pluginPath","description":"the plugin to be loaded"},{"type":"return","types":["Function"],"description":"A reference to scarlet(self)"},{"type":"chainable","string":""}],"description":{"full":"<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>","summary":"<p>loads a plugin</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"},"isPrivate":false,"ignore":false,"code":"self.loadPlugin = function(pluginPath) {\n\t\tself.lib.Plugins.loadPlugin(self, pluginPath);\n\t\treturn self;\n\t};","ctx":{"type":"method","receiver":"self","name":"loadPlugin","string":"self.loadPlugin()"},"fileName":"lib/scarlet.js"},{"tags":[{"type":"category","string":"Scarlet"},{"type":"method","string":"intercept"},{"type":"param","types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"},{"type":"return","types":["Function"],"description":"An interceptor object"}],"description":{"full":"<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet interceptor</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"},"isPrivate":false,"ignore":false,"code":"self.intercept = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tif (typeOrInstance.prototype)\n\t\t\treturn interceptType(typeOrInstance);\n\n\t\treturn interceptObject(typeOrInstance);\n\t};\n\n\tif(pluginArr){\n\t\tif (pluginArr.length) {\n\t\t\tpluginArr.forEach(function(plugin){\n\t\t\t\tself.loadPlugin(plugin);\n\t\t\t});\n\t\t}\t\t\n\t}\n\n}\n\nmodule.exports = Scarlet;","ctx":{"type":"method","receiver":"self","name":"intercept","string":"self.intercept()"},"fileName":"lib/scarlet.js"},{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"function isObjectLiteral(_obj) {\n\tvar _test = _obj;\n\treturn (typeof _obj !== 'object' || _obj === null ?\n\t\tfalse :\n\t\t((function() {\n\t\t\twhile (!false) {\n\t\t\t\tif (Object.getPrototypeOf(_test = Object.getPrototypeOf(_test)) === null) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn Object.getPrototypeOf(_obj) === _test;\n\t\t})()));\n}\n\nfunction getAllPropertyNames(obj) {\n\tvar props = [];\n\n\tvar getProperties = function(){\n\t\tObject.getOwnPropertyNames(obj).forEach(function(prop) {\n\t\t\tif (props.indexOf(prop) === -1) {\n\t\t\t\tprops.push(prop);\n\t\t\t}\n\t\t});\n\t};\n\n\tvar objectPrototype;\n\tdo {\n\t\tgetProperties();\n\t\tobjectPrototype = Object.getPrototypeOf(obj);\n\t} while (objectPrototype);\n\n\treturn props;\n}\n\nvar names = getAllPropertyNames(new AnyObject());\n\nfor (var index = 0; index < names.length; index++) {\n\tconsole.log(names[index]);\n}","ctx":{"type":"function","name":"isObjectLiteral","string":"isObjectLiteral()"},"fileName":"lib/extensions/console.js"},{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"function Enumerable() {\n\n\tvar self = this;\n\n\tself.arrayFor = function(array, callback) {\n\t\tfor (var i = 0; i < array.length; i++) {\n\t\t\tcallback(array[i], i, array);\n\t\t}\n\t};\n\n\tself.funcFor = function(object, callback) {\n\t\tfor (var key in object) {\n\t\t\tcallback(object[key], key, object);\n\t\t}\n\t};\n\n\tself.stringFor = function(string, callback) {\n\t\tself.arrayFor(string.split(\"\"), function(chr, index) {\n\t\t\tcallback(chr, index, string);\n\t\t});\n\t};\n\n\tself.allEach = function(object, callback) {\n\t\tObject.getOwnPropertyNames(object).forEach(function(property) {\n\t\t\tcallback(object[property], property, object);\n\t\t});\n\t};\n\n\tself.forEach = function(object, callback) {\n\t\tif (object) {\n\t\t\tvar resolve = self.funcFor;\n\t\t\tif (object instanceof Function) {\n\t\t\t\tresolve = self.funcFor;\n\t\t\t} else if (typeof object == \"string\") {\n\t\t\t\tresolve = self.stringFor;\n\t\t\t} else if (typeof object.length == \"number\") {\n\t\t\t\tresolve = self.arrayFor;\n\t\t\t}\n\t\t\tresolve(object, callback);\n\t\t}\n\t};\n\n}\n\nmodule.exports = new Enumerable();","ctx":{"type":"function","name":"Enumerable","string":"Enumerable()"},"fileName":"lib/extensions/enumerable.js"},{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"module.exports = function(ctor, superCtor) {\n\tctor.super_ = superCtor;\n\tctor.prototype = Object.create(superCtor.prototype, {\n\t\tconstructor: {\n\t\t\tvalue: ctor,\n\t\t\tenumerable: false,\n\t\t\twritable: true,\n\t\t\tconfigurable: true\n\t\t}\n\t});\n};","ctx":{"type":"method","receiver":"module","name":"exports","string":"module.exports()"},"fileName":"lib/extensions/inherits.js"},{"tags":[],"description":{"full":"","summary":"","body":""},"isPrivate":false,"code":"function Uuid(){\n\n\tfunction s4() {\n\t\treturn Math.floor((1 + Math.random()) * 0x10000)\n\t\t\t\t.toString(16)\n\t\t\t\t.substring(1);\n\t}\n\n\tfunction guid() {\n\t\treturn s4() + s4() + '-' + s4() + '-' + s4() + '-' +\n\t\t\t\ts4() + '-' + s4() + s4() + s4();\n\t}\n\n\tthis.next = function(){\n\t\treturn guid();\n\t};\n}\n\nmodule.exports = new Uuid();","ctx":{"type":"function","name":"Uuid","string":"Uuid()"},"fileName":"lib/extensions/uuid.js"}],"mox":[{"params":[],"name":"exports","type":"property","fileName":"lib/index.js","description":{"full":"","summary":"","body":""}},{"params":[{"types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"name":"Interceptor","type":"function","fileName":"lib/interceptor.js","description":{"full":"<p>Creates an Interceptor for an Object or Function</p>","summary":"<p>Creates an Interceptor for an Object or Function</p>","body":""},"class":"Interceptor","constructor":true},{"params":[],"name":"targets","type":{"types":["Array"]},"fileName":"lib/interceptor.js","description":{"full":"<p>Target interceptors</p>","summary":"<p>Target interceptors</p>","body":""},"property":"targets"},{"params":[],"name":"proxy","type":{"types":["Function"]},"fileName":"lib/interceptor.js","description":{"full":"<p>Proxy of the object</p>","summary":"<p>Proxy of the object</p>","body":""},"property":"proxy"},{"params":[],"name":"currentTarget","type":{"types":["Number"]},"fileName":"lib/interceptor.js","description":{"full":"<p>reference to the current target reference</p>","summary":"<p>reference to the current target reference</p>","body":""},"property":"currentTarget"},{"params":[],"name":"type","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The type or instance to be intercepted</p>","summary":"<p>The type or instance to be intercepted</p>","body":""},"property":"type "},{"params":[],"name":"proxiedInstance","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"proxiedInstance "},{"params":[],"name":"instance","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"proxiedInstance "},{"params":[],"name":"asType","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Create an interceptor for a function object</p>","summary":"<p>Create an interceptor for a function object</p>","body":""},"method":"asType","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[],"name":"asObject","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Create an interceptor for an object literal</p>","summary":"<p>Create an interceptor for an object literal</p>","body":""},"method":"asObject","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[{"types":["Function"],"name":"targetMethod","description":"the method to call when the type or instance is intercepted"},{"types":["Function"],"name":"targetThisContext","description":"the reference to self/this to be used when calling the intercepotr"}],"name":"using","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ","summary":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "},"category":"Scarlet","method":"using","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[],"name":"resolve","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ","summary":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "},"category":"Scarlet","method":"resolve","return":{"types":["Function"],"description":"A reference to the function being intercepted"}},{"params":[],"name":"release","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Remove all interceptors from the intercepted object</p>","summary":"<p>Remove all interceptors from the intercepted object</p>","body":""},"method":"release","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[{"types":["Function","Object"],"name":"object","description":"the original object or function"},{"types":["Function","Object"],"name":"method","description":"the method being intercepted"},{"types":["Function","Object"],"name":"args","description":"the original args passed into the function being intercepted"}],"name":"Invocation","type":"function","fileName":"lib/invocation.js","description":{"full":"<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>","summary":"<p>The object or function that has been intercepted</p>","body":"<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>"},"category":"Invocation","class":"Invocation","constructor":true},{"params":[],"name":"proceed","type":"method","fileName":"lib/invocation.js","description":{"full":"<p>Allows the intercepted method to be called</p>","summary":"<p>Allows the intercepted method to be called</p>","body":""},"category":"Invocation","method":"proceed","return":{"types":["Function","Object"],"description":"of the result of the original method call"}},{"params":[],"name":"path","type":"declaration","fileName":"lib/plugins.js","description":{"full":"","summary":"","body":""}},{"params":[{"types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"name":"ProxyInstance","type":"function","fileName":"lib/proxy-instance.js","description":{"full":"<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>","summary":"<p>Creates an Proxy for an instance or object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"},"category":"Proxy","class":"ProxyInstance","constructor":true},{"params":[],"name":"interceptor","type":{"types":["Function","Object"]},"fileName":"lib/proxy-instance.js","description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"property":"interceptor "},{"params":[{"types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"}],"name":"whenCalled","type":"method","fileName":"lib/proxy-instance.js","description":{"full":"<p>Creates an Proxy for a instance</p>","summary":"<p>Creates an Proxy for a instance</p>","body":""},"method":"whenCalled","required":true,"return":{"types":["Function"],"description":"the type being intercepted with the proxy attached to the instance"}},{"params":[{"types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"name":"ProxyPrototype","type":"function","fileName":"lib/proxy-prototype.js","description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"},"class":"ProxyPrototype","constructor":true},{"params":[],"name":"inheritedType","type":{"types":["Function","Object"]},"fileName":"lib/proxy-prototype.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"inheritedType "},{"params":[],"name":"interceptor","type":{"types":["Function","Object"]},"fileName":"lib/proxy-prototype.js","description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"property":"interceptor "},{"params":[{"types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"}],"name":"whenCalled","type":"method","fileName":"lib/proxy-prototype.js","description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":""},"method":"whenCalled","required":true,"return":{"types":["Function"],"description":"the type being intercepted with the proxy attached to the prototype"}},{"params":[{"types":["Array"],"name":"pluginArr","description":"the array of plugins to load"}],"name":"Scarlet","type":"function","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet Instance</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"},"category":"Scarlet","class":"Scarlet","constructor":true},{"params":[{"types":["Function","Object"],"name":"pluginPath","description":"the plugin to be loaded"}],"name":"loadPlugin","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>","summary":"<p>loads a plugin</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"},"category":"Scarlet","method":"loadPlugin","return":{"types":["Function"],"description":"A reference to scarlet(self)"},"chainable":true},{"params":[{"types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"name":"intercept","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet interceptor</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"},"category":"Scarlet","method":"intercept","return":{"types":["Function"],"description":"An interceptor object"}},{"params":[],"name":"isObjectLiteral","type":"function","fileName":"lib/extensions/console.js","description":{"full":"","summary":"","body":""}},{"params":[],"name":"Enumerable","type":"function","fileName":"lib/extensions/enumerable.js","description":{"full":"","summary":"","body":""}},{"params":[],"name":"exports","type":"method","fileName":"lib/extensions/inherits.js","description":{"full":"","summary":"","body":""}},{"params":[],"name":"Uuid","type":"function","fileName":"lib/extensions/uuid.js","description":{"full":"","summary":"","body":""}}],"categories":[{"tag":"Scarlet","moxComments":[{"params":[{"types":["Function"],"name":"targetMethod","description":"the method to call when the type or instance is intercepted"},{"types":["Function"],"name":"targetThisContext","description":"the reference to self/this to be used when calling the intercepotr"}],"name":"using","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ","summary":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "},"category":"Scarlet","method":"using","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[],"name":"resolve","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ","summary":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "},"category":"Scarlet","method":"resolve","return":{"types":["Function"],"description":"A reference to the function being intercepted"}},{"params":[{"types":["Array"],"name":"pluginArr","description":"the array of plugins to load"}],"name":"Scarlet","type":"function","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet Instance</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"},"category":"Scarlet","class":"Scarlet","constructor":true},{"params":[{"types":["Function","Object"],"name":"pluginPath","description":"the plugin to be loaded"}],"name":"loadPlugin","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>","summary":"<p>loads a plugin</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"},"category":"Scarlet","method":"loadPlugin","return":{"types":["Function"],"description":"A reference to scarlet(self)"},"chainable":true},{"params":[{"types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"name":"intercept","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet interceptor</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"},"category":"Scarlet","method":"intercept","return":{"types":["Function"],"description":"An interceptor object"}}]},{"tag":"Invocation","moxComments":[{"params":[{"types":["Function","Object"],"name":"object","description":"the original object or function"},{"types":["Function","Object"],"name":"method","description":"the method being intercepted"},{"types":["Function","Object"],"name":"args","description":"the original args passed into the function being intercepted"}],"name":"Invocation","type":"function","fileName":"lib/invocation.js","description":{"full":"<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>","summary":"<p>The object or function that has been intercepted</p>","body":"<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>"},"category":"Invocation","class":"Invocation","constructor":true},{"params":[],"name":"proceed","type":"method","fileName":"lib/invocation.js","description":{"full":"<p>Allows the intercepted method to be called</p>","summary":"<p>Allows the intercepted method to be called</p>","body":""},"category":"Invocation","method":"proceed","return":{"types":["Function","Object"],"description":"of the result of the original method call"}}]},{"tag":"Proxy","moxComments":[{"params":[{"types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"name":"ProxyInstance","type":"function","fileName":"lib/proxy-instance.js","description":{"full":"<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>","summary":"<p>Creates an Proxy for an instance or object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"},"category":"Proxy","class":"ProxyInstance","constructor":true}]}],"files":[{"tag":"lib/index.js","moxComments":[{"params":[],"name":"exports","type":"property","fileName":"lib/index.js","description":{"full":"","summary":"","body":""}}]},{"tag":"lib/interceptor.js","moxComments":[{"params":[{"types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"name":"Interceptor","type":"function","fileName":"lib/interceptor.js","description":{"full":"<p>Creates an Interceptor for an Object or Function</p>","summary":"<p>Creates an Interceptor for an Object or Function</p>","body":""},"class":"Interceptor","constructor":true},{"params":[],"name":"targets","type":{"types":["Array"]},"fileName":"lib/interceptor.js","description":{"full":"<p>Target interceptors</p>","summary":"<p>Target interceptors</p>","body":""},"property":"targets"},{"params":[],"name":"proxy","type":{"types":["Function"]},"fileName":"lib/interceptor.js","description":{"full":"<p>Proxy of the object</p>","summary":"<p>Proxy of the object</p>","body":""},"property":"proxy"},{"params":[],"name":"currentTarget","type":{"types":["Number"]},"fileName":"lib/interceptor.js","description":{"full":"<p>reference to the current target reference</p>","summary":"<p>reference to the current target reference</p>","body":""},"property":"currentTarget"},{"params":[],"name":"type","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The type or instance to be intercepted</p>","summary":"<p>The type or instance to be intercepted</p>","body":""},"property":"type "},{"params":[],"name":"proxiedInstance","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"proxiedInstance "},{"params":[],"name":"instance","type":{"types":["Function","Object"]},"fileName":"lib/interceptor.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"proxiedInstance "},{"params":[],"name":"asType","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Create an interceptor for a function object</p>","summary":"<p>Create an interceptor for a function object</p>","body":""},"method":"asType","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[],"name":"asObject","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Create an interceptor for an object literal</p>","summary":"<p>Create an interceptor for an object literal</p>","body":""},"method":"asObject","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[{"types":["Function"],"name":"targetMethod","description":"the method to call when the type or instance is intercepted"},{"types":["Function"],"name":"targetThisContext","description":"the reference to self/this to be used when calling the intercepotr"}],"name":"using","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ","summary":"<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "},"category":"Scarlet","method":"using","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}},{"params":[],"name":"resolve","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ","summary":"<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "},"category":"Scarlet","method":"resolve","return":{"types":["Function"],"description":"A reference to the function being intercepted"}},{"params":[],"name":"release","type":"method","fileName":"lib/interceptor.js","description":{"full":"<p>Remove all interceptors from the intercepted object</p>","summary":"<p>Remove all interceptors from the intercepted object</p>","body":""},"method":"release","chainable":true,"return":{"types":["Function"],"description":"A reference to the current interceptor(self)"}}]},{"tag":"lib/invocation.js","moxComments":[{"params":[{"types":["Function","Object"],"name":"object","description":"the original object or function"},{"types":["Function","Object"],"name":"method","description":"the method being intercepted"},{"types":["Function","Object"],"name":"args","description":"the original args passed into the function being intercepted"}],"name":"Invocation","type":"function","fileName":"lib/invocation.js","description":{"full":"<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>","summary":"<p>The object or function that has been intercepted</p>","body":"<p>Maintains the following properties for the object or function being intercepted:<br />* args (Object) - The original args passed into the function being intercepted<br />* object (Function|Object) - The original object or function<br />* method (Function|Object) - The method being intercepted<br />* result (Function|Object) - The result of the method being intercepted</p>"},"category":"Invocation","class":"Invocation","constructor":true},{"params":[],"name":"proceed","type":"method","fileName":"lib/invocation.js","description":{"full":"<p>Allows the intercepted method to be called</p>","summary":"<p>Allows the intercepted method to be called</p>","body":""},"category":"Invocation","method":"proceed","return":{"types":["Function","Object"],"description":"of the result of the original method call"}}]},{"tag":"lib/plugins.js","moxComments":[{"params":[],"name":"path","type":"declaration","fileName":"lib/plugins.js","description":{"full":"","summary":"","body":""}}]},{"tag":"lib/proxy-instance.js","moxComments":[{"params":[{"types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"name":"ProxyInstance","type":"function","fileName":"lib/proxy-instance.js","description":{"full":"<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>","summary":"<p>Creates an Proxy for an instance or object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"},"category":"Proxy","class":"ProxyInstance","constructor":true},{"params":[],"name":"interceptor","type":{"types":["Function","Object"]},"fileName":"lib/proxy-instance.js","description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"property":"interceptor "},{"params":[{"types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"}],"name":"whenCalled","type":"method","fileName":"lib/proxy-instance.js","description":{"full":"<p>Creates an Proxy for a instance</p>","summary":"<p>Creates an Proxy for a instance</p>","body":""},"method":"whenCalled","required":true,"return":{"types":["Function"],"description":"the type being intercepted with the proxy attached to the instance"}}]},{"tag":"lib/proxy-prototype.js","moxComments":[{"params":[{"types":["Function","Object"],"name":"interceptor","description":"the scarlet interceptor to apply"}],"name":"ProxyPrototype","type":"function","fileName":"lib/proxy-prototype.js","description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"},"class":"ProxyPrototype","constructor":true},{"params":[],"name":"inheritedType","type":{"types":["Function","Object"]},"fileName":"lib/proxy-prototype.js","description":{"full":"<p>The instance with the proxy interceptor</p>","summary":"<p>The instance with the proxy interceptor</p>","body":""},"property":"inheritedType "},{"params":[],"name":"interceptor","type":{"types":["Function","Object"]},"fileName":"lib/proxy-prototype.js","description":{"full":"<p>The scarlet interceptor</p>","summary":"<p>The scarlet interceptor</p>","body":""},"property":"interceptor "},{"params":[{"types":["Function"],"name":"target","description":"the target method to call when the proxied object is called"}],"name":"whenCalled","type":"method","fileName":"lib/proxy-prototype.js","description":{"full":"<p>Creates an Proxy for a prototype Function Object</p>","summary":"<p>Creates an Proxy for a prototype Function Object</p>","body":""},"method":"whenCalled","required":true,"return":{"types":["Function"],"description":"the type being intercepted with the proxy attached to the prototype"}}]},{"tag":"lib/scarlet.js","moxComments":[{"params":[{"types":["Array"],"name":"pluginArr","description":"the array of plugins to load"}],"name":"Scarlet","type":"function","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet Instance</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"},"category":"Scarlet","class":"Scarlet","constructor":true},{"params":[{"types":["Function","Object"],"name":"pluginPath","description":"the plugin to be loaded"}],"name":"loadPlugin","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>","summary":"<p>loads a plugin</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"},"category":"Scarlet","method":"loadPlugin","return":{"types":["Function"],"description":"A reference to scarlet(self)"},"chainable":true},{"params":[{"types":["Function","Object"],"name":"typeOrInstance","description":"the type or instance to be intercepted"}],"name":"intercept","type":"method","fileName":"lib/scarlet.js","description":{"full":"<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>","summary":"<p>Creates a Scarlet interceptor</p>","body":"<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"},"category":"Scarlet","method":"intercept","return":{"types":["Function"],"description":"An interceptor object"}}]},{"tag":"lib/extensions/console.js","moxComments":[{"params":[],"name":"isObjectLiteral","type":"function","fileName":"lib/extensions/console.js","description":{"full":"","summary":"","body":""}}]},{"tag":"lib/extensions/enumerable.js","moxComments":[{"params":[],"name":"Enumerable","type":"function","fileName":"lib/extensions/enumerable.js","description":{"full":"","summary":"","body":""}}]},{"tag":"lib/extensions/inherits.js","moxComments":[{"params":[],"name":"exports","type":"method","fileName":"lib/extensions/inherits.js","description":{"full":"","summary":"","body":""}}]},{"tag":"lib/extensions/uuid.js","moxComments":[{"params":[],"name":"Uuid","type":"function","fileName":"lib/extensions/uuid.js","description":{"full":"","summary":"","body":""}}]}]}
+{
+    "comments": [
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "module.exports = {\n\tUtil: require(\"util\"),\n\tAssert: require(\"assert\"),\n\tPlugins: require(\"./plugins\"),\n\tInvocation: require(\"./invocation\"),\n\tInterceptor: require(\"./interceptor\"),\n\tProxyInstance: require(\"./proxy-instance\"),\n\tProxyPrototype: require(\"./proxy-prototype\"),\n\tEnumerable: require(\"./extensions/enumerable\")\n};",
+            "ctx": {
+                "type": "property",
+                "receiver": "module",
+                "name": "exports",
+                "value": "{",
+                "string": "module.exports"
+            },
+            "fileName": "lib/index.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "class",
+                    "string": "Interceptor"
+                },
+                {
+                    "type": "constructor",
+                    "string": ""
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates an Interceptor for an Object or Function</p>",
+                "summary": "<p>Creates an Interceptor for an Object or Function</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;",
+            "ctx": {
+                "type": "function",
+                "name": "Interceptor",
+                "string": "Interceptor()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "targets"
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Array"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>Target interceptors</p>",
+                "summary": "<p>Target interceptors</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.targets = [];",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "targets",
+                "value": "[]",
+                "string": "self.targets"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "proxy"
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>Proxy of the object</p>",
+                "summary": "<p>Proxy of the object</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.proxy = null;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "proxy",
+                "value": "null",
+                "string": "self.proxy"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "currentTarget"
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Number"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>reference to the current target reference</p>",
+                "summary": "<p>reference to the current target reference</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.currentTarget = 0;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "currentTarget",
+                "value": "0",
+                "string": "self.currentTarget"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "type "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The type or instance to be intercepted</p>",
+                "summary": "<p>The type or instance to be intercepted</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.type = typeOrInstance;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "type",
+                "value": "typeOrInstance",
+                "string": "self.type"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "proxiedInstance "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.proxiedInstance = null;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "proxiedInstance",
+                "value": "null",
+                "string": "self.proxiedInstance"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "proxiedInstance "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.instance = typeOrInstance;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "instance",
+                "value": "typeOrInstance",
+                "string": "self.instance"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "method",
+                    "string": "asType"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the current interceptor(self)"
+                }
+            ],
+            "description": {
+                "full": "<p>Create an interceptor for a function object</p>",
+                "summary": "<p>Create an interceptor for a function object</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.asType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "asType",
+                "string": "self.asType()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "method",
+                    "string": "asObject"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the current interceptor(self)"
+                }
+            ],
+            "description": {
+                "full": "<p>Create an interceptor for an object literal</p>",
+                "summary": "<p>Create an interceptor for an object literal</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.asObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(method, args) {\n\n\t\t\tvar _invocation = new Invocation(self.instance, method, args);\n\n\t\t\tvar next = function(error, result){\n\n\t\t\t\tif(self.currentTarget >= self.targets.length){\n\t\t\t\t\tself.currentTarget = 0;\t\n\t\t\t\t\treturn _invocation.proceed();\n\t\t\t\t}\n\n\t\t\t\tvar targetMethod = self.targets[self.currentTarget];\n\t\t\t\tself.currentTarget++;\n\t\t\t\ttargetCall(targetMethod);\n\n\t\t\t\treturn _invocation.result;\n\t\t\t};\n\n\t\t\tvar targetCall = function(target){\n\t\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,_invocation]);\n\t\t\t};\n\n\t\t\tnext();\n\n\t\t\treturn _invocation.result;\n\n\t\t});\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "asObject",
+                "string": "self.asObject()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "method",
+                    "string": "using"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetMethod",
+                    "description": "the method to call when the type or instance is intercepted"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetThisContext",
+                    "description": "the reference to self/this to be used when calling the intercepotr"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the current interceptor(self)"
+                }
+            ],
+            "description": {
+                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.using = function(targetMethod,targetThisContext) {\n\t\tassert(targetMethod, \"Cannot have null target for interceptor\");\n\n\t\tif(!targetThisContext)\n\t\t\ttargetThisContext = self;\n\n\t\taddTarget(targetMethod,targetThisContext);\n\n\t\treturn self;\n\t};\n\n\tvar addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "using",
+                "string": "self.using()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "method",
+                    "string": "resolve"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the function being intercepted"
+                }
+            ],
+            "description": {
+                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.resolve = function(){\n\t\treturn self.proxiedInstance;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "resolve",
+                "string": "self.resolve()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "method",
+                    "string": "release"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to the current interceptor(self)"
+                }
+            ],
+            "description": {
+                "full": "<p>Remove all interceptors from the intercepted object</p>",
+                "summary": "<p>Remove all interceptors from the intercepted object</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.release = function() {\n\t\tproxy.unwrap();\n\t\treturn self;\n\t};\n\n}\n\nmodule.exports = Interceptor;",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "release",
+                "string": "self.release()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Invocation"
+                },
+                {
+                    "type": "class",
+                    "string": "Invocation"
+                },
+                {
+                    "type": "constructor",
+                    "string": ""
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "object",
+                    "description": "the original object or function"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "method",
+                    "description": "the method being intercepted"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "args",
+                    "description": "the original args passed into the function being intercepted"
+                }
+            ],
+            "description": {
+                "full": "<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>",
+                "summary": "<p>The object or function that has been intercepted</p>",
+                "body": "<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function Invocation(object, method, args) {\n\n\tassert(args, \"Scarlet::Invocation::args == null\");\n\tassert(object, \"Scarlet::Invocation::object == null\");\n\tassert(method, \"Scarlet::Invocation::method == null\");\n\n\tvar self = this;\n\n\tself.args = args;\n\n\tself.object = object;\n\tself.method = method;\n\tself.result = null;",
+            "ctx": {
+                "type": "function",
+                "name": "Invocation",
+                "string": "Invocation()"
+            },
+            "fileName": "lib/invocation.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Invocation"
+                },
+                {
+                    "type": "method",
+                    "string": "proceed"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "description": "of the result of the original method call"
+                }
+            ],
+            "description": {
+                "full": "<p>Allows the intercepted method to be called</p>",
+                "summary": "<p>Allows the intercepted method to be called</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.proceed = function() {\n\t\tvar parameters = Array.prototype.slice.call(args);\n\t\tself.result = self.method.apply(self.object, parameters);\n\t\treturn self.result;\n\t};\n}\n\nmodule.exports = Invocation;",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "proceed",
+                "string": "self.proceed()"
+            },
+            "fileName": "lib/invocation.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "var path = require(\"path\");\nvar assert = require(\"assert\");\n\nfunction Plugins() {\n\n\tvar self = this;\n\t\n\tself.loadPlugin = function($scarlet, pluginPath) {\n\n\t\tassert($scarlet, \"Scarlet::Plugins::loadPlugin::$scarlet == null\");\n\t\tassert(pluginPath, \"Scarlet::Plugins::loadPlugin::pluginPath == null\");\n\n\t\tfullPath = path.normalize(__dirname + \"/../../\" + pluginPath);\n\t\tvar plugin = require(fullPath);\n\n\t\tpluginObject = new plugin($scarlet);\n\t\tpluginObject.initialize();\n\n\t};\n\n}\n\nmodule.exports = new Plugins();",
+            "ctx": {
+                "type": "declaration",
+                "name": "path",
+                "value": "require(\"path\")",
+                "string": "path"
+            },
+            "fileName": "lib/plugins.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "class",
+                    "string": "ProxyInstance"
+                },
+                {
+                    "type": "constructor",
+                    "string": ""
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "interceptor",
+                    "description": "the scarlet interceptor to apply"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>",
+                "summary": "<p>Creates an Proxy for an instance or object</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function ProxyInstance(interceptor) {\n\n\tvar self = this;",
+            "ctx": {
+                "type": "function",
+                "name": "ProxyInstance",
+                "string": "ProxyInstance()"
+            },
+            "fileName": "lib/proxy-instance.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "interceptor "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The scarlet interceptor</p>",
+                "summary": "<p>The scarlet interceptor</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.interceptor = interceptor;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "interceptor",
+                "value": "interceptor",
+                "string": "self.interceptor"
+            },
+            "fileName": "lib/proxy-instance.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "method",
+                    "string": "whenCalled"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "target",
+                    "description": "the target method to call when the proxied object is called"
+                },
+                {
+                    "type": "required",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "the type being intercepted with the proxy attached to the instance"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates an Proxy for a instance</p>",
+                "summary": "<p>Creates an Proxy for a instance</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.whenCalled = function(target) {\n\t\tif (!interceptor.instance.__scarlet) {\n\n\t\t\tinterceptor.instance.__scarlet = {};\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tself.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];\n\n\t\t\t\tcreatePropertyProxy(member, memberName, target);\n\n\t\t\t\tcreateFunctionProxy(member, memberName, target);\n\n\t\t\t});\n\t\t}\n\n\t\treturn interceptor.instance;\n\t};\n\n\tvar createPropertyProxy = function(member,memberName,target){\n\t\tif (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== \"__scarlet\") && (memberName !== \"__typename\")) {\n\n\t\t\tself.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {\n\n\t\t\t\tconfigurable: true,\n\n\t\t\t\tget: function(){\n\t\t\t\t\treturn target(function(){\n\t\t\t\t\t\treturn self.interceptor.instance.__scarlet[memberName];\n\t\t\t\t\t}, self.interceptor.instance.__scarlet[memberName]);\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tset: function(value){\n\t\t\t\t\ttarget(function(){\n\t\t\t\t\t\tself.interceptor.instance.__scarlet[memberName] = value;\t\n\t\t\t\t\t}, value);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t});\n\t\t} else if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === \"__typename\")) {\n\t\t\tself.interceptor.instance.__typename = self.interceptor.instance.__scarlet.__typename;\n\t\t}\n\t};\n\n\tvar createFunctionProxy = function(member,memberName,target){\n\t\tif (member instanceof(Function)) {\n\t\t\tvar originalMethod = self.interceptor.instance.__scarlet[memberName];\n\t\t\t\n\t\t\tself.interceptor.instance[memberName] = function() {\n\t\t\t\treturn target(originalMethod, arguments);\n\t\t\t};\n\n\t\t}\n\t};\n\n\tself.unwrap = function() {\n\n\t\tif (interceptor.instance.__scarlet) {\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tif (member instanceof Function) {\n\t\t\t\t\tvar originalMethod = interceptor.instance.__scarlet[memberName];\n\t\t\t\t\tinterceptor.instance[memberName] = originalMethod;\n\t\t\t\t}\n\n\t\t\t});\n\t\t}\n\n\t};\n\n}\n\nmodule.exports = ProxyInstance;",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "whenCalled",
+                "string": "self.whenCalled()"
+            },
+            "fileName": "lib/proxy-instance.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "class",
+                    "string": "ProxyPrototype"
+                },
+                {
+                    "type": "constructor",
+                    "string": ""
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "interceptor",
+                    "description": "the scarlet interceptor to apply"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>",
+                "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function ProxyPrototype(interceptor) {\n\n\tvar self = this;",
+            "ctx": {
+                "type": "function",
+                "name": "ProxyPrototype",
+                "string": "ProxyPrototype()"
+            },
+            "fileName": "lib/proxy-prototype.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "inheritedType "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.inheritedType = null;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "inheritedType",
+                "value": "null",
+                "string": "self.inheritedType"
+            },
+            "fileName": "lib/proxy-prototype.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "property",
+                    "string": "interceptor "
+                },
+                {
+                    "type": "type",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ]
+                }
+            ],
+            "description": {
+                "full": "<p>The scarlet interceptor</p>",
+                "summary": "<p>The scarlet interceptor</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.interceptor = interceptor;",
+            "ctx": {
+                "type": "property",
+                "receiver": "self",
+                "name": "interceptor",
+                "value": "interceptor",
+                "string": "self.interceptor"
+            },
+            "fileName": "lib/proxy-prototype.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "method",
+                    "string": "whenCalled"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "target",
+                    "description": "the target method to call when the proxied object is called"
+                },
+                {
+                    "type": "required",
+                    "string": ""
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "the type being intercepted with the proxy attached to the prototype"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "body": ""
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.whenCalled = function(target) {\n\n\t\tassert(interceptor.type, \"Scarlet::Interceptor::type == null\");\n\t\tassert(interceptor.type.prototype, \"Cannot use 'asType()' for this object because it does not have a prototype\");\n\n\t\tself.inheritedType = function(){\n\n\t\t\tvar self = this;\n\n\t\t\t(function() {\n\t\t\t\tvar interceptorTypeConstructor = function(){\n\t\t\t\t\tvar parameters = Array.prototype.slice.call(arguments);\n\t\t\t\t\tinterceptor.type.apply(self,parameters);\n\n\t\t\t\t\tinterceptor.instance = self;\n\n\t\t\t\t\tvar proxy = new ProxyInstance(interceptor);\n\t\t\t\t\tproxy.whenCalled(target);\n\t\t\t\t};\n\n\t\t\t\treturn target(interceptorTypeConstructor,arguments);\n\t\t\t}());\n\n\t\t};\n\n\t\tinherits(self.inheritedType, interceptor.type);\n\t\treturn self.inheritedType;\n\t\t\n\t};\n\n\tself.unwrap = function() {};\n\n}\n\nmodule.exports = ProxyPrototype;",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "whenCalled",
+                "string": "self.whenCalled()"
+            },
+            "fileName": "lib/proxy-prototype.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "class",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "constructor",
+                    "string": ""
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Array"
+                    ],
+                    "name": "pluginArr",
+                    "description": "the array of plugins to load"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                "summary": "<p>Creates a Scarlet Instance</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\n\tself.lib = require(\"./index\");\n\n\tself.plugins = {};\n\n\tvar interceptType = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asType();\n\t};\n\n\tvar interceptObject = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asObject();\n\t};",
+            "ctx": {
+                "type": "function",
+                "name": "Scarlet",
+                "string": "Scarlet()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "method",
+                    "string": "loadPlugin"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "pluginPath",
+                    "description": "the plugin to be loaded"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A reference to scarlet(self)"
+                },
+                {
+                    "type": "chainable",
+                    "string": ""
+                }
+            ],
+            "description": {
+                "full": "<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
+                "summary": "<p>loads a plugin</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.loadPlugin = function(pluginPath) {\n\t\tself.lib.Plugins.loadPlugin(self, pluginPath);\n\t\treturn self;\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "loadPlugin",
+                "string": "self.loadPlugin()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Scarlet"
+                },
+                {
+                    "type": "method",
+                    "string": "intercept"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "An interceptor object"
+                }
+            ],
+            "description": {
+                "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                "summary": "<p>Creates a Scarlet interceptor</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.intercept = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tif (typeOrInstance.prototype)\n\t\t\treturn interceptType(typeOrInstance);\n\n\t\treturn interceptObject(typeOrInstance);\n\t};\n\n\tif(pluginArr){\n\t\tif (pluginArr.length) {\n\t\t\tpluginArr.forEach(function(plugin){\n\t\t\t\tself.loadPlugin(plugin);\n\t\t\t});\n\t\t}\t\t\n\t}\n\n}\n\nmodule.exports = Scarlet;",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "intercept",
+                "string": "self.intercept()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "function isObjectLiteral(_obj) {\n\tvar _test = _obj;\n\treturn (typeof _obj !== 'object' || _obj === null ?\n\t\tfalse :\n\t\t((function() {\n\t\t\twhile (!false) {\n\t\t\t\tif (Object.getPrototypeOf(_test = Object.getPrototypeOf(_test)) === null) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn Object.getPrototypeOf(_obj) === _test;\n\t\t})()));\n}\n\nfunction getAllPropertyNames(obj) {\n\tvar props = [];\n\n\tvar getProperties = function(){\n\t\tObject.getOwnPropertyNames(obj).forEach(function(prop) {\n\t\t\tif (props.indexOf(prop) === -1) {\n\t\t\t\tprops.push(prop);\n\t\t\t}\n\t\t});\n\t};\n\n\tvar objectPrototype;\n\tdo {\n\t\tgetProperties();\n\t\tobjectPrototype = Object.getPrototypeOf(obj);\n\t} while (objectPrototype);\n\n\treturn props;\n}\n\nvar names = getAllPropertyNames(new AnyObject());\n\nfor (var index = 0; index < names.length; index++) {\n\tconsole.log(names[index]);\n}",
+            "ctx": {
+                "type": "function",
+                "name": "isObjectLiteral",
+                "string": "isObjectLiteral()"
+            },
+            "fileName": "lib/extensions/console.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "function Enumerable() {\n\n\tvar self = this;\n\n\tself.arrayFor = function(array, callback) {\n\t\tfor (var i = 0; i < array.length; i++) {\n\t\t\tcallback(array[i], i, array);\n\t\t}\n\t};\n\n\tself.funcFor = function(object, callback) {\n\t\tfor (var key in object) {\n\t\t\tcallback(object[key], key, object);\n\t\t}\n\t};\n\n\tself.stringFor = function(string, callback) {\n\t\tself.arrayFor(string.split(\"\"), function(chr, index) {\n\t\t\tcallback(chr, index, string);\n\t\t});\n\t};\n\n\tself.allEach = function(object, callback) {\n\t\tObject.getOwnPropertyNames(object).forEach(function(property) {\n\t\t\tcallback(object[property], property, object);\n\t\t});\n\t};\n\n\tself.forEach = function(object, callback) {\n\t\tif (object) {\n\t\t\tvar resolve = self.funcFor;\n\t\t\tif (object instanceof Function) {\n\t\t\t\tresolve = self.funcFor;\n\t\t\t} else if (typeof object == \"string\") {\n\t\t\t\tresolve = self.stringFor;\n\t\t\t} else if (typeof object.length == \"number\") {\n\t\t\t\tresolve = self.arrayFor;\n\t\t\t}\n\t\t\tresolve(object, callback);\n\t\t}\n\t};\n\n}\n\nmodule.exports = new Enumerable();",
+            "ctx": {
+                "type": "function",
+                "name": "Enumerable",
+                "string": "Enumerable()"
+            },
+            "fileName": "lib/extensions/enumerable.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "module.exports = function(ctor, superCtor) {\n\tctor.super_ = superCtor;\n\tctor.prototype = Object.create(superCtor.prototype, {\n\t\tconstructor: {\n\t\t\tvalue: ctor,\n\t\t\tenumerable: false,\n\t\t\twritable: true,\n\t\t\tconfigurable: true\n\t\t}\n\t});\n};",
+            "ctx": {
+                "type": "method",
+                "receiver": "module",
+                "name": "exports",
+                "string": "module.exports()"
+            },
+            "fileName": "lib/extensions/inherits.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "function Uuid(){\n\n\tfunction s4() {\n\t\treturn Math.floor((1 + Math.random()) * 0x10000)\n\t\t\t\t.toString(16)\n\t\t\t\t.substring(1);\n\t}\n\n\tfunction guid() {\n\t\treturn s4() + s4() + '-' + s4() + '-' + s4() + '-' +\n\t\t\t\ts4() + '-' + s4() + s4() + s4();\n\t}\n\n\tthis.next = function(){\n\t\treturn guid();\n\t};\n}\n\nmodule.exports = new Uuid();",
+            "ctx": {
+                "type": "function",
+                "name": "Uuid",
+                "string": "Uuid()"
+            },
+            "fileName": "lib/extensions/uuid.js"
+        }
+    ],
+    "mox": [
+        {
+            "params": [],
+            "name": "exports",
+            "type": "property",
+            "fileName": "lib/index.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                }
+            ],
+            "name": "Interceptor",
+            "type": "function",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Creates an Interceptor for an Object or Function</p>",
+                "summary": "<p>Creates an Interceptor for an Object or Function</p>",
+                "body": ""
+            },
+            "class": "Interceptor",
+            "constructor": true
+        },
+        {
+            "params": [],
+            "name": "targets",
+            "type": {
+                "types": [
+                    "Array"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Target interceptors</p>",
+                "summary": "<p>Target interceptors</p>",
+                "body": ""
+            },
+            "property": "targets"
+        },
+        {
+            "params": [],
+            "name": "proxy",
+            "type": {
+                "types": [
+                    "Function"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Proxy of the object</p>",
+                "summary": "<p>Proxy of the object</p>",
+                "body": ""
+            },
+            "property": "proxy"
+        },
+        {
+            "params": [],
+            "name": "currentTarget",
+            "type": {
+                "types": [
+                    "Number"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>reference to the current target reference</p>",
+                "summary": "<p>reference to the current target reference</p>",
+                "body": ""
+            },
+            "property": "currentTarget"
+        },
+        {
+            "params": [],
+            "name": "type",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>The type or instance to be intercepted</p>",
+                "summary": "<p>The type or instance to be intercepted</p>",
+                "body": ""
+            },
+            "property": "type "
+        },
+        {
+            "params": [],
+            "name": "proxiedInstance",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "property": "proxiedInstance "
+        },
+        {
+            "params": [],
+            "name": "instance",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "property": "proxiedInstance "
+        },
+        {
+            "params": [],
+            "name": "asType",
+            "type": "method",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Create an interceptor for a function object</p>",
+                "summary": "<p>Create an interceptor for a function object</p>",
+                "body": ""
+            },
+            "method": "asType",
+            "chainable": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the current interceptor(self)"
+            }
+        },
+        {
+            "params": [],
+            "name": "asObject",
+            "type": "method",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Create an interceptor for an object literal</p>",
+                "summary": "<p>Create an interceptor for an object literal</p>",
+                "body": ""
+            },
+            "method": "asObject",
+            "chainable": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the current interceptor(self)"
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetMethod",
+                    "description": "the method to call when the type or instance is intercepted"
+                },
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "targetThisContext",
+                    "description": "the reference to self/this to be used when calling the intercepotr"
+                }
+            ],
+            "name": "using",
+            "type": "method",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+            },
+            "category": "Scarlet",
+            "method": "using",
+            "chainable": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the current interceptor(self)"
+            }
+        },
+        {
+            "params": [],
+            "name": "resolve",
+            "type": "method",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+            },
+            "category": "Scarlet",
+            "method": "resolve",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the function being intercepted"
+            }
+        },
+        {
+            "params": [],
+            "name": "release",
+            "type": "method",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>Remove all interceptors from the intercepted object</p>",
+                "summary": "<p>Remove all interceptors from the intercepted object</p>",
+                "body": ""
+            },
+            "method": "release",
+            "chainable": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to the current interceptor(self)"
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "object",
+                    "description": "the original object or function"
+                },
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "method",
+                    "description": "the method being intercepted"
+                },
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "args",
+                    "description": "the original args passed into the function being intercepted"
+                }
+            ],
+            "name": "Invocation",
+            "type": "function",
+            "fileName": "lib/invocation.js",
+            "description": {
+                "full": "<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>",
+                "summary": "<p>The object or function that has been intercepted</p>",
+                "body": "<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>"
+            },
+            "category": "Invocation",
+            "class": "Invocation",
+            "constructor": true
+        },
+        {
+            "params": [],
+            "name": "proceed",
+            "type": "method",
+            "fileName": "lib/invocation.js",
+            "description": {
+                "full": "<p>Allows the intercepted method to be called</p>",
+                "summary": "<p>Allows the intercepted method to be called</p>",
+                "body": ""
+            },
+            "category": "Invocation",
+            "method": "proceed",
+            "return": {
+                "types": [
+                    "Function",
+                    "Object"
+                ],
+                "description": "of the result of the original method call"
+            }
+        },
+        {
+            "params": [],
+            "name": "path",
+            "type": "declaration",
+            "fileName": "lib/plugins.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "interceptor",
+                    "description": "the scarlet interceptor to apply"
+                }
+            ],
+            "name": "ProxyInstance",
+            "type": "function",
+            "fileName": "lib/proxy-instance.js",
+            "description": {
+                "full": "<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>",
+                "summary": "<p>Creates an Proxy for an instance or object</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"
+            },
+            "class": "ProxyInstance",
+            "constructor": true
+        },
+        {
+            "params": [],
+            "name": "interceptor",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/proxy-instance.js",
+            "description": {
+                "full": "<p>The scarlet interceptor</p>",
+                "summary": "<p>The scarlet interceptor</p>",
+                "body": ""
+            },
+            "property": "interceptor "
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "target",
+                    "description": "the target method to call when the proxied object is called"
+                }
+            ],
+            "name": "whenCalled",
+            "type": "method",
+            "fileName": "lib/proxy-instance.js",
+            "description": {
+                "full": "<p>Creates an Proxy for a instance</p>",
+                "summary": "<p>Creates an Proxy for a instance</p>",
+                "body": ""
+            },
+            "method": "whenCalled",
+            "required": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "the type being intercepted with the proxy attached to the instance"
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "interceptor",
+                    "description": "the scarlet interceptor to apply"
+                }
+            ],
+            "name": "ProxyPrototype",
+            "type": "function",
+            "fileName": "lib/proxy-prototype.js",
+            "description": {
+                "full": "<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>",
+                "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"
+            },
+            "class": "ProxyPrototype",
+            "constructor": true
+        },
+        {
+            "params": [],
+            "name": "inheritedType",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/proxy-prototype.js",
+            "description": {
+                "full": "<p>The instance with the proxy interceptor</p>",
+                "summary": "<p>The instance with the proxy interceptor</p>",
+                "body": ""
+            },
+            "property": "inheritedType "
+        },
+        {
+            "params": [],
+            "name": "interceptor",
+            "type": {
+                "types": [
+                    "Function",
+                    "Object"
+                ]
+            },
+            "fileName": "lib/proxy-prototype.js",
+            "description": {
+                "full": "<p>The scarlet interceptor</p>",
+                "summary": "<p>The scarlet interceptor</p>",
+                "body": ""
+            },
+            "property": "interceptor "
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function"
+                    ],
+                    "name": "target",
+                    "description": "the target method to call when the proxied object is called"
+                }
+            ],
+            "name": "whenCalled",
+            "type": "method",
+            "fileName": "lib/proxy-prototype.js",
+            "description": {
+                "full": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                "body": ""
+            },
+            "method": "whenCalled",
+            "required": true,
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "the type being intercepted with the proxy attached to the prototype"
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Array"
+                    ],
+                    "name": "pluginArr",
+                    "description": "the array of plugins to load"
+                }
+            ],
+            "name": "Scarlet",
+            "type": "function",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                "summary": "<p>Creates a Scarlet Instance</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+            },
+            "category": "Scarlet",
+            "class": "Scarlet",
+            "constructor": true
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "pluginPath",
+                    "description": "the plugin to be loaded"
+                }
+            ],
+            "name": "loadPlugin",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
+                "summary": "<p>loads a plugin</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
+            },
+            "category": "Scarlet",
+            "method": "loadPlugin",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A reference to scarlet(self)"
+            },
+            "chainable": true
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                }
+            ],
+            "name": "intercept",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                "summary": "<p>Creates a Scarlet interceptor</p>",
+                "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+            },
+            "category": "Scarlet",
+            "method": "intercept",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "An interceptor object"
+            }
+        },
+        {
+            "params": [],
+            "name": "isObjectLiteral",
+            "type": "function",
+            "fileName": "lib/extensions/console.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [],
+            "name": "Enumerable",
+            "type": "function",
+            "fileName": "lib/extensions/enumerable.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [],
+            "name": "exports",
+            "type": "method",
+            "fileName": "lib/extensions/inherits.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [],
+            "name": "Uuid",
+            "type": "function",
+            "fileName": "lib/extensions/uuid.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        }
+    ],
+    "categories": [
+        {
+            "tag": "Scarlet",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetMethod",
+                            "description": "the method to call when the type or instance is intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetThisContext",
+                            "description": "the reference to self/this to be used when calling the intercepotr"
+                        }
+                    ],
+                    "name": "using",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+                    },
+                    "category": "Scarlet",
+                    "method": "using",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "resolve",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+                    },
+                    "category": "Scarlet",
+                    "method": "resolve",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the function being intercepted"
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Array"
+                            ],
+                            "name": "pluginArr",
+                            "description": "the array of plugins to load"
+                        }
+                    ],
+                    "name": "Scarlet",
+                    "type": "function",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                        "summary": "<p>Creates a Scarlet Instance</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "class": "Scarlet",
+                    "constructor": true
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "pluginPath",
+                            "description": "the plugin to be loaded"
+                        }
+                    ],
+                    "name": "loadPlugin",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
+                        "summary": "<p>loads a plugin</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "method": "loadPlugin",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to scarlet(self)"
+                    },
+                    "chainable": true
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "intercept",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                        "summary": "<p>Creates a Scarlet interceptor</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "An interceptor object"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "Invocation",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "object",
+                            "description": "the original object or function"
+                        },
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "method",
+                            "description": "the method being intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "args",
+                            "description": "the original args passed into the function being intercepted"
+                        }
+                    ],
+                    "name": "Invocation",
+                    "type": "function",
+                    "fileName": "lib/invocation.js",
+                    "description": {
+                        "full": "<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>",
+                        "summary": "<p>The object or function that has been intercepted</p>",
+                        "body": "<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>"
+                    },
+                    "category": "Invocation",
+                    "class": "Invocation",
+                    "constructor": true
+                },
+                {
+                    "params": [],
+                    "name": "proceed",
+                    "type": "method",
+                    "fileName": "lib/invocation.js",
+                    "description": {
+                        "full": "<p>Allows the intercepted method to be called</p>",
+                        "summary": "<p>Allows the intercepted method to be called</p>",
+                        "body": ""
+                    },
+                    "category": "Invocation",
+                    "method": "proceed",
+                    "return": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ],
+                        "description": "of the result of the original method call"
+                    }
+                }
+            ]
+        }
+    ],
+    "files": [
+        {
+            "tag": "lib/index.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "exports",
+                    "type": "property",
+                    "fileName": "lib/index.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/interceptor.js",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "Interceptor",
+                    "type": "function",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Creates an Interceptor for an Object or Function</p>",
+                        "summary": "<p>Creates an Interceptor for an Object or Function</p>",
+                        "body": ""
+                    },
+                    "class": "Interceptor",
+                    "constructor": true
+                },
+                {
+                    "params": [],
+                    "name": "targets",
+                    "type": {
+                        "types": [
+                            "Array"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Target interceptors</p>",
+                        "summary": "<p>Target interceptors</p>",
+                        "body": ""
+                    },
+                    "property": "targets"
+                },
+                {
+                    "params": [],
+                    "name": "proxy",
+                    "type": {
+                        "types": [
+                            "Function"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Proxy of the object</p>",
+                        "summary": "<p>Proxy of the object</p>",
+                        "body": ""
+                    },
+                    "property": "proxy"
+                },
+                {
+                    "params": [],
+                    "name": "currentTarget",
+                    "type": {
+                        "types": [
+                            "Number"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>reference to the current target reference</p>",
+                        "summary": "<p>reference to the current target reference</p>",
+                        "body": ""
+                    },
+                    "property": "currentTarget"
+                },
+                {
+                    "params": [],
+                    "name": "type",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>The type or instance to be intercepted</p>",
+                        "summary": "<p>The type or instance to be intercepted</p>",
+                        "body": ""
+                    },
+                    "property": "type "
+                },
+                {
+                    "params": [],
+                    "name": "proxiedInstance",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>The instance with the proxy interceptor</p>",
+                        "summary": "<p>The instance with the proxy interceptor</p>",
+                        "body": ""
+                    },
+                    "property": "proxiedInstance "
+                },
+                {
+                    "params": [],
+                    "name": "instance",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>The instance with the proxy interceptor</p>",
+                        "summary": "<p>The instance with the proxy interceptor</p>",
+                        "body": ""
+                    },
+                    "property": "proxiedInstance "
+                },
+                {
+                    "params": [],
+                    "name": "asType",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Create an interceptor for a function object</p>",
+                        "summary": "<p>Create an interceptor for a function object</p>",
+                        "body": ""
+                    },
+                    "method": "asType",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "asObject",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Create an interceptor for an object literal</p>",
+                        "summary": "<p>Create an interceptor for an object literal</p>",
+                        "body": ""
+                    },
+                    "method": "asObject",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetMethod",
+                            "description": "the method to call when the type or instance is intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "targetThisContext",
+                            "description": "the reference to self/this to be used when calling the intercepotr"
+                        }
+                    ],
+                    "name": "using",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    ",
+                        "summary": "<p>Attach an interceptor to the type or instance.  Can be chained with multiple using clauses</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nfunction interceptor1(proceed) { proceed();}\nfunction interceptor2(proceed) { proceed();}\n\nscarlet.intercept(AnyObject) \n            //indicates the first interceptor to be called\n            .using(interceptor1)\n            //indicates the second interceptor to be called\n            .using(interceptor2);\n            //-> AnyObject will now have the two interceptors attached\n</pre></div>    "
+                    },
+                    "category": "Scarlet",
+                    "method": "using",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "resolve",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    ",
+                        "summary": "<p>Provides the type or instance with the added intercepters. This is needed when intercepting a function.</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function AnyObject() {};\nAnyObject = scarlet.intercept(AnyObject)\n                    .using(interceptor)\n                    .resolve();\n//-> AnyObject will contain the **interceptor**\n</pre></div>    "
+                    },
+                    "category": "Scarlet",
+                    "method": "resolve",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the function being intercepted"
+                    }
+                },
+                {
+                    "params": [],
+                    "name": "release",
+                    "type": "method",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>Remove all interceptors from the intercepted object</p>",
+                        "summary": "<p>Remove all interceptors from the intercepted object</p>",
+                        "body": ""
+                    },
+                    "method": "release",
+                    "chainable": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to the current interceptor(self)"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/invocation.js",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "object",
+                            "description": "the original object or function"
+                        },
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "method",
+                            "description": "the method being intercepted"
+                        },
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "args",
+                            "description": "the original args passed into the function being intercepted"
+                        }
+                    ],
+                    "name": "Invocation",
+                    "type": "function",
+                    "fileName": "lib/invocation.js",
+                    "description": {
+                        "full": "<p>The object or function that has been intercepted</p>\n\n<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>",
+                        "summary": "<p>The object or function that has been intercepted</p>",
+                        "body": "<p>Maintains the following properties for the object or function being intercepted:</p>\n\n<ul>\n<li>args (Object) - The original args passed into the function being intercepted</li>\n<li>object (Function|Object) - The original object or function</li>\n<li>method (Function|Object) - The method being intercepted</li>\n<li>result (Function|Object) - The result of the method being intercepted</li>\n</ul>"
+                    },
+                    "category": "Invocation",
+                    "class": "Invocation",
+                    "constructor": true
+                },
+                {
+                    "params": [],
+                    "name": "proceed",
+                    "type": "method",
+                    "fileName": "lib/invocation.js",
+                    "description": {
+                        "full": "<p>Allows the intercepted method to be called</p>",
+                        "summary": "<p>Allows the intercepted method to be called</p>",
+                        "body": ""
+                    },
+                    "category": "Invocation",
+                    "method": "proceed",
+                    "return": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ],
+                        "description": "of the result of the original method call"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/plugins.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "path",
+                    "type": "declaration",
+                    "fileName": "lib/plugins.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/proxy-instance.js",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "interceptor",
+                            "description": "the scarlet interceptor to apply"
+                        }
+                    ],
+                    "name": "ProxyInstance",
+                    "type": "function",
+                    "fileName": "lib/proxy-instance.js",
+                    "description": {
+                        "full": "<p>Creates an Proxy for an instance or object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>",
+                        "summary": "<p>Creates an Proxy for an instance or object</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the ProxyInstance with the scarlet interceptor\nvar proxy = new ProxyInstance(interceptor);\n\n//Set the proxied method to call when the instance gets called\nproxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});        \n//--> someInance will now call the proxy when it's called\n</pre></div>"
+                    },
+                    "class": "ProxyInstance",
+                    "constructor": true
+                },
+                {
+                    "params": [],
+                    "name": "interceptor",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/proxy-instance.js",
+                    "description": {
+                        "full": "<p>The scarlet interceptor</p>",
+                        "summary": "<p>The scarlet interceptor</p>",
+                        "body": ""
+                    },
+                    "property": "interceptor "
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "target",
+                            "description": "the target method to call when the proxied object is called"
+                        }
+                    ],
+                    "name": "whenCalled",
+                    "type": "method",
+                    "fileName": "lib/proxy-instance.js",
+                    "description": {
+                        "full": "<p>Creates an Proxy for a instance</p>",
+                        "summary": "<p>Creates an Proxy for a instance</p>",
+                        "body": ""
+                    },
+                    "method": "whenCalled",
+                    "required": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "the type being intercepted with the proxy attached to the instance"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/proxy-prototype.js",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "interceptor",
+                            "description": "the scarlet interceptor to apply"
+                        }
+                    ],
+                    "name": "ProxyPrototype",
+                    "type": "function",
+                    "fileName": "lib/proxy-prototype.js",
+                    "description": {
+                        "full": "<p>Creates an Proxy for a prototype Function Object</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>",
+                        "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">//init a scarlet interceptor\nvar interceptor = new Interceptor(someInstance);\n\n//create the proxyPrototype with the scarlet interceptor\nvar proxy = new ProxyPrototype(interceptor);\n\n//Set the proxied method to call when the instance gets called\nsomeInstance = proxy.whenCalled(function(method,args){\n        //-->Do stuff with the method and args of the proxied object\n});\n//--> someInance will have the  proxy attached to its prototype\n</pre></div>"
+                    },
+                    "class": "ProxyPrototype",
+                    "constructor": true
+                },
+                {
+                    "params": [],
+                    "name": "inheritedType",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/proxy-prototype.js",
+                    "description": {
+                        "full": "<p>The instance with the proxy interceptor</p>",
+                        "summary": "<p>The instance with the proxy interceptor</p>",
+                        "body": ""
+                    },
+                    "property": "inheritedType "
+                },
+                {
+                    "params": [],
+                    "name": "interceptor",
+                    "type": {
+                        "types": [
+                            "Function",
+                            "Object"
+                        ]
+                    },
+                    "fileName": "lib/proxy-prototype.js",
+                    "description": {
+                        "full": "<p>The scarlet interceptor</p>",
+                        "summary": "<p>The scarlet interceptor</p>",
+                        "body": ""
+                    },
+                    "property": "interceptor "
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function"
+                            ],
+                            "name": "target",
+                            "description": "the target method to call when the proxied object is called"
+                        }
+                    ],
+                    "name": "whenCalled",
+                    "type": "method",
+                    "fileName": "lib/proxy-prototype.js",
+                    "description": {
+                        "full": "<p>Creates an Proxy for a prototype Function Object</p>",
+                        "summary": "<p>Creates an Proxy for a prototype Function Object</p>",
+                        "body": ""
+                    },
+                    "method": "whenCalled",
+                    "required": true,
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "the type being intercepted with the proxy attached to the prototype"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/scarlet.js",
+            "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Array"
+                            ],
+                            "name": "pluginArr",
+                            "description": "the array of plugins to load"
+                        }
+                    ],
+                    "name": "Scarlet",
+                    "type": "function",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet Instance</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>",
+                        "summary": "<p>Creates a Scarlet Instance</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet\n    .intercept(someFunction)\n    .using(someInterceptorFunction);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "class": "Scarlet",
+                    "constructor": true
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "pluginPath",
+                            "description": "the plugin to be loaded"
+                        }
+                    ],
+                    "name": "loadPlugin",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>loads a plugin</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>",
+                        "summary": "<p>loads a plugin</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.loadPlugin(someScarletPlugin);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "method": "loadPlugin",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A reference to scarlet(self)"
+                    },
+                    "chainable": true
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "intercept",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>",
+                        "summary": "<p>Creates a Scarlet interceptor</p>",
+                        "body": "<p>Example:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n    </pre></div>"
+                    },
+                    "category": "Scarlet",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "An interceptor object"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/extensions/console.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "isObjectLiteral",
+                    "type": "function",
+                    "fileName": "lib/extensions/console.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/extensions/enumerable.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "Enumerable",
+                    "type": "function",
+                    "fileName": "lib/extensions/enumerable.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/extensions/inherits.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "exports",
+                    "type": "method",
+                    "fileName": "lib/extensions/inherits.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/extensions/uuid.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "Uuid",
+                    "type": "function",
+                    "fileName": "lib/extensions/uuid.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        }
+    ],
+    "name": "Scarlet",
+    "version": "v0.0.40"
+}

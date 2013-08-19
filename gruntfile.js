@@ -44,7 +44,6 @@ module.exports = function(grunt) {
         sourceFiles : ['./lib/'],
         options: {
           name : "Scarlet",
-          version:"v0.0.40",
           template:"category",
           outputFile : "doc/README.md",
           moxFile :"doc/mox.json"

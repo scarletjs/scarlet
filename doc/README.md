@@ -1,21 +1,26 @@
-# Scarlet - v0.0.40
+# Scarlet
 
-## Scarlet
+## `Interception Methods`
 
-* [using][0]
-* [resolve][1]
-* [Scarlet][2]
-* [loadPlugin][3]
-* [intercept][4]
+* [`using`][0]
+* [`resolve`][1]
+* [`Scarlet`][2]
+* [`loadPlugin`][3]
+* [`intercept`][4]
 
-## Invocation
+## `Invocation Attributes`
 
-* [Invocation][5]
-* [proceed][6]
+* [`args`][5]
+* [`object`][6]
+* [`method`][7]
+* [`result`][8]
+* [`proceed`][9]
 
-## Scarlet
+## `Interception Methods`
 
-### using
+### `using`
+
+[\#][0] [Ⓣ][10]
 
 Example:
 
@@ -33,14 +38,18 @@ Example:
 
 #### Arguments
 
-1. targetMethod (Function) - the method to call when the type or instance is intercepted
-2. targetThisContext (Function) - the reference to self/this to be used when calling the intercepotr
+1. `targetMethod` _(Function)_ - the method to call when the type or instance is intercepted
+2. `targetThisContext` _(Function)_ - the reference to self/this to be used when calling the intercepotr
 
 #### Returns  
   
-(Function) - A reference to the current interceptor(self)
+_(Function)_ - A reference to the current interceptor(self)
 
-### resolve
+---
+
+### `resolve`
+
+[\#][1] [Ⓣ][10]
 
 Example:
 
@@ -53,11 +62,15 @@ Example:
 
 #### Returns  
   
-(Function) - A reference to the function being intercepted
+_(Function)_ - A reference to the function being intercepted
 
-### Scarlet
+---
 
-Example:
+### `Scarlet`
+
+[\#][2] [Ⓣ][10]
+
+#### Example:
 
     Scarlet
         .intercept(someFunction)
@@ -66,24 +79,32 @@ Example:
 
 #### Arguments
 
-1. pluginArr (Array) - the array of plugins to load
+1. `pluginArr` _(Array)_ - - optional array of plugins to load
 
-### loadPlugin
+---
 
-Example:
+### `loadPlugin`
+
+[\#][3] [Ⓣ][10]
+
+#### Example:
 
     Scarlet.loadPlugin(someScarletPlugin);
         
 
 #### Arguments
 
-1. pluginPath (Function | Object) - the plugin to be loaded
+1. `pluginPath` _(Function | Object)_ - the plugin to be loaded
 
 #### Returns  
   
-(Function) - A reference to scarlet(self)
+_(Function)_ - A reference to scarlet(self)
 
-### intercept
+---
+
+### `intercept`
+
+[\#][4] [Ⓣ][10]
 
 Example:
 
@@ -92,36 +113,76 @@ Example:
 
 #### Arguments
 
-1. typeOrInstance (Function | Object) - the type or instance to be intercepted
+1. `typeOrInstance` _(Function | Object)_ - the type or instance to be intercepted
 
 #### Returns  
   
-(Function) - An interceptor object
+_(Function)_ - An interceptor object
 
-## Invocation
+---
 
-### Invocation
+## `Invocation Attributes`
 
-Maintains the following properties for the object or function being intercepted:
+### `args`
 
-* args (Object) - The original args passed into the function being intercepted
-* object (Function|Object) - The original object or function
-* method (Function|Object) - The method being intercepted
-* result (Function|Object) - The result of the method being intercepted
+[\#][5] [Ⓣ][11]
 
-#### Arguments
+#### Types
 
-1. object (Function | Object) - the original object or function
-2. method (Function | Object) - the method being intercepted
-3. args (Function | Object) - the original args passed into the function being intercepted
+  * _Object_
 
-### proceed
+The original arguments passed into the function being intercepted
 
-Allows the intercepted method to be called
+---
+
+### `object`
+
+[\#][6] [Ⓣ][11]
+
+#### Types
+
+  * _Object_
+
+The reference to self for the original/called methd
+
+---
+
+### `method`
+
+[\#][7] [Ⓣ][11]
+
+#### Types
+
+  * _Function_
+
+The method being intercepted
+
+---
+
+### `result`
+
+[\#][8] [Ⓣ][11]
+
+#### Types
+
+  * _Any_
+
+The result of the method being intercepted
+
+---
+
+### `proceed`
+
+[\#][9] [Ⓣ][11]
+
+Calls the intercepted method
 
 #### Returns  
   
-(Function | Object) - of the result of the original method call
+_(Function | Object)_ - of the result of the original method call
+
+---
+
 
 
 [0]: #using
@@ -129,5 +190,10 @@ Allows the intercepted method to be called
 [2]: #scarlet
 [3]: #loadplugin
 [4]: #intercept
-[5]: #invocation
-[6]: #proceed
+[5]: #args
+[6]: #object
+[7]: #method
+[8]: #result
+[9]: #proceed
+[10]: #interception-methods
+[11]: #invocation-attributes

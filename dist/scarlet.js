@@ -254,65 +254,7 @@ function Interceptor(typeOrInstance) {
 }
 
 module.exports = Interceptor;
-},{"assert":4,"./invocation":6,"./proxy-instance":7,"./proxy-prototype":8}],6:[function(require,module,exports){
-var assert = require("assert");
-
-function Invocation(object, method, args) {
-
-	assert(args, "Scarlet::Invocation::args == null");
-	assert(object, "Scarlet::Invocation::object == null");
-	assert(method, "Scarlet::Invocation::method == null");
-
-	var self = this;
-
-	/**
-	 * The original arguments passed into the function being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Object} - the argument object based into objects
-	 */
-	self.args = args;
-
-	/**
-	 * The reference to self for the original/called methd
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Object}
-	 */
-	self.object = object;
-
-	/**
-	 * The method being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Function}
-	 */
-	self.method = method;
-
-	/**
-	 * The result of the method being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Any}
-	 */
-	self.result = null;
-
-	/**
-	 * Calls the intercepted method
-	 * 
-	 * @category Invocation Attributes
-     * @method proceed
-     * @return Function|Object of the result of the original method call
-     */
-	self.proceed = function() {
-		var parameters = Array.prototype.slice.call(args);
-		self.result = self.method.apply(self.object, parameters);
-		return self.result;
-	};
-}
-
-module.exports = Invocation;
-},{"assert":4}],4:[function(require,module,exports){
+},{"assert":4,"./invocation":6,"./proxy-instance":7,"./proxy-prototype":8}],4:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -982,237 +924,65 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":11}],5:[function(require,module,exports){
-module.exports = {
-	Util: require("util"),
-	Assert: require("assert"),
-	Plugins: require("./plugins"),
-	Invocation: require("./invocation"),
-	Interceptor: require("./interceptor"),
-	ProxyInstance: require("./proxy-instance"),
-	ProxyPrototype: require("./proxy-prototype"),
-	Enumerable: require("./extensions/enumerable")
-};
-
-
-},{"util":9,"assert":4,"./plugins":12,"./invocation":6,"./interceptor":3,"./proxy-instance":7,"./proxy-prototype":8,"./extensions/enumerable":13}],7:[function(require,module,exports){
-var enumerable = require("./extensions/enumerable");
-
-
-function ProxyInstance(interceptor) {
-
-	var self = this;
-
-	self.interceptor = interceptor;
-
-	self.whenCalled = function(target) {
-		if (!interceptor.instance.__scarlet) {
-
-			interceptor.instance.__scarlet = {};
-
-			enumerable.forEach(interceptor.instance, function(member, memberName) {
-
-				self.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];
-
-				createPropertyProxy(member, memberName, target);
-
-				createFunctionProxy(member, memberName, target);
-
-			});
-		}
-
-		return interceptor.instance;
-	};
-
-	var createPropertyProxy = function(member,memberName,target){
-		if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
-
-			self.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {
-
-				configurable: true,
-
-				get: function(){
-					return target(function(){
-						return self.interceptor.instance.__scarlet[memberName];
-					}, self.interceptor.instance.__scarlet[memberName]);
-				},
-				
-				set: function(value){
-					target(function(){
-						self.interceptor.instance.__scarlet[memberName] = value;	
-					}, value);
-				}
-				
-			});
-		} else if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
-			self.interceptor.instance.__typename = self.interceptor.instance.__scarlet.__typename;
-		}
-	};
-
-	var createFunctionProxy = function(member,memberName,target){
-		if (member instanceof(Function)) {
-			var originalMethod = self.interceptor.instance.__scarlet[memberName];
-			
-			self.interceptor.instance[memberName] = function() {
-				return target(originalMethod, arguments);
-			};
-
-		}
-	};
-
-	self.unwrap = function() {
-
-		if (interceptor.instance.__scarlet) {
-
-			enumerable.forEach(interceptor.instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = interceptor.instance.__scarlet[memberName];
-					interceptor.instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-}
-
-module.exports = ProxyInstance;
-},{"./extensions/enumerable":13}],8:[function(require,module,exports){
-var assert = require("assert");
-var ProxyInstance = require("./proxy-instance");
-var inherits = require("./extensions/inherits");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyPrototype(interceptor) {
-
-	var self = this;
-
-	self.inheritedType = null;
-
-	self.interceptor = interceptor;
-
-	self.whenCalled = function(target) {
-
-		assert(interceptor.type, "Scarlet::Interceptor::type == null");
-		assert(interceptor.type.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
-
-		self.inheritedType = function(){
-
-			var self = this;
-
-			(function() {
-				var interceptorTypeConstructor = function(){
-					var parameters = Array.prototype.slice.call(arguments);
-					interceptor.type.apply(self,parameters);
-
-					interceptor.instance = self;
-
-					var proxy = new ProxyInstance(interceptor);
-					proxy.whenCalled(target);
-				};
-
-				return target(interceptorTypeConstructor,arguments);
-			}());
-
-		};
-
-		inherits(self.inheritedType, interceptor.type);
-		return self.inheritedType;
-		
-	};
-
-	self.unwrap = function() {};
-
-}
-
-module.exports = ProxyPrototype;
-
-},{"assert":4,"./proxy-instance":7,"./extensions/inherits":14,"./extensions/enumerable":13}],13:[function(require,module,exports){
-function Enumerable() {
-
-	var self = this;
-
-	self.arrayFor = function(array, callback) {
-		for (var i = 0; i < array.length; i++) {
-			callback(array[i], i, array);
-		}
-	};
-
-	self.funcFor = function(object, callback) {
-		for (var key in object) {
-			callback(object[key], key, object);
-		}
-	};
-
-	self.stringFor = function(string, callback) {
-		self.arrayFor(string.split(""), function(chr, index) {
-			callback(chr, index, string);
-		});
-	};
-
-	self.allEach = function(object, callback) {
-		Object.getOwnPropertyNames(object).forEach(function(property) {
-			callback(object[property], property, object);
-		});
-	};
-
-	self.forEach = function(object, callback) {
-		if (object) {
-			var resolve = self.funcFor;
-			if (object instanceof Function) {
-				resolve = self.funcFor;
-			} else if (typeof object == "string") {
-				resolve = self.stringFor;
-			} else if (typeof object.length == "number") {
-				resolve = self.arrayFor;
-			}
-			resolve(object, callback);
-		}
-	};
-
-}
-
-module.exports = new Enumerable();
-},{}],14:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],12:[function(require,module,exports){
-(function(__dirname){var path = require("path");
+},{"events":11}],6:[function(require,module,exports){
 var assert = require("assert");
 
-function Plugins() {
+function Invocation(object, method, args) {
+
+	assert(args, "Scarlet::Invocation::args == null");
+	assert(object, "Scarlet::Invocation::object == null");
+	assert(method, "Scarlet::Invocation::method == null");
 
 	var self = this;
-	
-	self.loadPlugin = function($scarlet, pluginPath) {
 
-		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
-		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+	/**
+	 * The original arguments passed into the function being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object} - the argument object based into objects
+	 */
+	self.args = args;
 
-		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
+	/**
+	 * The reference to self for the original/called methd
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object}
+	 */
+	self.object = object;
 
-		pluginObject = new plugin($scarlet);
-		pluginObject.initialize();
+	/**
+	 * The method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Function}
+	 */
+	self.method = method;
 
+	/**
+	 * The result of the method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Any}
+	 */
+	self.result = null;
+
+	/**
+	 * Calls the intercepted method
+	 * 
+	 * @category Invocation Attributes
+     * @method proceed
+     * @return Function|Object of the result of the original method call
+     */
+	self.proceed = function() {
+		var parameters = Array.prototype.slice.call(args);
+		self.result = self.method.apply(self.object, parameters);
+		return self.result;
 	};
-
 }
 
-module.exports = new Plugins();
-})("/lib")
-},{"path":15,"assert":4}],16:[function(require,module,exports){
+module.exports = Invocation;
+},{"assert":4}],12:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1452,7 +1222,237 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":16}],15:[function(require,module,exports){
+},{"__browserify_process":12}],5:[function(require,module,exports){
+module.exports = {
+	Util: require("util"),
+	Assert: require("assert"),
+	Plugins: require("./plugins"),
+	Invocation: require("./invocation"),
+	Interceptor: require("./interceptor"),
+	ProxyInstance: require("./proxy-instance"),
+	ProxyPrototype: require("./proxy-prototype"),
+	Enumerable: require("./extensions/enumerable")
+};
+
+
+},{"util":9,"assert":4,"./plugins":13,"./invocation":6,"./interceptor":3,"./proxy-instance":7,"./proxy-prototype":8,"./extensions/enumerable":14}],7:[function(require,module,exports){
+var enumerable = require("./extensions/enumerable");
+
+
+function ProxyInstance(interceptor) {
+
+	var self = this;
+
+	self.interceptor = interceptor;
+
+	self.whenCalled = function(target) {
+		if (!interceptor.instance.__scarlet) {
+
+			interceptor.instance.__scarlet = {};
+
+			enumerable.forEach(interceptor.instance, function(member, memberName) {
+
+				self.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];
+
+				createPropertyProxy(member, memberName, target);
+
+				createFunctionProxy(member, memberName, target);
+
+			});
+		}
+
+		return interceptor.instance;
+	};
+
+	var createPropertyProxy = function(member,memberName,target){
+		if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
+
+			self.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {
+
+				configurable: true,
+
+				get: function(){
+					return target(function(){
+						return self.interceptor.instance.__scarlet[memberName];
+					}, self.interceptor.instance.__scarlet[memberName]);
+				},
+				
+				set: function(value){
+					target(function(){
+						self.interceptor.instance.__scarlet[memberName] = value;	
+					}, value);
+				}
+				
+			});
+		} else if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
+			self.interceptor.instance.__typename = self.interceptor.instance.__scarlet.__typename;
+		}
+	};
+
+	var createFunctionProxy = function(member,memberName,target){
+		if (member instanceof(Function)) {
+			var originalMethod = self.interceptor.instance.__scarlet[memberName];
+			
+			self.interceptor.instance[memberName] = function() {
+				return target(originalMethod, arguments);
+			};
+
+		}
+	};
+
+	self.unwrap = function() {
+
+		if (interceptor.instance.__scarlet) {
+
+			enumerable.forEach(interceptor.instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = interceptor.instance.__scarlet[memberName];
+					interceptor.instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
+}
+
+module.exports = ProxyInstance;
+},{"./extensions/enumerable":14}],8:[function(require,module,exports){
+var assert = require("assert");
+var ProxyInstance = require("./proxy-instance");
+var inherits = require("./extensions/inherits");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyPrototype(interceptor) {
+
+	var self = this;
+
+	self.inheritedType = null;
+
+	self.interceptor = interceptor;
+
+	self.whenCalled = function(target) {
+
+		assert(interceptor.type, "Scarlet::Interceptor::type == null");
+		assert(interceptor.type.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
+
+		self.inheritedType = function(){
+
+			var self = this;
+
+			(function() {
+				var interceptorTypeConstructor = function(){
+					var parameters = Array.prototype.slice.call(arguments);
+					interceptor.type.apply(self,parameters);
+
+					interceptor.instance = self;
+
+					var proxy = new ProxyInstance(interceptor);
+					proxy.whenCalled(target);
+				};
+
+				return target(interceptorTypeConstructor,arguments);
+			}());
+
+		};
+
+		inherits(self.inheritedType, interceptor.type);
+		return self.inheritedType;
+		
+	};
+
+	self.unwrap = function() {};
+
+}
+
+module.exports = ProxyPrototype;
+
+},{"assert":4,"./proxy-instance":7,"./extensions/inherits":15,"./extensions/enumerable":14}],14:[function(require,module,exports){
+function Enumerable() {
+
+	var self = this;
+
+	self.arrayFor = function(array, callback) {
+		for (var i = 0; i < array.length; i++) {
+			callback(array[i], i, array);
+		}
+	};
+
+	self.funcFor = function(object, callback) {
+		for (var key in object) {
+			callback(object[key], key, object);
+		}
+	};
+
+	self.stringFor = function(string, callback) {
+		self.arrayFor(string.split(""), function(chr, index) {
+			callback(chr, index, string);
+		});
+	};
+
+	self.allEach = function(object, callback) {
+		Object.getOwnPropertyNames(object).forEach(function(property) {
+			callback(object[property], property, object);
+		});
+	};
+
+	self.forEach = function(object, callback) {
+		if (object) {
+			var resolve = self.funcFor;
+			if (object instanceof Function) {
+				resolve = self.funcFor;
+			} else if (typeof object == "string") {
+				resolve = self.stringFor;
+			} else if (typeof object.length == "number") {
+				resolve = self.arrayFor;
+			}
+			resolve(object, callback);
+		}
+	};
+
+}
+
+module.exports = new Enumerable();
+},{}],15:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+};
+},{}],13:[function(require,module,exports){
+(function(__dirname){var path = require("path");
+var assert = require("assert");
+
+function Plugins() {
+
+	var self = this;
+	
+	self.loadPlugin = function($scarlet, pluginPath) {
+
+		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
+		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+
+		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
+		var plugin = require(fullPath);
+
+		pluginObject = new plugin($scarlet);
+		pluginObject.initialize();
+
+	};
+
+}
+
+module.exports = new Plugins();
+})("/lib")
+},{"path":16,"assert":4}],16:[function(require,module,exports){
 (function(process){function filter (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
@@ -1630,7 +1630,93 @@ exports.relative = function(from, to) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":16}],10:[function(require,module,exports){
+},{"__browserify_process":12}],17:[function(require,module,exports){
+exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
+  var e, m,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      nBits = -7,
+      i = isBE ? 0 : (nBytes - 1),
+      d = isBE ? 1 : -1,
+      s = buffer[offset + i];
+
+  i += d;
+
+  e = s & ((1 << (-nBits)) - 1);
+  s >>= (-nBits);
+  nBits += eLen;
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  m = e & ((1 << (-nBits)) - 1);
+  e >>= (-nBits);
+  nBits += mLen;
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
+
+  if (e === 0) {
+    e = 1 - eBias;
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity);
+  } else {
+    m = m + Math.pow(2, mLen);
+    e = e - eBias;
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+};
+
+exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
+  var e, m, c,
+      eLen = nBytes * 8 - mLen - 1,
+      eMax = (1 << eLen) - 1,
+      eBias = eMax >> 1,
+      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
+      i = isBE ? (nBytes - 1) : 0,
+      d = isBE ? -1 : 1,
+      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+
+  value = Math.abs(value);
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0;
+    e = eMax;
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2);
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--;
+      c *= 2;
+    }
+    if (e + eBias >= 1) {
+      value += rt / c;
+    } else {
+      value += rt * Math.pow(2, 1 - eBias);
+    }
+    if (value * c >= 2) {
+      e++;
+      c /= 2;
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0;
+      e = eMax;
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen);
+      e = e + eBias;
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+      e = 0;
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
+
+  e = (e << mLen) | m;
+  eLen += mLen;
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
+
+  buffer[offset + i - d] |= s * 128;
+};
+
+},{}],10:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -2714,93 +2800,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"assert":4,"./buffer_ieee754":17,"base64-js":18}],17:[function(require,module,exports){
-exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isBE ? 0 : (nBytes - 1),
-      d = isBE ? 1 : -1,
-      s = buffer[offset + i];
-
-  i += d;
-
-  e = s & ((1 << (-nBits)) - 1);
-  s >>= (-nBits);
-  nBits += eLen;
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  m = e & ((1 << (-nBits)) - 1);
-  e >>= (-nBits);
-  nBits += mLen;
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8);
-
-  if (e === 0) {
-    e = 1 - eBias;
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity);
-  } else {
-    m = m + Math.pow(2, mLen);
-    e = e - eBias;
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
-};
-
-exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isBE ? (nBytes - 1) : 0,
-      d = isBE ? -1 : 1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
-
-  value = Math.abs(value);
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0;
-    e = eMax;
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2);
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--;
-      c *= 2;
-    }
-    if (e + eBias >= 1) {
-      value += rt / c;
-    } else {
-      value += rt * Math.pow(2, 1 - eBias);
-    }
-    if (value * c >= 2) {
-      e++;
-      c /= 2;
-    }
-
-    if (e + eBias >= eMax) {
-      m = 0;
-      e = eMax;
-    } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen);
-      e = e + eBias;
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
-      e = 0;
-    }
-  }
-
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8);
-
-  e = (e << mLen) | m;
-  eLen += mLen;
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8);
-
-  buffer[offset + i - d] |= s * 128;
-};
-
-},{}],18:[function(require,module,exports){
+},{"assert":4,"./buffer_ieee754":17,"base64-js":18}],18:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 

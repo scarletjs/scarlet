@@ -14,6 +14,7 @@ describe("Given we are intercepting", function() {
 	var methodWasCalled = false;
 
 	function interceptor(proceed,invocation) {
+
 		var result = proceed();
 		methodWasCalled = true;
 		return result;
@@ -30,6 +31,41 @@ describe("Given we are intercepting", function() {
 	beforeEach(function() {
 		methodWasCalled = false;
 		method2WasCalled = false;
+	});
+
+	describe("When interceptor has an asynchronous call", function(done) {
+		var asyncInterceptorWasCalled = false;
+
+		function asyncInterceptor(proceed,invocation) {
+			setTimeout(function() {
+				proceed();
+				asyncInterceptorWasCalled = true;
+				done();	
+
+			}, 1);
+		};
+
+		var instance = new NamedFunction();
+
+		scarlet
+			.intercept(instance)
+			.using(asyncInterceptor);
+		
+		it("Then should be able to intercept", function() {
+			var result = instance.methodWithReturn();
+
+			setTimeout(function() {
+				assert(asyncInterceptorWasCalled);
+				done();	
+			}, 10);
+
+		});
+
+		it("Then should be able to intercept", function() {
+			var result = instance.methodWithReturn();
+			assert(result === "any");
+		});
+
 	});
 
 	describe("When using multiple interceptors", function() {
@@ -50,7 +86,8 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have an object literal instance", function() {
 
-		var instance = ObjectLiteral;
+		var instance = Object.create(ObjectLiteral);
+		instance.property = ObjectLiteral.property;
 
 		scarlet
 			.intercept(instance)
@@ -241,14 +278,14 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a prototype function type", function() {
 
-		PrototypeFunction = scarlet.intercept(PrototypeFunction)
+		var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
 									.using(interceptor)
 									.resolve();
 
-		var instance = new PrototypeFunction();
+		var instance = new InterPrototypeFunc();
 
 		it("Then should be able to intercept the constructor", function() {
-			var constructorInstance = new PrototypeFunction();
+			var constructorInstance = new InterPrototypeFunc();
 			assert(methodWasCalled);
 
 		});
@@ -265,11 +302,11 @@ describe("Given we are intercepting", function() {
 	describe("When we have a prototype function instance", function() {
 		describe("When intercepted method uses an instance property", function() {
 
-			PrototypeFunction = scarlet.intercept(PrototypeFunction)
+			var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
 										.using(interceptor)
 										.resolve();
 
-			var instance = new PrototypeFunction();
+			var instance = new InterPrototypeFunc();
 
 			it("Then should be able to use it", function() {
 
@@ -282,6 +319,28 @@ describe("Given we are intercepting", function() {
 
 	});
 
+	describe('When defining an interceptor for a method that is already intercepted', function(){
+		var instance = new PrototypeFunction();
+
+		scarlet.intercept(instance)
+				.using(interceptor);
+
+		it('should throw an exception',function(){
+
+			var didThrowException = false;
+
+			try{
+				scarlet.intercept(instance)
+						.using(interceptor);
+
+			}catch(exception){
+				didThrowException = true;
+			}
+
+			assert(didThrowException);
+		});
+	});
+
 	describe("When we have a prototype function instance", function() {
 		describe("When intercepted method uses an instance property", function() {
 			
@@ -289,6 +348,7 @@ describe("Given we are intercepting", function() {
 
 			scarlet.intercept(instance)
 					.using(interceptor);
+
 
 			it("Then should be able to use it", function() {
 
@@ -302,14 +362,18 @@ describe("Given we are intercepting", function() {
 	});
 	
 	describe("When intercepting specific members", function() {
-		it("should intercept correctly",function(){
-			scarlet.intercept(Math,"max")
-					.using(interceptor);
+		var InterObjectLiteral = Object.create(ObjectLiteral);
 
-			var result = Math.max(123,5,1)
-			assert.equal(result,123);
+		var memberInterceptor = scarlet.intercept(InterObjectLiteral,"methodWithReturn")
+										.using(interceptor);
+
+		it("should intercept correctly",function(){
+
+			var result = InterObjectLiteral.methodWithReturn();
+			assert.equal(result,"any");
 			assert(methodWasCalled);
 		});
+
 	});
 
 	describe("When doing an object interceptor", function() {
@@ -344,39 +408,6 @@ describe("Given we are intercepting", function() {
 
 		});
 
-	});
-
-	describe('When using defining a after method', function(){
-		it('should get called after all interceptors are complete',function(done){
-			
-			var didCallInterceptor = false;
-
-			function interceptor(proceed,invocation){
-				didCallInterceptor = true;
-				proceed();
-			}
-
-			scarlet.intercept(Math,'min').using(interceptor).after(function(invocation){
-				assert(didCallInterceptor);
-				done();
-			});
-			Math.min(123,5,1);
-		});
-		it('should get called with the invocation containg the result of the intercepted method',function(done){
-			
-			var didCallInterceptor = false;
-
-			function interceptor(proceed,invocation){
-				didCallInterceptor = true;
-				proceed();
-			}
-
-			scarlet.intercept(Math,'abs').using(interceptor).after(function(invocation){
-				assert(invocation.result,1);
-				done();
-			});
-			Math.abs(1);
-		});
 	});
 
 });

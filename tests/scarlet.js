@@ -346,4 +346,39 @@ describe("Given we are intercepting", function() {
 
 	});
 
+	describe('When using defining a after method', function(){
+		it('should get called after all interceptors are complete',function(done){
+			
+			var didCallInterceptor = false;
+
+			function interceptor(proceed,invocation){
+				didCallInterceptor = true;
+				proceed();
+			}
+
+			scarlet.intercept(Math,'min').using(interceptor).after(function(invocation){
+				assert(didCallInterceptor);
+				done();
+			});
+			Math.min(123,5,1);
+		});
+		it('should get called with the invocation containg the result of the intercepted method',function(done){
+			
+			var didCallInterceptor = false;
+
+			function interceptor(proceed,invocation){
+				didCallInterceptor = true;
+				proceed();
+			}
+
+			scarlet.intercept(Math,'abs').using(interceptor).after(function(invocation){
+				assert(invocation.result,1);
+				done();
+			});
+			Math.abs(1);
+		});
+	});
+
 });
+
+

@@ -38,13 +38,12 @@ describe("Given we are intercepting", function() {
 
 		scarlet
 			.intercept(instance)
-			.using(interceptor)
-			.using(interceptor2);
+			.using(interceptor);
 
 		it("Then should be able to intercept", function() {
 			var result = instance.method();
 			assert(methodWasCalled);
-			assert(method2WasCalled);
+
 		});
 
 	});
@@ -301,6 +300,17 @@ describe("Given we are intercepting", function() {
 		});
 
 	});
+	
+	describe("When intercepting specific members", function() {
+		it("should intercept correctly",function(){
+			scarlet.intercept(Math,"max")
+					.using(interceptor);
+
+			var result = Math.max(123,5,1)
+			assert.equal(result,123);
+			assert(methodWasCalled);
+		});
+	});
 
 	describe("When doing an object interceptor", function() {
 
@@ -322,7 +332,7 @@ describe("Given we are intercepting", function() {
 					};
 				};
 
-				AnyObject = scarlet.intercept(AnyObject)
+				var AnyObject = scarlet.intercept(AnyObject)
 									.using(interceptor)
 									.resolve();
 

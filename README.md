@@ -17,20 +17,19 @@ The simple fast javascript interceptor for methods and properties.
 ```javascript
 var scarlet = require('scarlet');
 
-//Create an scarlet interceptor function with a callback function
-function interceptor(proceed) { proceed(); }
-
 //Tell scarlet to start intercepting
-scarlet.intercept(someFunction) 
-        .using(interceptor);
+scarlet.intercept(Math,"max")
+        .using(function(proceed){ //->Create a interceptor function with a callback function
+            proceed(); 
+        });
 
-//-> when someFunction() gets called the interceptor will get called first and then **proceed** to someFunction()
+//-> when Math.max() gets called the interceptor will get called first and then **proceed** to Math.max function
 
 ```
 
 See [Simple Example for full code](#simple-node-example)
 
-### What is getting called when?
+### What does Scarlet call when?
 ```
 -->someFunction  //call to main method
             |

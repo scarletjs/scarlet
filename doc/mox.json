@@ -26,7 +26,7 @@
                 "body": ""
             },
             "isPrivate": false,
-            "code": "var assert = require(\"assert\");\nvar Invocation = require(\"./invocation\");\nvar ProxyInstance = require(\"./proxy-instance\");\nvar ProxyPrototype = require(\"./proxy-prototype\");\n\nfunction Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.targets = [];\n\tself.proxy = null;\n\tself.currentTarget = 0;\n\tself.type = typeOrInstance;\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\n\tself.asType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.asObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(method, args) {\n\n\t\t\tvar _invocation = new Invocation(self.instance, method, args);\n\n\t\t\tvar next = function(error, result){\n\n\t\t\t\tif(self.currentTarget >= self.targets.length){\n\t\t\t\t\tself.currentTarget = 0;\t\n\t\t\t\t\treturn _invocation.proceed();\n\t\t\t\t}\n\n\t\t\t\tvar targetMethod = self.targets[self.currentTarget];\n\t\t\t\tself.currentTarget++;\n\t\t\t\ttargetCall(targetMethod);\n\n\t\t\t\treturn _invocation.result;\n\t\t\t};\n\n\t\t\tvar targetCall = function(target){\n\t\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,_invocation]);\n\t\t\t};\n\n\t\t\tnext();\n\n\t\t\treturn _invocation.result;\n\n\t\t});\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n}\n\nmodule.exports = Interceptor;",
+            "code": "var assert = require(\"assert\");\nvar Invocation = require(\"./invocation\");\nvar ProxyInstance = require(\"./proxy-instance\");\nvar ProxyPrototype = require(\"./proxy-prototype\");\nvar ProxyMember = require(\"./proxy-member\");\n\nfunction Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.targets = [];\n\tself.proxy = null;\n\tself.currentTarget = 0;\n\tself.type = typeOrInstance;\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\n\tself.forType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self.instance,self);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forMember = function(memberName) {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\t\tassert(memberName !== null, \"When defining a member Interceptor must define a member property to intercept\");\n\n\t\tself.proxy = new ProxyMember(self.instance,memberName);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {\n\n\n\t\t\tvar _invocation = new Invocation(instance, method, args);\n\n\t\t\tvar next = function(error, result){\n\n\n\t\t\t\tif(self.currentTarget >= self.targets.length){\n\t\t\t\t\tself.currentTarget = 0;\t\n\t\t\t\t\treturn _invocation.proceed();\n\t\t\t\t}\n\n\t\t\t\tvar targetMethod = self.targets[self.currentTarget];\n\t\t\t\tself.currentTarget++;\n\t\t\t\ttargetCall(targetMethod);\n\n\t\t\t\treturn _invocation.result;\n\t\t\t};\n\n\t\t\tvar targetCall = function(target){\n\t\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,_invocation]);\n\t\t\t};\n\n\t\t\tnext();\n\n\t\t\treturn _invocation.result;\n\n\t\t});\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n}\n\nmodule.exports = Interceptor;",
             "ctx": {
                 "type": "declaration",
                 "name": "assert",
@@ -215,12 +215,12 @@
                 "body": ""
             },
             "isPrivate": false,
-            "code": "var enumerable = require(\"./extensions/enumerable\");\n\n\nfunction ProxyInstance(interceptor) {\n\n\tvar self = this;\n\n\tself.interceptor = interceptor;\n\n\tself.whenCalled = function(target) {\n\t\tif (!interceptor.instance.__scarlet) {\n\n\t\t\tinterceptor.instance.__scarlet = {};\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tself.interceptor.instance.__scarlet[memberName] = self.interceptor.instance[memberName];\n\n\t\t\t\tcreatePropertyProxy(member, memberName, target);\n\n\t\t\t\tcreateFunctionProxy(member, memberName, target);\n\n\t\t\t});\n\t\t}\n\n\t\treturn interceptor.instance;\n\t};\n\n\tvar createPropertyProxy = function(member,memberName,target){\n\t\tif (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== \"__scarlet\") && (memberName !== \"__typename\")) {\n\n\t\t\tself.interceptor.instance[memberName] = Object.defineProperty(interceptor.instance, memberName, {\n\n\t\t\t\tconfigurable: true,\n\n\t\t\t\tget: function(){\n\t\t\t\t\treturn target(function(){\n\t\t\t\t\t\treturn self.interceptor.instance.__scarlet[memberName];\n\t\t\t\t\t}, self.interceptor.instance.__scarlet[memberName]);\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tset: function(value){\n\t\t\t\t\ttarget(function(){\n\t\t\t\t\t\tself.interceptor.instance.__scarlet[memberName] = value;\t\n\t\t\t\t\t}, value);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t});\n\t\t} else if (interceptor.instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === \"__typename\")) {\n\t\t\tself.interceptor.instance.__typename = self.interceptor.instance.__scarlet.__typename;\n\t\t}\n\t};\n\n\tvar createFunctionProxy = function(member,memberName,target){\n\t\tif (member instanceof(Function)) {\n\t\t\tvar originalMethod = self.interceptor.instance.__scarlet[memberName];\n\t\t\t\n\t\t\tself.interceptor.instance[memberName] = function() {\n\t\t\t\treturn target(originalMethod, arguments);\n\t\t\t};\n\n\t\t}\n\t};\n\n\tself.unwrap = function() {\n\n\t\tif (interceptor.instance.__scarlet) {\n\n\t\t\tenumerable.forEach(interceptor.instance, function(member, memberName) {\n\n\t\t\t\tif (member instanceof Function) {\n\t\t\t\t\tvar originalMethod = interceptor.instance.__scarlet[memberName];\n\t\t\t\t\tinterceptor.instance[memberName] = originalMethod;\n\t\t\t\t}\n\n\t\t\t});\n\t\t}\n\n\t};\n\n}\n\nmodule.exports = ProxyInstance;",
+            "code": "var ProxyMember = require(\"./proxy-member\");\nvar enumerable = require(\"./extensions/enumerable\");\n\nfunction ProxyInstance(instance) {\n\n\tvar self = this;\n\n\tself.instance = instance;\n\n\tself.whenCalled = function(target) {\n\t\tif (!instance.__scarlet) {\n\n\t\t\tinstance.__scarlet = {};\n\n\t\t\tenumerable.forEach(instance, function(member, memberName) {\n\t\t\t\tvar proxy = new ProxyMember(instance,memberName);\n\t\t\t\tproxy.whenCalled(target);\n\t\t\t});\n\t\t}\n\n\t\treturn instance;\n\t};\n\n\tself.unwrap = function() {\n\n\t\tif (instance.__scarlet) {\n\n\t\t\tenumerable.forEach(instance, function(member, memberName) {\n\n\t\t\t\tif (member instanceof Function) {\n\t\t\t\t\tvar originalMethod = instance.__scarlet[memberName];\n\t\t\t\t\tinstance[memberName] = originalMethod;\n\t\t\t\t}\n\n\t\t\t});\n\t\t}\n\n\t};\n\n}\n\nmodule.exports = ProxyInstance;",
             "ctx": {
                 "type": "declaration",
-                "name": "enumerable",
-                "value": "require(\"./extensions/enumerable\")",
-                "string": "enumerable"
+                "name": "ProxyMember",
+                "value": "require(\"./proxy-member\")",
+                "string": "ProxyMember"
             },
             "fileName": "lib/proxy-instance.js"
         },
@@ -232,7 +232,24 @@
                 "body": ""
             },
             "isPrivate": false,
-            "code": "var assert = require(\"assert\");\nvar ProxyInstance = require(\"./proxy-instance\");\nvar inherits = require(\"./extensions/inherits\");\nvar enumerable = require(\"./extensions/enumerable\");\n\nfunction ProxyPrototype(interceptor) {\n\n\tvar self = this;\n\n\tself.inheritedType = null;\n\n\tself.interceptor = interceptor;\n\n\tself.whenCalled = function(target) {\n\n\t\tassert(interceptor.type, \"Scarlet::Interceptor::type == null\");\n\t\tassert(interceptor.type.prototype, \"Cannot use 'asType()' for this object because it does not have a prototype\");\n\n\t\tself.inheritedType = function(){\n\n\t\t\tvar self = this;\n\n\t\t\t(function() {\n\t\t\t\tvar interceptorTypeConstructor = function(){\n\t\t\t\t\tvar parameters = Array.prototype.slice.call(arguments);\n\t\t\t\t\tinterceptor.type.apply(self,parameters);\n\n\t\t\t\t\tinterceptor.instance = self;\n\n\t\t\t\t\tvar proxy = new ProxyInstance(interceptor);\n\t\t\t\t\tproxy.whenCalled(target);\n\t\t\t\t};\n\n\t\t\t\treturn target(interceptorTypeConstructor,arguments);\n\t\t\t}());\n\n\t\t};\n\n\t\tinherits(self.inheritedType, interceptor.type);\n\t\treturn self.inheritedType;\n\t\t\n\t};\n\n\tself.unwrap = function() {};\n\n}\n\nmodule.exports = ProxyPrototype;",
+            "code": "var enumerable = require(\"./extensions/enumerable\");\n\n\nfunction ProxyMember(instance, memberName) {\n\n\tvar self = this;\n\n\tif(!instance.__scarlet)\n\t\tinstance.__scarlet = {};\n\n\tself.whenCalled = function(target) {\n\n\t\tinstance.__scarlet[memberName] = instance[memberName];\n\n\t\tcreatePropertyProxy(instance[memberName], memberName, target);\n\n\t\tcreateFunctionProxy(instance[memberName], memberName, target);\n\n\t\treturn instance;\n\n\t};\n\n\tvar createPropertyProxy = function(member,memberName,target){\n\t\tif (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== \"__scarlet\") && (memberName !== \"__typename\")) {\n\n\t\t\tinstance[memberName] = Object.defineProperty(instance, memberName, {\n\n\t\t\t\tconfigurable: true,\n\n\t\t\t\tget: function(){\n\t\t\t\t\treturn target(instance,function(){\n\t\t\t\t\t\treturn instance.__scarlet[memberName];\n\t\t\t\t\t}, instance.__scarlet[memberName]);\n\t\t\t\t},\n\t\t\t\t\n\t\t\t\tset: function(value){\n\t\t\t\t\ttarget(instance,function(){\n\t\t\t\t\t\tinstance.__scarlet[memberName] = value;\t\n\t\t\t\t\t}, value);\n\t\t\t\t}\n\t\t\t\t\n\t\t\t});\n\t\t} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === \"__typename\")) {\n\t\t\tinstance.__typename = instance.__scarlet.__typename;\n\t\t}\n\t};\n\n\tvar createFunctionProxy = function(member,memberName,target){\n\t\tif (member instanceof(Function)) {\n\t\t\tvar originalMethod = instance.__scarlet[memberName];\n\t\t\t\n\t\t\tinstance[memberName] = function() {\n\t\t\t\treturn target(instance,instance.__scarlet[memberName], arguments);\n\t\t\t};\n\t\t}\n\t};\n\n\tself.unwrap = function() {\n\n\t\tif (instance.__scarlet) {\n\n\t\t\tenumerable.forEach(instance, function(member, memberName) {\n\n\t\t\t\tif (member instanceof Function) {\n\t\t\t\t\tvar originalMethod = instance.__scarlet[memberName];\n\t\t\t\t\tinstance[memberName] = originalMethod;\n\t\t\t\t}\n\n\t\t\t});\n\t\t}\n\n\t};\n\n\treturn self;\n}\n\nmodule.exports = ProxyMember;",
+            "ctx": {
+                "type": "declaration",
+                "name": "enumerable",
+                "value": "require(\"./extensions/enumerable\")",
+                "string": "enumerable"
+            },
+            "fileName": "lib/proxy-member.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "var assert = require(\"assert\");\nvar ProxyInstance = require(\"./proxy-instance\");\nvar inherits = require(\"./extensions/inherits\");\nvar enumerable = require(\"./extensions/enumerable\");\n\nfunction ProxyPrototype(instance,interceptor) {\n\n\tvar self = this;\n\n\tself.inheritedType = null;\n\tself.instance = instance;\n\n\tself.whenCalled = function(target) {\n\n\t\tassert(instance, \"Scarlet::Interceptor::type == null\");\n\t\tassert(instance.prototype, \"Cannot use 'asType()' for this object because it does not have a prototype\");\n\n\t\tself.inheritedType = function(){\n\n\t\t\tvar self = this;\n\n\t\t\t(function() {\n\n\t\t\t\tvar interceptorTypeConstructor = function(){\n\t\t\t\t\tvar parameters = Array.prototype.slice.call(arguments);\n\t\t\t\t\tif(instance.apply)\n\t\t\t\t\t\tinstance.apply(self,parameters);\n\n\t\t\t\t\tvar proxy = new ProxyInstance(self);\n\t\t\t\t\tproxy.whenCalled(target);\n\t\t\t\t};\n\n\t\t\t\treturn target(self,interceptorTypeConstructor,arguments);\n\n\t\t\t}());\n\n\t\t};\n\n\t\tinherits(self.inheritedType, instance);\n\n\t\treturn self.inheritedType;\n\t\t\n\t};\n\n\tself.unwrap = function() {};\n\n\treturn self;\n\n}\n\nmodule.exports = ProxyPrototype;",
             "ctx": {
                 "type": "declaration",
                 "name": "assert",
@@ -271,7 +288,7 @@
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\tself.plugins = {};\n\tself.interceptor = {};\n\tself.lib = require(\"./index\");\n\n\tvar interceptType = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asType();\n\t};\n\n\tvar interceptObject = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\treturn _interceptor.asObject();\n\t};",
+            "code": "function Scarlet(pluginArr) {\n\n\t\"use strict\";\n\n\tvar self = this;\n\tself.plugins = {};\n\tself.interceptor = {};\n\tself.lib = require(\"./index\");",
             "ctx": {
                 "type": "function",
                 "name": "Scarlet",
@@ -313,7 +330,7 @@
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "self.intercept = function(typeOrInstance) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tif (typeOrInstance.prototype)\n\t\t\tself.interceptor =  interceptType(typeOrInstance);\n\t\telse\n\t\t\tself.interceptor = interceptObject(typeOrInstance);\n\n\t\treturn self;\n\t};",
+            "code": "self.intercept = function(typeOrInstance, memberName) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\n\t\tvar self = this;\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\tif(typeOrInstance.hasOwnProperty(memberName))\n\t\t\tself.interceptor = _interceptor.forMember(memberName);\n\t\telse if (typeOrInstance.prototype)\n\t\t\tself.interceptor =  _interceptor.forType();\n\t\telse\n\t\t\tself.interceptor = _interceptor.forObject();\n\n\t\treturn self;\n\t};",
             "ctx": {
                 "type": "method",
                 "receiver": "self",
@@ -643,9 +660,20 @@
         },
         {
             "params": [],
-            "name": "enumerable",
+            "name": "ProxyMember",
             "type": "declaration",
             "fileName": "lib/proxy-instance.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            }
+        },
+        {
+            "params": [],
+            "name": "enumerable",
+            "type": "declaration",
+            "fileName": "lib/proxy-member.js",
             "description": {
                 "full": "",
                 "summary": "",
@@ -1213,9 +1241,25 @@
             "moxComments": [
                 {
                     "params": [],
-                    "name": "enumerable",
+                    "name": "ProxyMember",
                     "type": "declaration",
                     "fileName": "lib/proxy-instance.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/proxy-member.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "enumerable",
+                    "type": "declaration",
+                    "fileName": "lib/proxy-member.js",
                     "description": {
                         "full": "",
                         "summary": "",

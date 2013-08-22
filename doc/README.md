@@ -1,124 +1,26 @@
 # Scarlet
 
-## `Invocation Attributes`
-
-* [`args`][0]
-* [`object`][1]
-* [`method`][2]
-* [`result`][3]
-* [`proceed`][4]
-
 ## `Interception Methods`
 
-* [`Scarlet`][5]
-* [`intercept`][6]
-* [`using`][7]
-* [`resolve`][8]
-* [`loadPlugin`][9]
+* [`using`][0]
+* [`resolve`][1]
+* [`Scarlet`][2]
+* [`intercept`][3]
+* [`loadPlugin`][4]
 
 ## `Invocation Attributes`
 
-### `args`
-
-[\#][0] [Ⓣ][10]
-
-#### Types
-
-  * _Object_
-
-The original arguments passed into the function being intercepted
-
----
-
-### `object`
-
-[\#][1] [Ⓣ][10]
-
-#### Types
-
-  * _Object_
-
-The reference to self for the original/called methd
-
----
-
-### `method`
-
-[\#][2] [Ⓣ][10]
-
-#### Types
-
-  * _Function_
-
-The method being intercepted
-
----
-
-### `result`
-
-[\#][3] [Ⓣ][10]
-
-#### Types
-
-  * _Any_
-
-The result of the method being intercepted
-
----
-
-### `proceed`
-
-[\#][4] [Ⓣ][10]
-
-Calls the intercepted method
-
-#### Returns  
-  
-_(Function | Object)_ - of the result of the original method call
-
----
+* [`args`][5]
+* [`object`][6]
+* [`method`][7]
+* [`result`][8]
+* [`proceed`][9]
 
 ## `Interception Methods`
-
-### `Scarlet`
-
-[\#][5] [Ⓣ][11]
-
-#### Example:
-
-    Scarlet
-        .intercept(someFunction)
-        .using(someInterceptorFunction);
-    
-
-#### Arguments
-
-1. `pluginArr` _(Array)_ - - optional array of plugins to load
-
----
-
-### `intercept`
-
-[\#][6] [Ⓣ][11]
-
-#### Example:
-
-    Scarlet.intercept(someFunction);
-    
-
-#### Arguments
-
-1. `typeOrInstance` _(Function | Object)_ - the type or instance to be intercepted
-
-#### Returns  
-  
-_(Function)_ - An interceptor object
-
----
 
 ### `using`
 
-[\#][7] [Ⓣ][11]
+[\#][0] [Ⓣ][10]
 
 #### Example:
 
@@ -146,7 +48,7 @@ _(Function)_ - A reference to the current interceptor(self)
 
 ### `resolve`
 
-[\#][8] [Ⓣ][11]
+[\#][1] [Ⓣ][10]
 
 #### Example:
 
@@ -165,9 +67,45 @@ _(Function)_ - A reference to the function being intercepted
 
 ---
 
+### `Scarlet`
+
+[\#][2] [Ⓣ][10]
+
+#### Example:
+
+    Scarlet
+        .intercept(someFunction)
+        .using(someInterceptorFunction);
+    
+
+#### Arguments
+
+1. `pluginArr` _(Array)_ - - optional array of plugins to load
+
+---
+
+### `intercept`
+
+[\#][3] [Ⓣ][10]
+
+#### Example:
+
+    Scarlet.intercept(someFunction);
+    
+
+#### Arguments
+
+1. `typeOrInstance` _(Function | Object)_ - the type or instance to be intercepted
+
+#### Returns  
+  
+_(Function)_ - An interceptor object
+
+---
+
 ### `loadPlugin`
 
-[\#][9] [Ⓣ][11]
+[\#][4] [Ⓣ][10]
 
 #### Example:
 
@@ -184,17 +122,79 @@ _(Function)_ - A reference to scarlet(self)
 
 ---
 
+## `Invocation Attributes`
+
+### `args`
+
+[\#][5] [Ⓣ][11]
+
+#### Types
+
+  * _Object_
+
+The original arguments passed into the function being intercepted
+
+---
+
+### `object`
+
+[\#][6] [Ⓣ][11]
+
+#### Types
+
+  * _Object_
+
+The reference to self for the original/called methd
+
+---
+
+### `method`
+
+[\#][7] [Ⓣ][11]
+
+#### Types
+
+  * _Function_
+
+The method being intercepted
+
+---
+
+### `result`
+
+[\#][8] [Ⓣ][11]
+
+#### Types
+
+  * _Any_
+
+The result of the method being intercepted
+
+---
+
+### `proceed`
+
+[\#][9] [Ⓣ][11]
+
+Calls the intercepted method
+
+#### Returns  
+  
+_(Function | Object)_ - of the result of the original method call
+
+---
 
 
-[0]: #args
-[1]: #object
-[2]: #method
-[3]: #result
-[4]: #proceed
-[5]: #scarlet
-[6]: #intercept
-[7]: #using
-[8]: #resolve
-[9]: #loadplugin
-[10]: #invocation-attributes
-[11]: #interception-methods
+
+[0]: #using
+[1]: #resolve
+[2]: #scarlet
+[3]: #intercept
+[4]: #loadplugin
+[5]: #args
+[6]: #object
+[7]: #method
+[8]: #result
+[9]: #proceed
+[10]: #interception-methods
+[11]: #invocation-attributes

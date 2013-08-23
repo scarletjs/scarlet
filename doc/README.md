@@ -34,15 +34,15 @@
 Basic interceptor
 
     Scarlet.intercept(someFunction)
-                .using(someInterceptor);
+           .using(someInterceptor);
     
 
 Interceptor with events
 
     Scarlet.intercept(someFunction)
-                .on('before', beforeFunction)
-                .on('after', afterFunction)
-                .on('done', doneFunction);
+            .on('before', beforeFunction)
+            .on('after', afterFunction)
+            .on('done', doneFunction);
     
 
 #### Arguments
@@ -135,9 +135,9 @@ Basic interceptor
 interceptor with events
 
     Scarlet.intercept(someFunction)
-                .on('before', beforeFunction)
-                .on('after', afterFunction)
-                .on('done', doneFunction);
+           .on('before', beforeFunction)
+           .on('after', afterFunction)
+           .on('done', doneFunction);
     
 
 #### Arguments

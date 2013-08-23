@@ -1,6 +1,6 @@
 {
   "name": "scarlet",
-  "description": "A Javascript interceptor",
+  "description": "The simple fast javascript interceptor for methods and properties.",
   "version": "0.4.1",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
@@ -22,8 +22,7 @@
     "grunt-browserify": "~1.2.0",
     "hooks": "~0.3.0",
     "html-md": "~2.1.1",
-    "grunt-mox": "~0.0.6",
-    "grunt-bump": "0.0.11"
+    "grunt-mox": "~0.0.6"
   },
   "browserDependencies": {},
   "keywords": [

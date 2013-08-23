@@ -3,7 +3,7 @@ Scarlet
 
 The simple fast javascript interceptor for methods and properties.
 
-[![Build Status](https://travis-ci.org/tjchaplin/scarlet.png?branch=master)](https://travis-ci.org/tjchaplin/scarlet)
+[![Build Status](https://travis-ci.org/scarletjs/scarlet.png?branch=0.0.24)](https://travis-ci.org/scarletjs/scarlet)
 
 ![Scarlet!](http://www.scarletjs.com/img/scarlet.png)
 
@@ -17,19 +17,17 @@ The simple fast javascript interceptor for methods and properties.
 ```javascript
 var scarlet = require('scarlet');
 
-//Tell scarlet to start intercepting
 scarlet.intercept(Math,"min")
-        .using(function(proceed){ //->Create a interceptor function
-            proceed(); 
+        .using(function(proceed){ 
+                console.log("In interceptor");
+                proceed(); 
         });
         
 Math.min(1,2,3);
-//-> 1. interceptor will get called
+//-> 1. interceptor called --> outputs "In interceptor" 
 //-> 2. Math.min will be called as normal and will return 1
 
 ```
-
-See [Simple Example for full code](#simple-node-example)
 
 ### What does Scarlet call when?
 ```
@@ -93,20 +91,12 @@ Scarlet interceptors emit the following events:
 * done - emitted after all *interceptors* and *intercepted* method called
 
 ```javascript
-function asyncInterceptor(proceed){
-    setTimeout(function(){ 
-        console.log("completed long running function");
-        
-        proceed(); //-> proceeds to the next interceptor if one exists
-     }, 10);
-}
-
 Scarlet.intercept(Math, 'min')
         .on('before', beforeFunction)
         .on('after', afterFunction)
         .on('done', doneFunction);
         
-var min = Math.min(1,2,3); //-> will return 1;
+var min = Math.min(1,2,3);
 //-> 1. beforeFunction called
 //-> 2. Math.min called as normal and will return 1
 //-> 3. doneFunction called
@@ -130,7 +120,7 @@ scarlet.intercept(Math,"min")
         .using(asyncInterceptor);
         
 var min = Math.min(1,2,3); //-> will return 1;
-//-> 10 ms laster --> outputs "completed long running function"
+//-> ~10 ms laster --> outputs "completed long running function"
 ```
 
 ### Access to intercpted method details (arguments, result, etc)
@@ -157,7 +147,7 @@ scarlet.intercept(Math,'min')
 		.using(someInterceptor);
 
 Math.min(1,2,3);
-//-> 1. interceptor called
+//-> 1. someInterceptor called
 //-> 2. Math.min will be called as normal and will return 1
 //-> 3. Outputs --> "intercepted method returned:1"
 //-> 4. Outputs --> "given the following parameters:[1,2,3]"
@@ -196,6 +186,27 @@ scarlet.intercept(someFunction)
         .using(interceptor) //->indicates the interceptor to be called
 
 //-> someFunction will now have the interceptors
+```
+
+### Creation of interception events
+
+Scarlet interceptors emit the following events:
+
+* before - emitted before *interceptors* are called
+* after - emitted after *intercepted* method
+* done - emitted after all *interceptors* and *intercepted* method called
+
+```javascript
+Scarlet.intercept(Math, 'min')
+        .on('before', beforeFunction)
+        .on('after', afterFunction)
+        .on('done', doneFunction);
+        
+var min = Math.min(1,2,3);
+//-> 1. beforeFunction called
+//-> 2. Math.min called as normal and will return 1
+//-> 3. doneFunction called
+//-> 4. afterFunction called
 ```
 
 ### Multiple Interceptor

@@ -31,18 +31,27 @@ function Scarlet(pluginArr) {
 	self.lib = require("./index");
 
 	/**
-	 * Creates a Scarlet interceptor
+	 * Creates a Scarlet interceptor.
 	 *
 	 * ####Example:
 	 *
+	 * Basic interceptor
 	 * ```javascript
 	 * Scarlet.intercept(someFunction);
+	 * ```
+	 * 
+	 * interceptor with events
+	 * ```javascript
+	 * Scarlet.intercept(someFunction)
+	 *        .on('before', beforeFunction)
+	 *        .on('after', afterFunction)
+	 *        .on('done', doneFunction);
 	 * ```
 	 * 
 	 * @category Interception Methods
 	 * @method intercept
 	 * @param {Function|Object} typeOrInstance the type or instance to be intercepted
-	 * @return {Function} An interceptor object
+	 * @return {Function} A Scarlet interceptor object.
 	**/
 	self.intercept = function(typeOrInstance, memberName) {
 
@@ -104,6 +113,38 @@ var ProxyPrototype = require("./proxy-prototype");
 var ProxyMember = require("./proxy-member");
 var Series = require("./extensions/series");
 
+/**
+ * A Scarlet interceptor that emits events.
+ *
+ * #### Emited Events
+ *
+ * * before - emitted before *interceptors* are called
+ * * after - emitted after *intercepted* method
+ * * done - emitted after all *interceptors* and *intercepted* method called
+ * 
+ * ####Example:
+ *
+ * Basic interceptor
+ * 
+ * ```javascript
+ * Scarlet.intercept(someFunction)
+ *        .using(someInterceptor);
+ * ```
+ * 
+ * Interceptor with events
+ * 
+ * ```javascript
+ * Scarlet.intercept(someFunction)
+ *         .on('before', beforeFunction)
+ *         .on('after', afterFunction)
+ *         .on('done', doneFunction);
+ * ```
+ * 
+ * @category Interception Methods
+ * @method intercept
+ * @param {Function|Object} typeOrInstance the type or instance to be intercepted
+ * @return {Function} A Scarlet interceptor object.
+**/
 function Interceptor(typeOrInstance) {
 
 	assert(typeOrInstance, "Scarlet::Interceptor::typeOrInstance == null");
@@ -229,7 +270,7 @@ function Interceptor(typeOrInstance) {
 
 }
 
-Interceptor.prototype.__proto__ = events.EventEmitter.prototype;
+Interceptor.prototype = events.EventEmitter.prototype;
 
 module.exports = Interceptor;
 },{"assert":4,"events":6,"./invocation":7,"./proxy-instance":8,"./proxy-prototype":9,"./proxy-member":10,"./extensions/series":11}],11:[function(require,module,exports){
@@ -364,7 +405,277 @@ function Invocation(object, method, args) {
 }
 
 module.exports = Invocation;
-},{"assert":4}],12:[function(require,module,exports){
+},{"assert":4}],5:[function(require,module,exports){
+module.exports = {
+	Util: require("util"),
+	Assert: require("assert"),
+	Plugins: require("./plugins"),
+	Invocation: require("./invocation"),
+	Interceptor: require("./interceptor"),
+	ProxyInstance: require("./proxy-instance"),
+	ProxyPrototype: require("./proxy-prototype"),
+	Enumerable: require("./extensions/enumerable")
+};
+
+
+},{"util":12,"assert":4,"./plugins":13,"./invocation":7,"./interceptor":3,"./proxy-instance":8,"./proxy-prototype":9,"./extensions/enumerable":14}],8:[function(require,module,exports){
+var ProxyMember = require("./proxy-member");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyInstance(instance) {
+
+	var self = this;
+
+	self.instance = instance;
+
+	self.whenCalled = function(target) {
+		if (!instance.__scarlet) {
+
+			instance.__scarlet = {};
+
+			enumerable.forEach(instance, function(member, memberName) {
+				var proxy = new ProxyMember(instance,memberName);
+				proxy.whenCalled(target);
+			});
+		}
+
+		return instance;
+	};
+
+	self.unwrap = function() {
+
+		if (instance.__scarlet) {
+
+			enumerable.forEach(instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = instance.__scarlet[memberName];
+					instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
+}
+
+module.exports = ProxyInstance;
+},{"./proxy-member":10,"./extensions/enumerable":14}],9:[function(require,module,exports){
+var assert = require("assert");
+var ProxyInstance = require("./proxy-instance");
+var inherits = require("./extensions/inherits");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyPrototype(instance) {
+
+	var self = this;
+
+	self.inheritedType = null;
+	self.instance = instance;
+
+	self.whenCalled = function(target) {
+
+		assert(instance, "Scarlet::Interceptor::type == null");
+		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
+
+		self.inheritedType = function(){
+
+			var self = this;
+
+			(function() {
+
+				var interceptorTypeConstructor = function(){
+					var parameters = Array.prototype.slice.call(arguments);
+					if(instance.apply)
+						instance.apply(self,parameters);
+
+					var proxy = new ProxyInstance(self);
+					proxy.whenCalled(target);
+				};
+
+				return target(self,interceptorTypeConstructor,arguments);
+
+			}());
+
+		};
+
+		inherits(self.inheritedType, instance);
+
+		return self.inheritedType;
+		
+	};
+
+	self.unwrap = function() {};
+
+	return self;
+
+}
+
+module.exports = ProxyPrototype;
+
+},{"assert":4,"./proxy-instance":8,"./extensions/inherits":15,"./extensions/enumerable":14}],10:[function(require,module,exports){
+var enumerable = require("./extensions/enumerable");
+
+
+function ProxyMember(instance, memberName) {
+
+	var self = this;
+
+	if(!instance.__scarlet)
+		instance.__scarlet = {};
+
+	self.whenCalled = function(target) {
+
+		instance.__scarlet[memberName] = instance[memberName];
+
+		createPropertyProxy(instance[memberName], memberName, target);
+
+		createFunctionProxy(instance[memberName], memberName, target);
+
+		return instance;
+
+	};
+
+	var createPropertyProxy = function(member,memberName,target){
+		if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
+
+			instance[memberName] = Object.defineProperty(instance, memberName, {
+
+				configurable: true,
+
+				get: function(){
+					return target(instance,function(){
+						return instance.__scarlet[memberName];
+					}, instance.__scarlet[memberName]);
+				},
+				
+				set: function(value){
+					target(instance,function(){
+						instance.__scarlet[memberName] = value;	
+					}, value);
+				}
+				
+			});
+		} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
+			instance.__typename = instance.__scarlet.__typename;
+		}
+	};
+
+	var createFunctionProxy = function(member,memberName,target){
+		if (member instanceof(Function)) {
+			var originalMethod = instance.__scarlet[memberName];
+			
+			instance[memberName] = function() {
+				return target(instance,instance.__scarlet[memberName], arguments);
+			};
+		}
+	};
+
+	self.unwrap = function() {
+
+		if (instance.__scarlet) {
+
+			enumerable.forEach(instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = instance.__scarlet[memberName];
+					instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
+	return self;
+}
+
+module.exports = ProxyMember;
+},{"./extensions/enumerable":14}],14:[function(require,module,exports){
+function Enumerable() {
+
+	var self = this;
+
+	self.arrayFor = function(array, callback) {
+		for (var i = 0; i < array.length; i++) {
+			callback(array[i], i, array);
+		}
+	};
+
+	self.funcFor = function(object, callback) {
+		for (var key in object) {
+			callback(object[key], key, object);
+		}
+	};
+
+	self.stringFor = function(string, callback) {
+		self.arrayFor(string.split(""), function(chr, index) {
+			callback(chr, index, string);
+		});
+	};
+
+	self.allEach = function(object, callback) {
+		Object.getOwnPropertyNames(object).forEach(function(property) {
+			callback(object[property], property, object);
+		});
+	};
+
+	self.forEach = function(object, callback) {
+		if (object) {
+			var resolve = self.funcFor;
+			if (object instanceof Function) {
+				resolve = self.funcFor;
+			} else if (typeof object == "string") {
+				resolve = self.stringFor;
+			} else if (typeof object.length == "number") {
+				resolve = self.arrayFor;
+			}
+			resolve(object, callback);
+		}
+	};
+
+}
+
+module.exports = new Enumerable();
+},{}],15:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+};
+},{}],13:[function(require,module,exports){
+(function(__dirname){var path = require("path");
+var assert = require("assert");
+
+function Plugins() {
+
+	var self = this;
+	
+	self.loadPlugin = function($scarlet, pluginPath) {
+
+		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
+		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+
+		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
+		var plugin = require(fullPath);
+
+		pluginObject = new plugin($scarlet);
+		pluginObject.initialize();
+
+	};
+
+}
+
+module.exports = new Plugins();
+})("/lib")
+},{"path":16,"assert":4}],17:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -604,7 +915,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":12}],13:[function(require,module,exports){
+},{"__browserify_process":17}],12:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -957,20 +1268,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":6}],5:[function(require,module,exports){
-module.exports = {
-	Util: require("util"),
-	Assert: require("assert"),
-	Plugins: require("./plugins"),
-	Invocation: require("./invocation"),
-	Interceptor: require("./interceptor"),
-	ProxyInstance: require("./proxy-instance"),
-	ProxyPrototype: require("./proxy-prototype"),
-	Enumerable: require("./extensions/enumerable")
-};
-
-
-},{"util":13,"assert":4,"./plugins":14,"./invocation":7,"./interceptor":3,"./proxy-instance":8,"./proxy-prototype":9,"./extensions/enumerable":15}],4:[function(require,module,exports){
+},{"events":6}],4:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -1287,264 +1585,7 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"util":13,"buffer":16}],8:[function(require,module,exports){
-var ProxyMember = require("./proxy-member");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyInstance(instance) {
-
-	var self = this;
-
-	self.instance = instance;
-
-	self.whenCalled = function(target) {
-		if (!instance.__scarlet) {
-
-			instance.__scarlet = {};
-
-			enumerable.forEach(instance, function(member, memberName) {
-				var proxy = new ProxyMember(instance,memberName);
-				proxy.whenCalled(target);
-			});
-		}
-
-		return instance;
-	};
-
-	self.unwrap = function() {
-
-		if (instance.__scarlet) {
-
-			enumerable.forEach(instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = instance.__scarlet[memberName];
-					instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-}
-
-module.exports = ProxyInstance;
-},{"./proxy-member":10,"./extensions/enumerable":15}],9:[function(require,module,exports){
-var assert = require("assert");
-var ProxyInstance = require("./proxy-instance");
-var inherits = require("./extensions/inherits");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyPrototype(instance) {
-
-	var self = this;
-
-	self.inheritedType = null;
-	self.instance = instance;
-
-	self.whenCalled = function(target) {
-
-		assert(instance, "Scarlet::Interceptor::type == null");
-		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
-
-		self.inheritedType = function(){
-
-			var self = this;
-
-			(function() {
-
-				var interceptorTypeConstructor = function(){
-					var parameters = Array.prototype.slice.call(arguments);
-					if(instance.apply)
-						instance.apply(self,parameters);
-
-					var proxy = new ProxyInstance(self);
-					proxy.whenCalled(target);
-				};
-
-				return target(self,interceptorTypeConstructor,arguments);
-
-			}());
-
-		};
-
-		inherits(self.inheritedType, instance);
-
-		return self.inheritedType;
-		
-	};
-
-	self.unwrap = function() {};
-
-	return self;
-
-}
-
-module.exports = ProxyPrototype;
-
-},{"assert":4,"./proxy-instance":8,"./extensions/inherits":17,"./extensions/enumerable":15}],10:[function(require,module,exports){
-var enumerable = require("./extensions/enumerable");
-
-
-function ProxyMember(instance, memberName) {
-
-	var self = this;
-
-	if(!instance.__scarlet)
-		instance.__scarlet = {};
-
-	self.whenCalled = function(target) {
-
-		instance.__scarlet[memberName] = instance[memberName];
-
-		createPropertyProxy(instance[memberName], memberName, target);
-
-		createFunctionProxy(instance[memberName], memberName, target);
-
-		return instance;
-
-	};
-
-	var createPropertyProxy = function(member,memberName,target){
-		if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
-
-			instance[memberName] = Object.defineProperty(instance, memberName, {
-
-				configurable: true,
-
-				get: function(){
-					return target(instance,function(){
-						return instance.__scarlet[memberName];
-					}, instance.__scarlet[memberName]);
-				},
-				
-				set: function(value){
-					target(instance,function(){
-						instance.__scarlet[memberName] = value;	
-					}, value);
-				}
-				
-			});
-		} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
-			instance.__typename = instance.__scarlet.__typename;
-		}
-	};
-
-	var createFunctionProxy = function(member,memberName,target){
-		if (member instanceof(Function)) {
-			var originalMethod = instance.__scarlet[memberName];
-			
-			instance[memberName] = function() {
-				return target(instance,instance.__scarlet[memberName], arguments);
-			};
-		}
-	};
-
-	self.unwrap = function() {
-
-		if (instance.__scarlet) {
-
-			enumerable.forEach(instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = instance.__scarlet[memberName];
-					instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-	return self;
-}
-
-module.exports = ProxyMember;
-},{"./extensions/enumerable":15}],15:[function(require,module,exports){
-function Enumerable() {
-
-	var self = this;
-
-	self.arrayFor = function(array, callback) {
-		for (var i = 0; i < array.length; i++) {
-			callback(array[i], i, array);
-		}
-	};
-
-	self.funcFor = function(object, callback) {
-		for (var key in object) {
-			callback(object[key], key, object);
-		}
-	};
-
-	self.stringFor = function(string, callback) {
-		self.arrayFor(string.split(""), function(chr, index) {
-			callback(chr, index, string);
-		});
-	};
-
-	self.allEach = function(object, callback) {
-		Object.getOwnPropertyNames(object).forEach(function(property) {
-			callback(object[property], property, object);
-		});
-	};
-
-	self.forEach = function(object, callback) {
-		if (object) {
-			var resolve = self.funcFor;
-			if (object instanceof Function) {
-				resolve = self.funcFor;
-			} else if (typeof object == "string") {
-				resolve = self.stringFor;
-			} else if (typeof object.length == "number") {
-				resolve = self.arrayFor;
-			}
-			resolve(object, callback);
-		}
-	};
-
-}
-
-module.exports = new Enumerable();
-},{}],14:[function(require,module,exports){
-(function(__dirname){var path = require("path");
-var assert = require("assert");
-
-function Plugins() {
-
-	var self = this;
-	
-	self.loadPlugin = function($scarlet, pluginPath) {
-
-		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
-		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
-
-		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
-
-		pluginObject = new plugin($scarlet);
-		pluginObject.initialize();
-
-	};
-
-}
-
-module.exports = new Plugins();
-})("/lib")
-},{"path":18,"assert":4}],17:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],18:[function(require,module,exports){
+},{"util":12,"buffer":18}],16:[function(require,module,exports){
 (function(process){function filter (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
@@ -1722,7 +1763,7 @@ exports.relative = function(from, to) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":12}],19:[function(require,module,exports){
+},{"__browserify_process":17}],19:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1808,7 +1849,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;

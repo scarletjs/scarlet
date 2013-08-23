@@ -1,6 +1,3 @@
 ## Coding Guidelines
 
-Please follow the conventions already established in the code.  
-
-For additonal guidelines and conventions used see:
-[Javascript Guidelines - Google](http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml)
+In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).

@@ -49,7 +49,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha tests/* --reporter spec"
+    "test": "mocha tests/* --reporter spec"
   },
   "license": "MIT"
 }

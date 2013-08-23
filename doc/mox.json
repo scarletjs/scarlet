@@ -26,6 +26,48 @@
                 },
                 {
                     "type": "method",
+                    "string": "intercept"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A Scarlet interceptor object."
+                }
+            ],
+            "description": {
+                "full": "<p>A Scarlet interceptor that emits events.</p>\n\n<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>A Scarlet interceptor that emits events.</p>",
+                "body": "<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "function Interceptor(typeOrInstance) {\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.proxy = null;\n\tself.series = new Series();\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\tevents.EventEmitter.call(this);\n\n\tself.forType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forMember = function(memberName) {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\t\tassert(memberName !== null, \"When defining a member Interceptor must define a member property to intercept\");\n\n\t\tself.proxy = new ProxyMember(self.instance,memberName);\n\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\t\t\n\t\tself.series.addOnDone(function(invocation){ self.emit('done',invocation); }, self);\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {\n\t\t\t\n\t\t\tvar _invocation = new Invocation(instance, method, args);\n\n\t\t\tself.emit('before',_invocation);\n\t\t\tself.series.invoke(_invocation,_invocation.proceed);\n\t\t\tself.emit('after',_invocation);\n\t\t\t\n\t\t\treturn _invocation.result;\n\t\t});\n\t};",
+            "ctx": {
+                "type": "function",
+                "name": "Interceptor",
+                "string": "Interceptor()"
+            },
+            "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Interception Methods"
+                },
+                {
+                    "type": "method",
                     "string": "using"
                 },
                 {
@@ -97,7 +139,7 @@
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "self.resolve = function(){\n\t\treturn self.proxiedInstance;\n\t};\n\n\tself.release = function() {\n\t\tself.proxy.unwrap();\n\t\treturn self;\n\t};\n\n}\n\nmodule.exports = Interceptor;",
+            "code": "self.resolve = function(){\n\t\treturn self.proxiedInstance;\n\t};\n\n\tself.release = function() {\n\t\t//TODO: remove all listners\n\t\t//self.removeAllListeners(\"called\");\n\n\t\tself.proxy.unwrap();\n\t\treturn self;\n\t};\n\n}\n\nInterceptor.prototype.__proto__ = events.EventEmitter.prototype;\n\nmodule.exports = Interceptor;",
             "ctx": {
                 "type": "method",
                 "receiver": "self",
@@ -391,13 +433,13 @@
                     "types": [
                         "Function"
                     ],
-                    "description": "An interceptor object"
+                    "description": "A Scarlet interceptor object."
                 }
             ],
             "description": {
-                "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
-                "summary": "<p>Creates a Scarlet interceptor</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+                "full": "<p>Creates a Scarlet interceptor.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>Creates a Scarlet interceptor.</p>",
+                "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
             },
             "isPrivate": false,
             "ignore": false,
@@ -514,7 +556,7 @@
                 "body": ""
             },
             "isPrivate": false,
-            "code": "function Series(){\n\tvar self = this;\n\n\tself.targets = [];\n\tself.onDone = null;\n\n\tself.invoke = function(invocation,onAllTargetsCalled) {\n\t\tvar didComplete = false;\n\n\t\tself.callAllTargets(invocation,function(){\n\t\t\tif(!didComplete){\n\t\t\t\tonAllTargetsCalled();\n\t\t\t\tdidComplete = true;\n\t\t\t}\n\n\t\t\tif(self.onDone)\n\t\t\t\tself.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);\n\t\t});\n\n\t\tif(!didComplete){\n\t\t\tonAllTargetsCalled();\n\t\t\tdidComplete = true;\n\t\t}\n\n\t\treturn;\n\t};\n\n\tself.callAllTargets = function(invocation,onComplete) {\n\t\tvar currentTarget  = 0;\n\n\t\tvar next = function(error, result){\n\t\t\t\n\t\t\tif(currentTarget >= self.targets.length){\n\t\t\t\tonComplete();\n\t\t\t\treturn;\t\t\t\t\n\t\t\t}\n\n\t\t\tvar targetMethod = self.targets[currentTarget];\n\t\t\tcurrentTarget++;\n\t\t\ttargetCall(targetMethod);\n\n\t\t\treturn;\n\t\t};\n\n\t\tvar targetCall = function(target){\n\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,invocation]);\n\t\t};\n\n\t\tnext();\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n\tself.addDone = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.onDone = target;\n\t};\n\t\n}\n\nmodule.exports = Series;",
+            "code": "function Series(){\n\tvar self = this;\n\n\tself.targets = [];\n\tself.onDone = null;\n\n\tself.invoke = function(invocation,onAllTargetsCalled) {\n\t\tvar didComplete = false;\n\n\t\tself.callAllTargets(invocation,function(){\n\t\t\tif(!didComplete){\n\t\t\t\tonAllTargetsCalled();\n\t\t\t\tdidComplete = true;\n\t\t\t}\n\n\t\t\tif(self.onDone)\n\t\t\t\tself.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);\n\n\t\t});\n\n\t\tif(!didComplete){\n\t\t\tonAllTargetsCalled();\n\t\t\tdidComplete = true;\n\t\t}\n\n\t\treturn;\n\t};\n\n\tself.callAllTargets = function(invocation,onComplete) {\n\t\tvar currentTarget  = 0;\n\n\t\tvar next = function(error, result){\n\t\t\t\n\t\t\tif(currentTarget >= self.targets.length){\n\t\t\t\tonComplete();\n\t\t\t\treturn;\t\t\t\t\n\t\t\t}\n\n\t\t\tvar targetMethod = self.targets[currentTarget];\n\t\t\tcurrentTarget++;\n\t\t\ttargetCall(targetMethod);\n\n\t\t\treturn;\n\t\t};\n\n\t\tvar targetCall = function(target){\n\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,invocation]);\n\t\t};\n\n\t\tnext();\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n\tself.addOnDone = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.onDone = target;\n\t};\n\t\n}\n\nmodule.exports = Series;",
             "ctx": {
                 "type": "function",
                 "name": "Series",
@@ -549,6 +591,34 @@
                 "full": "",
                 "summary": "",
                 "body": ""
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                }
+            ],
+            "name": "Interceptor",
+            "type": "function",
+            "fileName": "lib/interceptor.js",
+            "description": {
+                "full": "<p>A Scarlet interceptor that emits events.</p>\n\n<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>A Scarlet interceptor that emits events.</p>",
+                "body": "<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
+            },
+            "category": "Interception Methods",
+            "method": "intercept",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A Scarlet interceptor object."
             }
         },
         {
@@ -770,9 +840,9 @@
             "type": "method",
             "fileName": "lib/scarlet.js",
             "description": {
-                "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
-                "summary": "<p>Creates a Scarlet interceptor</p>",
-                "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+                "full": "<p>Creates a Scarlet interceptor.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>Creates a Scarlet interceptor.</p>",
+                "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
             },
             "category": "Interception Methods",
             "method": "intercept",
@@ -780,7 +850,7 @@
                 "types": [
                     "Function"
                 ],
-                "description": "An interceptor object"
+                "description": "A Scarlet interceptor object."
             }
         },
         {
@@ -876,6 +946,34 @@
                     "params": [
                         {
                             "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "Interceptor",
+                    "type": "function",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>A Scarlet interceptor that emits events.</p>\n\n<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>A Scarlet interceptor that emits events.</p>",
+                        "body": "<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A Scarlet interceptor object."
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
                                 "Function"
                             ],
                             "name": "targetMethod",
@@ -963,9 +1061,9 @@
                     "type": "method",
                     "fileName": "lib/scarlet.js",
                     "description": {
-                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
-                        "summary": "<p>Creates a Scarlet interceptor</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+                        "full": "<p>Creates a Scarlet interceptor.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Scarlet interceptor.</p>",
+                        "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
                     },
                     "category": "Interception Methods",
                     "method": "intercept",
@@ -973,7 +1071,7 @@
                         "types": [
                             "Function"
                         ],
-                        "description": "An interceptor object"
+                        "description": "A Scarlet interceptor object."
                     }
                 },
                 {
@@ -1117,6 +1215,34 @@
         {
             "tag": "lib/interceptor.js",
             "moxComments": [
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "Interceptor",
+                    "type": "function",
+                    "fileName": "lib/interceptor.js",
+                    "description": {
+                        "full": "<p>A Scarlet interceptor that emits events.</p>\n\n<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>A Scarlet interceptor that emits events.</p>",
+                        "body": "<h4>Emited Events</h4>\n\n<ul>\n<li>before - emitted before <em>interceptors</em> are called</li>\n<li>after - emitted after <em>intercepted</em> method</li>\n<li>done - emitted after all <em>interceptors</em> and <em>intercepted</em> method called</li>\n</ul>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .using(someInterceptor);\n</pre></div>\n\n<p>Interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A Scarlet interceptor object."
+                    }
+                },
                 {
                     "params": [
                         {
@@ -1366,9 +1492,9 @@
                     "type": "method",
                     "fileName": "lib/scarlet.js",
                     "description": {
-                        "full": "<p>Creates a Scarlet interceptor</p>\n\n<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>",
-                        "summary": "<p>Creates a Scarlet interceptor</p>",
-                        "body": "<h4>Example:</h4>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>"
+                        "full": "<p>Creates a Scarlet interceptor.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Scarlet interceptor.</p>",
+                        "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n            .on('before', beforeFunction)\n            .on('after', afterFunction)\n            .on('done', doneFunction);\n</pre></div>"
                     },
                     "category": "Interception Methods",
                     "method": "intercept",
@@ -1376,7 +1502,7 @@
                         "types": [
                             "Function"
                         ],
-                        "description": "An interceptor object"
+                        "description": "A Scarlet interceptor object."
                     }
                 },
                 {

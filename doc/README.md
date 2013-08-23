@@ -2,25 +2,62 @@
 
 ## `Interception Methods`
 
-* [`using`][0]
-* [`resolve`][1]
-* [`Scarlet`][2]
-* [`intercept`][3]
-* [`loadPlugin`][4]
+* [`Interceptor`][0]
+* [`using`][1]
+* [`resolve`][2]
+* [`Scarlet`][3]
+* [`intercept`][4]
+* [`loadPlugin`][5]
 
 ## `Invocation Attributes`
 
-* [`args`][5]
-* [`object`][6]
-* [`method`][7]
-* [`result`][8]
-* [`proceed`][9]
+* [`args`][6]
+* [`object`][7]
+* [`method`][8]
+* [`result`][9]
+* [`proceed`][10]
 
 ## `Interception Methods`
 
+### `Interceptor`
+
+[\#][0] [Ⓣ][11]
+
+#### Emited Events
+
+* before - emitted before _interceptors_ are called
+* after - emitted after _intercepted_ method
+* done - emitted after all _interceptors_ and _intercepted_ method called
+
+#### Example:
+
+Basic interceptor
+
+    Scarlet.intercept(someFunction)
+                .using(someInterceptor);
+    
+
+Interceptor with events
+
+    Scarlet.intercept(someFunction)
+                .on('before', beforeFunction)
+                .on('after', afterFunction)
+                .on('done', doneFunction);
+    
+
+#### Arguments
+
+1. `typeOrInstance` _(Function | Object)_ - the type or instance to be intercepted
+
+#### Returns  
+  
+_(Function)_ - A Scarlet interceptor object.
+
+---
+
 ### `using`
 
-[\#][0] [Ⓣ][10]
+[\#][1] [Ⓣ][11]
 
 #### Example:
 
@@ -48,7 +85,7 @@ _(Function)_ - A reference to the current interceptor(self)
 
 ### `resolve`
 
-[\#][1] [Ⓣ][10]
+[\#][2] [Ⓣ][11]
 
 #### Example:
 
@@ -69,7 +106,7 @@ _(Function)_ - A reference to the function being intercepted
 
 ### `Scarlet`
 
-[\#][2] [Ⓣ][10]
+[\#][3] [Ⓣ][11]
 
 #### Example:
 
@@ -86,11 +123,21 @@ _(Function)_ - A reference to the function being intercepted
 
 ### `intercept`
 
-[\#][3] [Ⓣ][10]
+[\#][4] [Ⓣ][11]
 
 #### Example:
 
+Basic interceptor
+
     Scarlet.intercept(someFunction);
+    
+
+interceptor with events
+
+    Scarlet.intercept(someFunction)
+                .on('before', beforeFunction)
+                .on('after', afterFunction)
+                .on('done', doneFunction);
     
 
 #### Arguments
@@ -99,13 +146,13 @@ _(Function)_ - A reference to the function being intercepted
 
 #### Returns  
   
-_(Function)_ - An interceptor object
+_(Function)_ - A Scarlet interceptor object.
 
 ---
 
 ### `loadPlugin`
 
-[\#][4] [Ⓣ][10]
+[\#][5] [Ⓣ][11]
 
 #### Example:
 
@@ -126,7 +173,7 @@ _(Function)_ - A reference to scarlet(self)
 
 ### `args`
 
-[\#][5] [Ⓣ][11]
+[\#][6] [Ⓣ][12]
 
 #### Types
 
@@ -138,7 +185,7 @@ The original arguments passed into the function being intercepted
 
 ### `object`
 
-[\#][6] [Ⓣ][11]
+[\#][7] [Ⓣ][12]
 
 #### Types
 
@@ -150,7 +197,7 @@ The reference to self for the original/called methd
 
 ### `method`
 
-[\#][7] [Ⓣ][11]
+[\#][8] [Ⓣ][12]
 
 #### Types
 
@@ -162,7 +209,7 @@ The method being intercepted
 
 ### `result`
 
-[\#][8] [Ⓣ][11]
+[\#][9] [Ⓣ][12]
 
 #### Types
 
@@ -174,7 +221,7 @@ The result of the method being intercepted
 
 ### `proceed`
 
-[\#][9] [Ⓣ][11]
+[\#][10] [Ⓣ][12]
 
 Calls the intercepted method
 
@@ -186,15 +233,16 @@ _(Function | Object)_ - of the result of the original method call
 
 
 
-[0]: #using
-[1]: #resolve
-[2]: #scarlet
-[3]: #intercept
-[4]: #loadplugin
-[5]: #args
-[6]: #object
-[7]: #method
-[8]: #result
-[9]: #proceed
-[10]: #interception-methods
-[11]: #invocation-attributes
+[0]: #interceptor
+[1]: #using
+[2]: #resolve
+[3]: #scarlet
+[4]: #intercept
+[5]: #loadplugin
+[6]: #args
+[7]: #object
+[8]: #method
+[9]: #result
+[10]: #proceed
+[11]: #interception-methods
+[12]: #invocation-attributes

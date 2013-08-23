@@ -28,7 +28,6 @@ function Scarlet(pluginArr) {
 
 	var self = this;
 	self.plugins = {};
-	self.interceptor = {};
 	self.lib = require("./index");
 
 	/**
@@ -48,85 +47,20 @@ function Scarlet(pluginArr) {
 	self.intercept = function(typeOrInstance, memberName) {
 
 		assert(typeOrInstance, "Cannot have null type or instance");
+		assert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');
 
 		var self = this;
 
 		var _interceptor = new self.lib.Interceptor(typeOrInstance);
 
+
 		if(typeOrInstance.hasOwnProperty(memberName))
-			self.interceptor = _interceptor.forMember(memberName);
-		else if (typeOrInstance.prototype)
-			self.interceptor =  _interceptor.forType();
-		else
-			self.interceptor = _interceptor.forObject();
+			return _interceptor.forMember(memberName);
+		
+		if (typeOrInstance.prototype)
+			return  _interceptor.forType();		
 
-		return self;
-	};
-
-
-	/**
-	 * Attach an interceptor to the type or instance.  Can be chained with multiple using clauses
-	 *
-	 * ####Example:
-	 *
-	 * ```javascript
-	 * function AnyObject() {};
-	 * function interceptor1(proceed) { proceed();}
-	 * function interceptor2(proceed) { proceed();}
-	 * 
-	 * scarlet.intercept(AnyObject) 
-	 *         .using(interceptor1) //->indicates the first interceptor to be called
-	 *         .using(interceptor2); //->indicates the second interceptor to be called
-	 *         
-	 * //-> AnyObject will now have the two interceptors attached
-	 * ```	
-	 * 
-	 * @category Interception Methods
-	 * @method using
-	 * @param {Function} targetMethod the method to call when the type or instance is intercepted
-	 * @param {Function} targetThisContext the reference to self/this to be used when calling the intercepotr
-	 * @chainable
-	 * @return {Function} A reference to the current interceptor(self)
-	 * 
-	**/
-	self.using = function(targetMethod,targetThisContext) {
-		assert(targetMethod, "Cannot have null target for interceptor");
-
-		if(!targetThisContext)
-			targetThisContext = self.interceptor;
-
-		self.interceptor.addTarget(targetMethod,targetThisContext);
-
-		return self;
-	};
-
-	/**
-	 * Provides the type or instance with the added intercepters. This is needed when intercepting a function.
-	 *
-	 * ####Example:
-	 *
-	 * ```javascript
-	 * function AnyObject() {};
-	 * 
-	 * AnyObject = scarlet.intercept(AnyObject)
-	 *                     .using(interceptor)
-	 *                     .resolve();
-	 *                     
-	 * //-> AnyObject will contain the **interceptor**
-	 * ```	
-	 *
-	 * @category Interception Methods
-	 * @method resolve
-	 * @return {Function} A reference to the function being intercepted
-	 * 
-	**/
-	self.resolve = function(){
-		return self.interceptor.proxiedInstance;
-	};
-
-	self.release = function() {
-		self.interceptor.proxy.unwrap();
-		return self;
+		return _interceptor.forObject();
 	};
 
 	/**
@@ -167,6 +101,7 @@ var Invocation = require("./invocation");
 var ProxyInstance = require("./proxy-instance");
 var ProxyPrototype = require("./proxy-prototype");
 var ProxyMember = require("./proxy-member");
+var Series = require("./extensions/series");
 
 function Interceptor(typeOrInstance) {
 
@@ -174,10 +109,8 @@ function Interceptor(typeOrInstance) {
 
 	var self = this;
 
-	self.targets = [];
 	self.proxy = null;
-	self.currentTarget = 0;
-	self.type = typeOrInstance;
+	self.series = new Series();
 	self.proxiedInstance = null;
 	self.instance = typeOrInstance;
 
@@ -202,6 +135,7 @@ function Interceptor(typeOrInstance) {
 		assert(memberName !== null, "When defining a member Interceptor must define a member property to intercept");
 
 		self.proxy = new ProxyMember(self.instance,memberName);
+
 		initProxy();
 		return self;
 	};
@@ -211,33 +145,131 @@ function Interceptor(typeOrInstance) {
 
 		self.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {
 
-
 			var _invocation = new Invocation(instance, method, args);
-
-			var next = function(error, result){
-
-
-				if(self.currentTarget >= self.targets.length){
-					self.currentTarget = 0;	
-					return _invocation.proceed();
-				}
-
-				var targetMethod = self.targets[self.currentTarget];
-				self.currentTarget++;
-				targetCall(targetMethod);
-
-				return _invocation.result;
-			};
-
-			var targetCall = function(target){
-				target.targetMethod.apply(target.targetThisContext,[next,_invocation]);
-			};
-
-			next();
+			self.series.invoke(_invocation,_invocation.proceed);
 
 			return _invocation.result;
-
 		});
+	};
+
+	/**
+	 * Attach an interceptor to the type or instance.  Can be chained with multiple using clauses
+	 *
+	 * ####Example:
+	 *
+	 * ```javascript
+	 * function AnyObject() {};
+	 * function interceptor1(proceed) { proceed();}
+	 * function interceptor2(proceed) { proceed();}
+	 * 
+	 * scarlet.intercept(AnyObject) 
+	 *         .using(interceptor1) //->indicates the first interceptor to be called
+	 *         .using(interceptor2); //->indicates the second interceptor to be called
+	 *         
+	 * //-> AnyObject will now have the two interceptors attached
+	 * ```	
+	 * 
+	 * @category Interception Methods
+	 * @method using
+	 * @param {Function} targetMethod the method to call when the type or instance is intercepted
+	 * @param {Function} targetThisContext the reference to self/this to be used when calling the intercepotr
+	 * @chainable
+	 * @return {Function} A reference to the current interceptor(self)
+	 * 
+	**/
+	self.using = function(targetMethod,targetThisContext) {
+		assert(targetMethod, "Cannot have null target for interceptor");
+
+		if(!targetThisContext)
+			targetThisContext = self;
+
+		self.series.addTarget(targetMethod,targetThisContext);
+
+		return self;
+	};
+
+	/**
+	 * Provides the type or instance with the added intercepters. This is needed when intercepting a function.
+	 *
+	 * ####Example:
+	 *
+	 * ```javascript
+	 * function AnyObject() {};
+	 * 
+	 * AnyObject = scarlet.intercept(AnyObject)
+	 *                     .using(interceptor)
+	 *                     .resolve();
+	 *                     
+	 * //-> AnyObject will contain the **interceptor**
+	 * ```	
+	 *
+	 * @category Interception Methods
+	 * @method resolve
+	 * @return {Function} A reference to the function being intercepted
+	 * 
+	**/
+	self.resolve = function(){
+		return self.proxiedInstance;
+	};
+
+	self.release = function() {
+		self.proxy.unwrap();
+		return self;
+	};
+
+}
+
+module.exports = Interceptor;
+},{"assert":4,"./invocation":6,"./proxy-instance":7,"./proxy-prototype":8,"./proxy-member":9,"./extensions/series":10}],10:[function(require,module,exports){
+function Series(){
+	var self = this;
+
+	self.targets = [];
+	self.onDone = null;
+
+	self.invoke = function(invocation,onAllTargetsCalled) {
+		var didComplete = false;
+
+		self.callAllTargets(invocation,function(){
+			if(!didComplete){
+				onAllTargetsCalled();
+				didComplete = true;
+			}
+
+			if(self.onDone)
+				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);
+		});
+
+		if(!didComplete){
+			onAllTargetsCalled();
+			didComplete = true;
+		}
+
+		return;
+	};
+
+	self.callAllTargets = function(invocation,onComplete) {
+		var currentTarget  = 0;
+
+		var next = function(error, result){
+			
+			if(currentTarget >= self.targets.length){
+				onComplete();
+				return;				
+			}
+
+			var targetMethod = self.targets[currentTarget];
+			currentTarget++;
+			targetCall(targetMethod);
+
+			return;
+		};
+
+		var targetCall = function(target){
+			target.targetMethod.apply(target.targetThisContext,[next,invocation]);
+		};
+
+		next();
 	};
 
 	self.addTarget = function(targetMethod,targetThisContext){
@@ -249,327 +281,77 @@ function Interceptor(typeOrInstance) {
 		self.targets.push(target);
 	};
 
+	self.addDone = function(targetMethod,targetThisContext){
+		var target = {
+			targetMethod : targetMethod,
+			targetThisContext : targetThisContext
+		};
+
+		self.onDone = target;
+	};
+	
 }
 
-module.exports = Interceptor;
-},{"assert":4,"./invocation":6,"./proxy-instance":7,"./proxy-prototype":8,"./proxy-member":9}],4:[function(require,module,exports){
-(function(){// UTILITY
-var util = require('util');
-var Buffer = require("buffer").Buffer;
-var pSlice = Array.prototype.slice;
+module.exports = Series;
+},{}],6:[function(require,module,exports){
+var assert = require("assert");
 
-function objectKeys(object) {
-  if (Object.keys) return Object.keys(object);
-  var result = [];
-  for (var name in object) {
-    if (Object.prototype.hasOwnProperty.call(object, name)) {
-      result.push(name);
-    }
-  }
-  return result;
+function Invocation(object, method, args) {
+
+	assert(args, "Scarlet::Invocation::args == null");
+	assert(object, "Scarlet::Invocation::object == null");
+	assert(method, "Scarlet::Invocation::method == null");
+
+	var self = this;
+
+	/**
+	 * The original arguments passed into the function being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object} - the argument object based into objects
+	 */
+	self.args = args;
+
+	/**
+	 * The reference to self for the original/called methd
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object}
+	 */
+	self.object = object;
+
+	/**
+	 * The method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Function}
+	 */
+	self.method = method;
+
+	/**
+	 * The result of the method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Any}
+	 */
+	self.result = null;
+
+	/**
+	 * Calls the intercepted method
+	 * 
+	 * @category Invocation Attributes
+     * @method proceed
+     * @return Function|Object of the result of the original method call
+     */
+	self.proceed = function() {
+		var parameters = Array.prototype.slice.call(args);
+		self.result = self.method.apply(self.object, parameters);
+		return self.result;
+	};
 }
 
-// 1. The assert module provides functions that throw
-// AssertionError's when particular conditions are not met. The
-// assert module must conform to the following interface.
-
-var assert = module.exports = ok;
-
-// 2. The AssertionError is defined in assert.
-// new assert.AssertionError({ message: message,
-//                             actual: actual,
-//                             expected: expected })
-
-assert.AssertionError = function AssertionError(options) {
-  this.name = 'AssertionError';
-  this.message = options.message;
-  this.actual = options.actual;
-  this.expected = options.expected;
-  this.operator = options.operator;
-  var stackStartFunction = options.stackStartFunction || fail;
-
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, stackStartFunction);
-  }
-};
-util.inherits(assert.AssertionError, Error);
-
-function replacer(key, value) {
-  if (value === undefined) {
-    return '' + value;
-  }
-  if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
-    return value.toString();
-  }
-  if (typeof value === 'function' || value instanceof RegExp) {
-    return value.toString();
-  }
-  return value;
-}
-
-function truncate(s, n) {
-  if (typeof s == 'string') {
-    return s.length < n ? s : s.slice(0, n);
-  } else {
-    return s;
-  }
-}
-
-assert.AssertionError.prototype.toString = function() {
-  if (this.message) {
-    return [this.name + ':', this.message].join(' ');
-  } else {
-    return [
-      this.name + ':',
-      truncate(JSON.stringify(this.actual, replacer), 128),
-      this.operator,
-      truncate(JSON.stringify(this.expected, replacer), 128)
-    ].join(' ');
-  }
-};
-
-// assert.AssertionError instanceof Error
-
-assert.AssertionError.__proto__ = Error.prototype;
-
-// At present only the three keys mentioned above are used and
-// understood by the spec. Implementations or sub modules can pass
-// other keys to the AssertionError's constructor - they will be
-// ignored.
-
-// 3. All of the following functions must throw an AssertionError
-// when a corresponding condition is not met, with a message that
-// may be undefined if not provided.  All assertion methods provide
-// both the actual and expected values to the assertion error for
-// display purposes.
-
-function fail(actual, expected, message, operator, stackStartFunction) {
-  throw new assert.AssertionError({
-    message: message,
-    actual: actual,
-    expected: expected,
-    operator: operator,
-    stackStartFunction: stackStartFunction
-  });
-}
-
-// EXTENSION! allows for well behaved errors defined elsewhere.
-assert.fail = fail;
-
-// 4. Pure assertion tests whether a value is truthy, as determined
-// by !!guard.
-// assert.ok(guard, message_opt);
-// This statement is equivalent to assert.equal(true, guard,
-// message_opt);. To test strictly for the value true, use
-// assert.strictEqual(true, guard, message_opt);.
-
-function ok(value, message) {
-  if (!!!value) fail(value, true, message, '==', assert.ok);
-}
-assert.ok = ok;
-
-// 5. The equality assertion tests shallow, coercive equality with
-// ==.
-// assert.equal(actual, expected, message_opt);
-
-assert.equal = function equal(actual, expected, message) {
-  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
-};
-
-// 6. The non-equality assertion tests for whether two objects are not equal
-// with != assert.notEqual(actual, expected, message_opt);
-
-assert.notEqual = function notEqual(actual, expected, message) {
-  if (actual == expected) {
-    fail(actual, expected, message, '!=', assert.notEqual);
-  }
-};
-
-// 7. The equivalence assertion tests a deep equality relation.
-// assert.deepEqual(actual, expected, message_opt);
-
-assert.deepEqual = function deepEqual(actual, expected, message) {
-  if (!_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
-  }
-};
-
-function _deepEqual(actual, expected) {
-  // 7.1. All identical values are equivalent, as determined by ===.
-  if (actual === expected) {
-    return true;
-
-  } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
-    if (actual.length != expected.length) return false;
-
-    for (var i = 0; i < actual.length; i++) {
-      if (actual[i] !== expected[i]) return false;
-    }
-
-    return true;
-
-  // 7.2. If the expected value is a Date object, the actual value is
-  // equivalent if it is also a Date object that refers to the same time.
-  } else if (actual instanceof Date && expected instanceof Date) {
-    return actual.getTime() === expected.getTime();
-
-  // 7.3. Other pairs that do not both pass typeof value == 'object',
-  // equivalence is determined by ==.
-  } else if (typeof actual != 'object' && typeof expected != 'object') {
-    return actual == expected;
-
-  // 7.4. For all other Object pairs, including Array objects, equivalence is
-  // determined by having the same number of owned properties (as verified
-  // with Object.prototype.hasOwnProperty.call), the same set of keys
-  // (although not necessarily the same order), equivalent values for every
-  // corresponding key, and an identical 'prototype' property. Note: this
-  // accounts for both named and indexed properties on Arrays.
-  } else {
-    return objEquiv(actual, expected);
-  }
-}
-
-function isUndefinedOrNull(value) {
-  return value === null || value === undefined;
-}
-
-function isArguments(object) {
-  return Object.prototype.toString.call(object) == '[object Arguments]';
-}
-
-function objEquiv(a, b) {
-  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
-    return false;
-  // an identical 'prototype' property.
-  if (a.prototype !== b.prototype) return false;
-  //~~~I've managed to break Object.keys through screwy arguments passing.
-  //   Converting to array solves the problem.
-  if (isArguments(a)) {
-    if (!isArguments(b)) {
-      return false;
-    }
-    a = pSlice.call(a);
-    b = pSlice.call(b);
-    return _deepEqual(a, b);
-  }
-  try {
-    var ka = objectKeys(a),
-        kb = objectKeys(b),
-        key, i;
-  } catch (e) {//happens when one is a string literal and the other isn't
-    return false;
-  }
-  // having the same number of owned properties (keys incorporates
-  // hasOwnProperty)
-  if (ka.length != kb.length)
-    return false;
-  //the same set of keys (although not necessarily the same order),
-  ka.sort();
-  kb.sort();
-  //~~~cheap key test
-  for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i])
-      return false;
-  }
-  //equivalent values for every corresponding key, and
-  //~~~possibly expensive deep test
-  for (i = ka.length - 1; i >= 0; i--) {
-    key = ka[i];
-    if (!_deepEqual(a[key], b[key])) return false;
-  }
-  return true;
-}
-
-// 8. The non-equivalence assertion tests for any deep inequality.
-// assert.notDeepEqual(actual, expected, message_opt);
-
-assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-  if (_deepEqual(actual, expected)) {
-    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
-  }
-};
-
-// 9. The strict equality assertion tests strict equality, as determined by ===.
-// assert.strictEqual(actual, expected, message_opt);
-
-assert.strictEqual = function strictEqual(actual, expected, message) {
-  if (actual !== expected) {
-    fail(actual, expected, message, '===', assert.strictEqual);
-  }
-};
-
-// 10. The strict non-equality assertion tests for strict inequality, as
-// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
-
-assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
-  if (actual === expected) {
-    fail(actual, expected, message, '!==', assert.notStrictEqual);
-  }
-};
-
-function expectedException(actual, expected) {
-  if (!actual || !expected) {
-    return false;
-  }
-
-  if (expected instanceof RegExp) {
-    return expected.test(actual);
-  } else if (actual instanceof expected) {
-    return true;
-  } else if (expected.call({}, actual) === true) {
-    return true;
-  }
-
-  return false;
-}
-
-function _throws(shouldThrow, block, expected, message) {
-  var actual;
-
-  if (typeof expected === 'string') {
-    message = expected;
-    expected = null;
-  }
-
-  try {
-    block();
-  } catch (e) {
-    actual = e;
-  }
-
-  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
-            (message ? ' ' + message : '.');
-
-  if (shouldThrow && !actual) {
-    fail('Missing expected exception' + message);
-  }
-
-  if (!shouldThrow && expectedException(actual, expected)) {
-    fail('Got unwanted exception' + message);
-  }
-
-  if ((shouldThrow && actual && expected &&
-      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
-    throw actual;
-  }
-}
-
-// 11. Expected to throw an error:
-// assert.throws(block, Error_opt, message_opt);
-
-assert.throws = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [true].concat(pSlice.call(arguments)));
-};
-
-// EXTENSION! This is annoying to write outside this module.
-assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
-  _throws.apply(this, [false].concat(pSlice.call(arguments)));
-};
-
-assert.ifError = function(err) { if (err) {throw err;}};
-
-})()
-},{"util":10,"buffer":11}],10:[function(require,module,exports){
+module.exports = Invocation;
+},{"assert":4}],11:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -922,65 +704,594 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":12}],6:[function(require,module,exports){
-var assert = require("assert");
+},{"events":12}],4:[function(require,module,exports){
+(function(){// UTILITY
+var util = require('util');
+var Buffer = require("buffer").Buffer;
+var pSlice = Array.prototype.slice;
 
-function Invocation(object, method, args) {
+function objectKeys(object) {
+  if (Object.keys) return Object.keys(object);
+  var result = [];
+  for (var name in object) {
+    if (Object.prototype.hasOwnProperty.call(object, name)) {
+      result.push(name);
+    }
+  }
+  return result;
+}
 
-	assert(args, "Scarlet::Invocation::args == null");
-	assert(object, "Scarlet::Invocation::object == null");
-	assert(method, "Scarlet::Invocation::method == null");
+// 1. The assert module provides functions that throw
+// AssertionError's when particular conditions are not met. The
+// assert module must conform to the following interface.
+
+var assert = module.exports = ok;
+
+// 2. The AssertionError is defined in assert.
+// new assert.AssertionError({ message: message,
+//                             actual: actual,
+//                             expected: expected })
+
+assert.AssertionError = function AssertionError(options) {
+  this.name = 'AssertionError';
+  this.message = options.message;
+  this.actual = options.actual;
+  this.expected = options.expected;
+  this.operator = options.operator;
+  var stackStartFunction = options.stackStartFunction || fail;
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, stackStartFunction);
+  }
+};
+util.inherits(assert.AssertionError, Error);
+
+function replacer(key, value) {
+  if (value === undefined) {
+    return '' + value;
+  }
+  if (typeof value === 'number' && (isNaN(value) || !isFinite(value))) {
+    return value.toString();
+  }
+  if (typeof value === 'function' || value instanceof RegExp) {
+    return value.toString();
+  }
+  return value;
+}
+
+function truncate(s, n) {
+  if (typeof s == 'string') {
+    return s.length < n ? s : s.slice(0, n);
+  } else {
+    return s;
+  }
+}
+
+assert.AssertionError.prototype.toString = function() {
+  if (this.message) {
+    return [this.name + ':', this.message].join(' ');
+  } else {
+    return [
+      this.name + ':',
+      truncate(JSON.stringify(this.actual, replacer), 128),
+      this.operator,
+      truncate(JSON.stringify(this.expected, replacer), 128)
+    ].join(' ');
+  }
+};
+
+// assert.AssertionError instanceof Error
+
+assert.AssertionError.__proto__ = Error.prototype;
+
+// At present only the three keys mentioned above are used and
+// understood by the spec. Implementations or sub modules can pass
+// other keys to the AssertionError's constructor - they will be
+// ignored.
+
+// 3. All of the following functions must throw an AssertionError
+// when a corresponding condition is not met, with a message that
+// may be undefined if not provided.  All assertion methods provide
+// both the actual and expected values to the assertion error for
+// display purposes.
+
+function fail(actual, expected, message, operator, stackStartFunction) {
+  throw new assert.AssertionError({
+    message: message,
+    actual: actual,
+    expected: expected,
+    operator: operator,
+    stackStartFunction: stackStartFunction
+  });
+}
+
+// EXTENSION! allows for well behaved errors defined elsewhere.
+assert.fail = fail;
+
+// 4. Pure assertion tests whether a value is truthy, as determined
+// by !!guard.
+// assert.ok(guard, message_opt);
+// This statement is equivalent to assert.equal(true, guard,
+// message_opt);. To test strictly for the value true, use
+// assert.strictEqual(true, guard, message_opt);.
+
+function ok(value, message) {
+  if (!!!value) fail(value, true, message, '==', assert.ok);
+}
+assert.ok = ok;
+
+// 5. The equality assertion tests shallow, coercive equality with
+// ==.
+// assert.equal(actual, expected, message_opt);
+
+assert.equal = function equal(actual, expected, message) {
+  if (actual != expected) fail(actual, expected, message, '==', assert.equal);
+};
+
+// 6. The non-equality assertion tests for whether two objects are not equal
+// with != assert.notEqual(actual, expected, message_opt);
+
+assert.notEqual = function notEqual(actual, expected, message) {
+  if (actual == expected) {
+    fail(actual, expected, message, '!=', assert.notEqual);
+  }
+};
+
+// 7. The equivalence assertion tests a deep equality relation.
+// assert.deepEqual(actual, expected, message_opt);
+
+assert.deepEqual = function deepEqual(actual, expected, message) {
+  if (!_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'deepEqual', assert.deepEqual);
+  }
+};
+
+function _deepEqual(actual, expected) {
+  // 7.1. All identical values are equivalent, as determined by ===.
+  if (actual === expected) {
+    return true;
+
+  } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
+    if (actual.length != expected.length) return false;
+
+    for (var i = 0; i < actual.length; i++) {
+      if (actual[i] !== expected[i]) return false;
+    }
+
+    return true;
+
+  // 7.2. If the expected value is a Date object, the actual value is
+  // equivalent if it is also a Date object that refers to the same time.
+  } else if (actual instanceof Date && expected instanceof Date) {
+    return actual.getTime() === expected.getTime();
+
+  // 7.3. Other pairs that do not both pass typeof value == 'object',
+  // equivalence is determined by ==.
+  } else if (typeof actual != 'object' && typeof expected != 'object') {
+    return actual == expected;
+
+  // 7.4. For all other Object pairs, including Array objects, equivalence is
+  // determined by having the same number of owned properties (as verified
+  // with Object.prototype.hasOwnProperty.call), the same set of keys
+  // (although not necessarily the same order), equivalent values for every
+  // corresponding key, and an identical 'prototype' property. Note: this
+  // accounts for both named and indexed properties on Arrays.
+  } else {
+    return objEquiv(actual, expected);
+  }
+}
+
+function isUndefinedOrNull(value) {
+  return value === null || value === undefined;
+}
+
+function isArguments(object) {
+  return Object.prototype.toString.call(object) == '[object Arguments]';
+}
+
+function objEquiv(a, b) {
+  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
+    return false;
+  // an identical 'prototype' property.
+  if (a.prototype !== b.prototype) return false;
+  //~~~I've managed to break Object.keys through screwy arguments passing.
+  //   Converting to array solves the problem.
+  if (isArguments(a)) {
+    if (!isArguments(b)) {
+      return false;
+    }
+    a = pSlice.call(a);
+    b = pSlice.call(b);
+    return _deepEqual(a, b);
+  }
+  try {
+    var ka = objectKeys(a),
+        kb = objectKeys(b),
+        key, i;
+  } catch (e) {//happens when one is a string literal and the other isn't
+    return false;
+  }
+  // having the same number of owned properties (keys incorporates
+  // hasOwnProperty)
+  if (ka.length != kb.length)
+    return false;
+  //the same set of keys (although not necessarily the same order),
+  ka.sort();
+  kb.sort();
+  //~~~cheap key test
+  for (i = ka.length - 1; i >= 0; i--) {
+    if (ka[i] != kb[i])
+      return false;
+  }
+  //equivalent values for every corresponding key, and
+  //~~~possibly expensive deep test
+  for (i = ka.length - 1; i >= 0; i--) {
+    key = ka[i];
+    if (!_deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
+
+// 8. The non-equivalence assertion tests for any deep inequality.
+// assert.notDeepEqual(actual, expected, message_opt);
+
+assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
+  if (_deepEqual(actual, expected)) {
+    fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
+  }
+};
+
+// 9. The strict equality assertion tests strict equality, as determined by ===.
+// assert.strictEqual(actual, expected, message_opt);
+
+assert.strictEqual = function strictEqual(actual, expected, message) {
+  if (actual !== expected) {
+    fail(actual, expected, message, '===', assert.strictEqual);
+  }
+};
+
+// 10. The strict non-equality assertion tests for strict inequality, as
+// determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
+
+assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
+  if (actual === expected) {
+    fail(actual, expected, message, '!==', assert.notStrictEqual);
+  }
+};
+
+function expectedException(actual, expected) {
+  if (!actual || !expected) {
+    return false;
+  }
+
+  if (expected instanceof RegExp) {
+    return expected.test(actual);
+  } else if (actual instanceof expected) {
+    return true;
+  } else if (expected.call({}, actual) === true) {
+    return true;
+  }
+
+  return false;
+}
+
+function _throws(shouldThrow, block, expected, message) {
+  var actual;
+
+  if (typeof expected === 'string') {
+    message = expected;
+    expected = null;
+  }
+
+  try {
+    block();
+  } catch (e) {
+    actual = e;
+  }
+
+  message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
+            (message ? ' ' + message : '.');
+
+  if (shouldThrow && !actual) {
+    fail('Missing expected exception' + message);
+  }
+
+  if (!shouldThrow && expectedException(actual, expected)) {
+    fail('Got unwanted exception' + message);
+  }
+
+  if ((shouldThrow && actual && expected &&
+      !expectedException(actual, expected)) || (!shouldThrow && actual)) {
+    throw actual;
+  }
+}
+
+// 11. Expected to throw an error:
+// assert.throws(block, Error_opt, message_opt);
+
+assert.throws = function(block, /*optional*/error, /*optional*/message) {
+  _throws.apply(this, [true].concat(pSlice.call(arguments)));
+};
+
+// EXTENSION! This is annoying to write outside this module.
+assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
+  _throws.apply(this, [false].concat(pSlice.call(arguments)));
+};
+
+assert.ifError = function(err) { if (err) {throw err;}};
+
+})()
+},{"util":11,"buffer":13}],5:[function(require,module,exports){
+module.exports = {
+	Util: require("util"),
+	Assert: require("assert"),
+	Plugins: require("./plugins"),
+	Invocation: require("./invocation"),
+	Interceptor: require("./interceptor"),
+	ProxyInstance: require("./proxy-instance"),
+	ProxyPrototype: require("./proxy-prototype"),
+	Enumerable: require("./extensions/enumerable")
+};
+
+
+},{"util":11,"assert":4,"./plugins":14,"./invocation":6,"./interceptor":3,"./proxy-instance":7,"./proxy-prototype":8,"./extensions/enumerable":15}],7:[function(require,module,exports){
+var ProxyMember = require("./proxy-member");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyInstance(instance) {
 
 	var self = this;
 
-	/**
-	 * The original arguments passed into the function being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Object} - the argument object based into objects
-	 */
-	self.args = args;
+	self.instance = instance;
 
-	/**
-	 * The reference to self for the original/called methd
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Object}
-	 */
-	self.object = object;
+	self.whenCalled = function(target) {
+		if (!instance.__scarlet) {
 
-	/**
-	 * The method being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Function}
-	 */
-	self.method = method;
+			instance.__scarlet = {};
 
-	/**
-	 * The result of the method being intercepted
-	 * 
-	 * @category Invocation Attributes
-	 * @type {Any}
-	 */
-	self.result = null;
+			enumerable.forEach(instance, function(member, memberName) {
+				var proxy = new ProxyMember(instance,memberName);
+				proxy.whenCalled(target);
+			});
+		}
 
-	/**
-	 * Calls the intercepted method
-	 * 
-	 * @category Invocation Attributes
-     * @method proceed
-     * @return Function|Object of the result of the original method call
-     */
-	self.proceed = function() {
-		var parameters = Array.prototype.slice.call(args);
-		self.result = self.method.apply(self.object, parameters);
-		return self.result;
+		return instance;
 	};
+
+	self.unwrap = function() {
+
+		if (instance.__scarlet) {
+
+			enumerable.forEach(instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = instance.__scarlet[memberName];
+					instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
 }
 
-module.exports = Invocation;
-},{"assert":4}],13:[function(require,module,exports){
+module.exports = ProxyInstance;
+},{"./proxy-member":9,"./extensions/enumerable":15}],8:[function(require,module,exports){
+var assert = require("assert");
+var ProxyInstance = require("./proxy-instance");
+var inherits = require("./extensions/inherits");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyPrototype(instance) {
+
+	var self = this;
+
+	self.inheritedType = null;
+	self.instance = instance;
+
+	self.whenCalled = function(target) {
+
+		assert(instance, "Scarlet::Interceptor::type == null");
+		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
+
+		self.inheritedType = function(){
+
+			var self = this;
+
+			(function() {
+
+				var interceptorTypeConstructor = function(){
+					var parameters = Array.prototype.slice.call(arguments);
+					if(instance.apply)
+						instance.apply(self,parameters);
+
+					var proxy = new ProxyInstance(self);
+					proxy.whenCalled(target);
+				};
+
+				return target(self,interceptorTypeConstructor,arguments);
+
+			}());
+
+		};
+
+		inherits(self.inheritedType, instance);
+
+		return self.inheritedType;
+		
+	};
+
+	self.unwrap = function() {};
+
+	return self;
+
+}
+
+module.exports = ProxyPrototype;
+
+},{"assert":4,"./proxy-instance":7,"./extensions/inherits":16,"./extensions/enumerable":15}],9:[function(require,module,exports){
+var enumerable = require("./extensions/enumerable");
+
+
+function ProxyMember(instance, memberName) {
+
+	var self = this;
+
+	if(!instance.__scarlet)
+		instance.__scarlet = {};
+
+	self.whenCalled = function(target) {
+
+		instance.__scarlet[memberName] = instance[memberName];
+
+		createPropertyProxy(instance[memberName], memberName, target);
+
+		createFunctionProxy(instance[memberName], memberName, target);
+
+		return instance;
+
+	};
+
+	var createPropertyProxy = function(member,memberName,target){
+		if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
+
+			instance[memberName] = Object.defineProperty(instance, memberName, {
+
+				configurable: true,
+
+				get: function(){
+					return target(instance,function(){
+						return instance.__scarlet[memberName];
+					}, instance.__scarlet[memberName]);
+				},
+				
+				set: function(value){
+					target(instance,function(){
+						instance.__scarlet[memberName] = value;	
+					}, value);
+				}
+				
+			});
+		} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
+			instance.__typename = instance.__scarlet.__typename;
+		}
+	};
+
+	var createFunctionProxy = function(member,memberName,target){
+		if (member instanceof(Function)) {
+			var originalMethod = instance.__scarlet[memberName];
+			
+			instance[memberName] = function() {
+				return target(instance,instance.__scarlet[memberName], arguments);
+			};
+		}
+	};
+
+	self.unwrap = function() {
+
+		if (instance.__scarlet) {
+
+			enumerable.forEach(instance, function(member, memberName) {
+
+				if (member instanceof Function) {
+					var originalMethod = instance.__scarlet[memberName];
+					instance[memberName] = originalMethod;
+				}
+
+			});
+		}
+
+	};
+
+	return self;
+}
+
+module.exports = ProxyMember;
+},{"./extensions/enumerable":15}],15:[function(require,module,exports){
+function Enumerable() {
+
+	var self = this;
+
+	self.arrayFor = function(array, callback) {
+		for (var i = 0; i < array.length; i++) {
+			callback(array[i], i, array);
+		}
+	};
+
+	self.funcFor = function(object, callback) {
+		for (var key in object) {
+			callback(object[key], key, object);
+		}
+	};
+
+	self.stringFor = function(string, callback) {
+		self.arrayFor(string.split(""), function(chr, index) {
+			callback(chr, index, string);
+		});
+	};
+
+	self.allEach = function(object, callback) {
+		Object.getOwnPropertyNames(object).forEach(function(property) {
+			callback(object[property], property, object);
+		});
+	};
+
+	self.forEach = function(object, callback) {
+		if (object) {
+			var resolve = self.funcFor;
+			if (object instanceof Function) {
+				resolve = self.funcFor;
+			} else if (typeof object == "string") {
+				resolve = self.stringFor;
+			} else if (typeof object.length == "number") {
+				resolve = self.arrayFor;
+			}
+			resolve(object, callback);
+		}
+	};
+
+}
+
+module.exports = new Enumerable();
+},{}],16:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+};
+},{}],14:[function(require,module,exports){
+(function(__dirname){var path = require("path");
+var assert = require("assert");
+
+function Plugins() {
+
+	var self = this;
+	
+	self.loadPlugin = function($scarlet, pluginPath) {
+
+		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
+		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+
+		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
+		var plugin = require(fullPath);
+
+		pluginObject = new plugin($scarlet);
+		pluginObject.initialize();
+
+	};
+
+}
+
+module.exports = new Plugins();
+})("/lib")
+},{"path":17,"assert":4}],18:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -1220,240 +1531,185 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":13}],5:[function(require,module,exports){
-module.exports = {
-	Util: require("util"),
-	Assert: require("assert"),
-	Plugins: require("./plugins"),
-	Invocation: require("./invocation"),
-	Interceptor: require("./interceptor"),
-	ProxyInstance: require("./proxy-instance"),
-	ProxyPrototype: require("./proxy-prototype"),
-	Enumerable: require("./extensions/enumerable")
+},{"__browserify_process":18}],17:[function(require,module,exports){
+(function(process){function filter (xs, fn) {
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (fn(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length; i >= 0; i--) {
+    var last = parts[i];
+    if (last == '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Regex to split a filename into [*, dir, basename, ext]
+// posix version
+var splitPathRe = /^(.+\/(?!$)|\/)?((?:.+?)?(\.[^.]*)?)$/;
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+var resolvedPath = '',
+    resolvedAbsolute = false;
+
+for (var i = arguments.length; i >= -1 && !resolvedAbsolute; i--) {
+  var path = (i >= 0)
+      ? arguments[i]
+      : process.cwd();
+
+  // Skip empty and invalid entries
+  if (typeof path !== 'string' || !path) {
+    continue;
+  }
+
+  resolvedPath = path + '/' + resolvedPath;
+  resolvedAbsolute = path.charAt(0) === '/';
+}
+
+// At this point the path should be resolved to a full absolute path, but
+// handle relative paths to be safe (might happen when process.cwd() fails)
+
+// Normalize the path
+resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+var isAbsolute = path.charAt(0) === '/',
+    trailingSlash = path.slice(-1) === '/';
+
+// Normalize the path
+path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+  
+  return (isAbsolute ? '/' : '') + path;
 };
 
 
-},{"util":10,"assert":4,"./plugins":14,"./invocation":6,"./interceptor":3,"./proxy-instance":7,"./proxy-prototype":8,"./extensions/enumerable":15}],7:[function(require,module,exports){
-var ProxyMember = require("./proxy-member");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyInstance(instance) {
-
-	var self = this;
-
-	self.instance = instance;
-
-	self.whenCalled = function(target) {
-		if (!instance.__scarlet) {
-
-			instance.__scarlet = {};
-
-			enumerable.forEach(instance, function(member, memberName) {
-				var proxy = new ProxyMember(instance,memberName);
-				proxy.whenCalled(target);
-			});
-		}
-
-		return instance;
-	};
-
-	self.unwrap = function() {
-
-		if (instance.__scarlet) {
-
-			enumerable.forEach(instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = instance.__scarlet[memberName];
-					instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-}
-
-module.exports = ProxyInstance;
-},{"./proxy-member":9,"./extensions/enumerable":15}],8:[function(require,module,exports){
-var assert = require("assert");
-var ProxyInstance = require("./proxy-instance");
-var inherits = require("./extensions/inherits");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyPrototype(instance) {
-
-	var self = this;
-
-	self.inheritedType = null;
-	self.instance = instance;
-
-	self.whenCalled = function(target) {
-
-		assert(instance, "Scarlet::Interceptor::type == null");
-		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
-
-		self.inheritedType = function(){
-
-			var self = this;
-
-			(function() {
-
-				var interceptorTypeConstructor = function(){
-					var parameters = Array.prototype.slice.call(arguments);
-					if(instance.apply)
-						instance.apply(self,parameters);
-
-					var proxy = new ProxyInstance(self);
-					proxy.whenCalled(target);
-				};
-
-				return target(self,interceptorTypeConstructor,arguments);
-
-			}());
-
-		};
-
-		inherits(self.inheritedType, instance);
-
-		return self.inheritedType;
-		
-	};
-
-	self.unwrap = function() {};
-
-	return self;
-
-}
-
-module.exports = ProxyPrototype;
-
-},{"assert":4,"./proxy-instance":7,"./extensions/inherits":16,"./extensions/enumerable":15}],9:[function(require,module,exports){
-var enumerable = require("./extensions/enumerable");
-
-
-function ProxyMember(instance, memberName) {
-
-	var self = this;
-
-	if(!instance.__scarlet)
-		instance.__scarlet = {};
-
-	self.whenCalled = function(target) {
-
-		instance.__scarlet[memberName] = instance[memberName];
-
-		createPropertyProxy(instance[memberName], memberName, target);
-
-		createFunctionProxy(instance[memberName], memberName, target);
-
-		return instance;
-
-	};
-
-	var createPropertyProxy = function(member,memberName,target){
-		if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
-
-			instance[memberName] = Object.defineProperty(instance, memberName, {
-
-				configurable: true,
-
-				get: function(){
-					return target(instance,function(){
-						return instance.__scarlet[memberName];
-					}, instance.__scarlet[memberName]);
-				},
-				
-				set: function(value){
-					target(instance,function(){
-						instance.__scarlet[memberName] = value;	
-					}, value);
-				}
-				
-			});
-		} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
-			instance.__typename = instance.__scarlet.__typename;
-		}
-	};
-
-	var createFunctionProxy = function(member,memberName,target){
-		if (member instanceof(Function)) {
-			var originalMethod = instance.__scarlet[memberName];
-			
-			instance[memberName] = function() {
-				return target(instance,instance.__scarlet[memberName], arguments);
-			};
-		}
-	};
-
-	self.unwrap = function() {
-
-		if (instance.__scarlet) {
-
-			enumerable.forEach(instance, function(member, memberName) {
-
-				if (member instanceof Function) {
-					var originalMethod = instance.__scarlet[memberName];
-					instance[memberName] = originalMethod;
-				}
-
-			});
-		}
-
-	};
-
-	return self;
-}
-
-module.exports = ProxyMember;
-},{"./extensions/enumerable":15}],15:[function(require,module,exports){
-function Enumerable() {
-
-	var self = this;
-
-	self.arrayFor = function(array, callback) {
-		for (var i = 0; i < array.length; i++) {
-			callback(array[i], i, array);
-		}
-	};
-
-	self.funcFor = function(object, callback) {
-		for (var key in object) {
-			callback(object[key], key, object);
-		}
-	};
-
-	self.stringFor = function(string, callback) {
-		self.arrayFor(string.split(""), function(chr, index) {
-			callback(chr, index, string);
-		});
-	};
-
-	self.allEach = function(object, callback) {
-		Object.getOwnPropertyNames(object).forEach(function(property) {
-			callback(object[property], property, object);
-		});
-	};
-
-	self.forEach = function(object, callback) {
-		if (object) {
-			var resolve = self.funcFor;
-			if (object instanceof Function) {
-				resolve = self.funcFor;
-			} else if (typeof object == "string") {
-				resolve = self.stringFor;
-			} else if (typeof object.length == "number") {
-				resolve = self.arrayFor;
-			}
-			resolve(object, callback);
-		}
-	};
-
-}
-
-module.exports = new Enumerable();
-},{}],17:[function(require,module,exports){
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    return p && typeof p === 'string';
+  }).join('/'));
+};
+
+
+exports.dirname = function(path) {
+  var dir = splitPathRe.exec(path)[1] || '';
+  var isWindows = false;
+  if (!dir) {
+    // No dirname
+    return '.';
+  } else if (dir.length === 1 ||
+      (isWindows && dir.length <= 3 && dir.charAt(1) === ':')) {
+    // It is just a slash or a drive letter with a slash
+    return dir;
+  } else {
+    // It is a full dirname, strip trailing slash
+    return dir.substring(0, dir.length - 1);
+  }
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPathRe.exec(path)[2] || '';
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPathRe.exec(path)[3] || '';
+};
+
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+})(require("__browserify_process"))
+},{"__browserify_process":18}],19:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1539,44 +1795,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],14:[function(require,module,exports){
-(function(__dirname){var path = require("path");
-var assert = require("assert");
-
-function Plugins() {
-
-	var self = this;
-	
-	self.loadPlugin = function($scarlet, pluginPath) {
-
-		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
-		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
-
-		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
-
-		pluginObject = new plugin($scarlet);
-		pluginObject.initialize();
-
-	};
-
-}
-
-module.exports = new Plugins();
-})("/lib")
-},{"path":18,"assert":4}],16:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -2660,185 +2879,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"assert":4,"./buffer_ieee754":17,"base64-js":19}],18:[function(require,module,exports){
-(function(process){function filter (xs, fn) {
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (fn(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length; i >= 0; i--) {
-    var last = parts[i];
-    if (last == '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Regex to split a filename into [*, dir, basename, ext]
-// posix version
-var splitPathRe = /^(.+\/(?!$)|\/)?((?:.+?)?(\.[^.]*)?)$/;
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-var resolvedPath = '',
-    resolvedAbsolute = false;
-
-for (var i = arguments.length; i >= -1 && !resolvedAbsolute; i--) {
-  var path = (i >= 0)
-      ? arguments[i]
-      : process.cwd();
-
-  // Skip empty and invalid entries
-  if (typeof path !== 'string' || !path) {
-    continue;
-  }
-
-  resolvedPath = path + '/' + resolvedPath;
-  resolvedAbsolute = path.charAt(0) === '/';
-}
-
-// At this point the path should be resolved to a full absolute path, but
-// handle relative paths to be safe (might happen when process.cwd() fails)
-
-// Normalize the path
-resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-var isAbsolute = path.charAt(0) === '/',
-    trailingSlash = path.slice(-1) === '/';
-
-// Normalize the path
-path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-  
-  return (isAbsolute ? '/' : '') + path;
-};
-
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    return p && typeof p === 'string';
-  }).join('/'));
-};
-
-
-exports.dirname = function(path) {
-  var dir = splitPathRe.exec(path)[1] || '';
-  var isWindows = false;
-  if (!dir) {
-    // No dirname
-    return '.';
-  } else if (dir.length === 1 ||
-      (isWindows && dir.length <= 3 && dir.charAt(1) === ':')) {
-    // It is just a slash or a drive letter with a slash
-    return dir;
-  } else {
-    // It is a full dirname, strip trailing slash
-    return dir.substring(0, dir.length - 1);
-  }
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPathRe.exec(path)[2] || '';
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPathRe.exec(path)[3] || '';
-};
-
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-})(require("__browserify_process"))
-},{"__browserify_process":13}],19:[function(require,module,exports){
+},{"assert":4,"./buffer_ieee754":19,"base64-js":20}],20:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 

@@ -33,14 +33,13 @@ describe("Given we are intercepting", function() {
 		method2WasCalled = false;
 	});
 
-	describe("When interceptor has an asynchronous call", function(done) {
+	describe("When interceptor has an asynchronous call", function() {
 		var asyncInterceptorWasCalled = false;
 
 		function asyncInterceptor(proceed,invocation) {
 			setTimeout(function() {
 				proceed();
 				asyncInterceptorWasCalled = true;
-				done();	
 
 			}, 1);
 		};
@@ -51,7 +50,7 @@ describe("Given we are intercepting", function() {
 			.intercept(instance)
 			.using(asyncInterceptor);
 		
-		it("Then should be able to intercept", function() {
+		it("Then should be able to intercept", function(done) {
 			var result = instance.methodWithReturn();
 
 			setTimeout(function() {
@@ -61,9 +60,10 @@ describe("Given we are intercepting", function() {
 
 		});
 
-		it("Then should be able to intercept", function() {
+		it("Then should be able to intercept", function(done) {
 			var result = instance.methodWithReturn();
 			assert(result === "any");
+			done();
 		});
 
 	});

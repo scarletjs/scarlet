@@ -18,12 +18,14 @@ The simple fast javascript interceptor for methods and properties.
 var scarlet = require('scarlet');
 
 //Tell scarlet to start intercepting
-scarlet.intercept(Math,"max")
-        .using(function(proceed){ //->Create a interceptor function with a callback function
+scarlet.intercept(Math,"min")
+        .using(function(proceed){ //->Create a interceptor function
             proceed(); 
         });
-
-//-> when Math.max() gets called the interceptor will get called first and then **proceed** to Math.max function
+        
+Math.min(1,2,3);
+//-> 1. interceptor will get called
+//-> 2. Math.min will be called as normal and will return 1
 
 ```
 
@@ -32,16 +34,15 @@ See [Simple Example for full code](#simple-node-example)
 ### What does Scarlet call when?
 ```
 -->someFunction  //call to main method
-            |
-            |
-            -->interceptor //before method starts executing the interceptor gets called
+        |
+        |
+        -->interceptor //before method starts
+                |
+                |
+                -->someFunction //after the interceptor **proceeds**
                         |
                         |
-                        -->someFunction //after the interceptor **proceeds** it calls the main method
-                                    |
-                                    |
-                                    -->interceptor // interceptor gets called with the result of the main method
-
+                        -->interceptor // interceptor gets main method results
 ``` 
 
 ## Project Purpose
@@ -56,6 +57,73 @@ This project focuses on the following foundations:
 * Simple straightforward API
 * Browser compatible
 * Clean Code
+
+## Why you should choose Scarlet?
+
+Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly integrate aop interception into your application, framework, or method.
+
+One of the main benefits is that you can intercept all **enumerable** members for an object as follows:
+
+```javascript
+function someFunction(){
+	var self = this;
+    
+	self.memberFunction1 = function(){};
+	self.memberFunction1 = function(){};
+}
+
+scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercepted
+		.using(someInterceptor);
+```
+This stops you from writing each member when setting up an interceptor. It allows you to change *someFunction* and not have to change the interceptor definition; this is especially nice for logging all method calls in an object.
+
+Another benefit of using Scarlet is it allows you to create **asynchronous** interceptors on **synchronous** calls without having to change a method to contain a callback. here is an example
+
+```javascript
+function asyncInterceptor(proceed){
+	setTimeout(function(){ 
+        console.log("completed long running function");
+        
+        proceed(); //-> proceeds to the next interceptor if one exists
+     }, 10);
+}
+
+scarlet.intercept(Math,"min")
+        .using(asyncInterceptor);
+        
+var min = Math.min(1,2,3); //-> will return 1;
+//-> 10 ms laster --> outputs "completed long running function"
+```
+
+Finally it provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
+
+* result -> result of the method called (populated after main method gets called)
+* args -> the arguments passed into the method
+* object -> the *this* context of the called method
+
+Here is an example of how to get result and args from the invocation object:
+
+```javascript
+function someInterceptor(proceed, invocation){
+	proceed();
+    
+    console.log("intercepted method returned:"+invocation.result);
+    
+    var parameters = Array.prototype.slice.call(invocation.args);
+    console.log("given the following parameters:["+parameters+"]");
+}
+
+scarlet.intercept(Math,'min')
+		.using(someInterceptor);
+
+Math.min(1,2,3);
+//-> 1. interceptor called
+//-> 2. Math.min will be called as normal and will return 1
+//-> 3. Outputs --> "intercepted method returned:1"
+//-> 4. Outputs --> "given the following parameters:[1,2,3]"
+```
+
+These are just of couple of the reasons why **Scarlet** was written and why you should use it.
 
 ## Performance
 
@@ -90,7 +158,69 @@ scarlet.intercept(someFunction)
 //-> someFunction will now have the interceptors
 ```
 
-### Simple Browser Example
+### Multiple Interceptor
+
+```javascript
+var scarlet = require('scarlet');
+
+function interceptor1(proceed){ proceed(); }
+function interceptor2(proceed){ proceed(); }
+
+scarlet.intercept(Math,"min")
+        .using(interceptor1);
+        .using(interceptor2);
+        
+var min = Math.min(1,2,3);
+//-> 1. interceptor1 called
+//-> 2. interceptor2 called
+//-> Math.min called and returns result
+```
+
+### Async Interceptor
+
+```javascript
+var scarlet = require('scarlet');
+
+function asyncInterceptor(proceed){
+	setTimeout(function(){ 
+        console.log("completed long running function");
+        
+        proceed(); //-> proceeds to the next interceptor if one exists
+     }, 10);
+}
+
+scarlet.intercept(Math,"min")
+        .using(asyncInterceptor);
+        
+var min = Math.min(1,2,3); //-> will return 1;
+//-> 10 ms laster --> outputs "completed long running function"
+```
+
+### Using the invocation object
+
+```javascript
+var scarlet = require('scarlet');
+
+function someInterceptor(proceed, invocation){
+	proceed();
+    
+    console.log("intercepted method returned::"+invocation.result);
+    
+    var paramaters = Array.prototype.slice.call(invocation.args);
+    console.log("given the following paramaters:["+paramaters+"]");
+}
+
+scarlet.intercept(Math,'min')
+		.using(someInterceptor);
+
+Math.min(1,2,3);
+//-> 1. interceptor called
+//-> 2. Math.min will be called as normal and will return 1
+//-> 3. Outputs --> "intercepted method returned:1"
+//-> 4. Outputs --> "given the following paramaters:[1,2,3]"
+```
+
+### Browser Example
 
 Grab scarlet.js from the dist/scarlet.js.  Place it in your web pages javascript directory(js/) and start using.
 

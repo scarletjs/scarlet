@@ -33,6 +33,68 @@ describe("Given we are intercepting", function() {
 		method2WasCalled = false;
 	});
 
+	describe("When using interceptor events", function() {
+
+		var doneEventWasCalled = false;
+		var afterEventWasCalled = false;
+		var beforeEventWasCalled = false;
+
+		beforeEach(function() {
+			doneEventWasCalled = false;
+			afterEventWasCalled = false;
+			beforeEventWasCalled = false;
+		});
+
+		describe("When using beforeEvent", function() {
+			var instance = new NamedFunction();
+
+			scarlet
+				.intercept(instance)
+				.using(interceptor)
+				.on('before',function(invocation){
+					beforeEventWasCalled = true;
+				});
+
+			it("Then should call before event", function() {
+				var result = instance.method();
+				assert(beforeEventWasCalled);
+			});
+		});
+
+		describe("When using afterEvent", function() {
+			var instance = new NamedFunction();
+
+			scarlet
+				.intercept(instance)
+				.using(interceptor)
+				.on('after',function(invocation){
+					afterEventWasCalled = true;
+				});
+
+			it("Then should call after event", function() {
+				var result = instance.method();
+				assert(afterEventWasCalled);
+			});
+		});
+
+		describe("When using doneEvent", function() {
+			var instance = new NamedFunction();
+
+			scarlet
+				.intercept(instance)
+				.using(interceptor)
+				.on('done',function(invocation){
+					doneEventWasCalled = true;
+				});
+
+			it("Then should call after event", function() {
+				var result = instance.method();
+				assert(doneEventWasCalled);
+			});
+		});
+
+	});
+
 	describe("When interceptor has an asynchronous call", function() {
 		var asyncInterceptorWasCalled = false;
 
@@ -151,15 +213,15 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a named function type", function() {
 
-		NamedFunction = scarlet.intercept(NamedFunction)
+		var InterNamedFunction = scarlet.intercept(NamedFunction)
 								.using(interceptor)
 								.resolve();
 
-		var instance = new NamedFunction();
+		var instance = new InterNamedFunction();
 
 		it("Then should be able to intercept the constructor", function() {
 			
-			var constructorInstance = new NamedFunction();
+			var constructorInstance = new InterNamedFunction();
 			assert(methodWasCalled);
 
 		});
@@ -222,15 +284,15 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have an unnamed function type", function() {
 
-		UnnamedFunction = scarlet.intercept(UnnamedFunction)
-								.using(interceptor)
-								.resolve();
+		var InterUnnamedFunction = scarlet.intercept(UnnamedFunction)
+											.using(interceptor)
+											.resolve();
 
-		var instance = new UnnamedFunction();
+		var instance = new InterUnnamedFunction();
 
 		it("Then should be able to intercept the constructor", function() {
 
-			var constructorInstance = new UnnamedFunction();
+			var constructorInstance = new InterUnnamedFunction();
 			assert(methodWasCalled);
 
 		});

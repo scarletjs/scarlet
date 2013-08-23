@@ -63,7 +63,8 @@ This project focuses on the following foundations:
 Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly integrate aop interception into your application, framework, or method.  Here are a couple of reasons **Scarlet** was written:
 
 * Intercept all object members
-* Create Asynchronous interceptors
+* Creation of interception events
+* Creation of asynchronous interceptors
 * Access to intercpted method details (arguments, result, etc)
 
 ### Intercept all object members
@@ -83,7 +84,36 @@ scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercept
 ```
 This stops you from writing each member when setting up an interceptor. It allows you to change *someFunction* and not have to change the interceptor definition; this is especially nice for logging all method calls in an object.
 
-### Create Asynchronous interceptors
+### Creation of interception events
+
+Scarlet interceptors emit the following events:
+
+* before - emitted before *interceptors* are called
+* after - emitted after *intercepted* method
+* done - emitted after all *interceptors* and *intercepted* method called
+
+```javascript
+function asyncInterceptor(proceed){
+    setTimeout(function(){ 
+        console.log("completed long running function");
+        
+        proceed(); //-> proceeds to the next interceptor if one exists
+     }, 10);
+}
+
+Scarlet.intercept(Math, 'min')
+        .on('before', beforeFunction)
+        .on('after', afterFunction)
+        .on('done', doneFunction);
+        
+var min = Math.min(1,2,3); //-> will return 1;
+//-> 1. beforeFunction called
+//-> 2. Math.min called as normal and will return 1
+//-> 3. doneFunction called
+//-> 4. afterFunction called
+```
+
+### Creation of asynchronous interceptors
 
 Scarlet allows you to create **asynchronous** interceptors on **synchronous** calls without having to change a method to contain a callback. here is an example
 
@@ -102,6 +132,7 @@ scarlet.intercept(Math,"min")
 var min = Math.min(1,2,3); //-> will return 1;
 //-> 10 ms laster --> outputs "completed long running function"
 ```
+
 ### Access to intercpted method details (arguments, result, etc)
 
 Scarlet provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:

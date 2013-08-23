@@ -60,7 +60,13 @@ This project focuses on the following foundations:
 
 ## Why you should choose Scarlet?
 
-Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly integrate aop interception into your application, framework, or method.
+Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly integrate aop interception into your application, framework, or method.  Here are a couple of reasons **Scarlet** was written:
+
+* Intercept all object members
+* Create Asynchronous interceptors
+* Access to intercpted method details (arguments, result, etc)
+
+### Intercept all object members
 
 One of the main benefits is that you can intercept all **enumerable** members for an object as follows:
 
@@ -77,7 +83,9 @@ scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercept
 ```
 This stops you from writing each member when setting up an interceptor. It allows you to change *someFunction* and not have to change the interceptor definition; this is especially nice for logging all method calls in an object.
 
-Another benefit of using Scarlet is it allows you to create **asynchronous** interceptors on **synchronous** calls without having to change a method to contain a callback. here is an example
+### Create Asynchronous interceptors
+
+Scarlet allows you to create **asynchronous** interceptors on **synchronous** calls without having to change a method to contain a callback. here is an example
 
 ```javascript
 function asyncInterceptor(proceed){
@@ -94,8 +102,9 @@ scarlet.intercept(Math,"min")
 var min = Math.min(1,2,3); //-> will return 1;
 //-> 10 ms laster --> outputs "completed long running function"
 ```
+### Access to intercpted method details (arguments, result, etc)
 
-Finally it provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
+Scarlet provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
 
 * result -> result of the method called (populated after main method gets called)
 * args -> the arguments passed into the method

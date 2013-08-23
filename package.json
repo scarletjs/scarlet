@@ -26,7 +26,20 @@
     "grunt-bump": "0.0.11"
   },
   "browserDependencies": {},
-  "keywords": [],
+  "keywords": [
+    "interceptor",
+    "aop",
+    "aspect",
+    "interception",
+    "hook",
+    "hooks",
+    "hooker",
+    "monkey-patch",
+    "monkey patch",
+    "patch",
+    "debug",
+    "async"
+  ],
   "engines": {
     "node": ">= 0.2.0"
   },

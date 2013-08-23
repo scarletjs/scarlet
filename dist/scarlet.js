@@ -1317,7 +1317,7 @@ function ProxyInstance(instance) {
 }
 
 module.exports = ProxyInstance;
-},{"./extensions/enumerable":16,"./proxy-member":9}],8:[function(require,module,exports){
+},{"./proxy-member":9,"./extensions/enumerable":16}],8:[function(require,module,exports){
 var assert = require("assert");
 var ProxyInstance = require("./proxy-instance");
 var inherits = require("./extensions/inherits");
@@ -1494,6 +1494,18 @@ function Enumerable() {
 }
 
 module.exports = new Enumerable();
+},{}],17:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+};
 },{}],18:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -1605,19 +1617,7 @@ function Plugins() {
 
 module.exports = new Plugins();
 })("/lib")
-},{"path":19,"assert":4}],17:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],12:[function(require,module,exports){
+},{"path":19,"assert":4}],12:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;

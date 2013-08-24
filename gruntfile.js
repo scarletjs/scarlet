@@ -1,12 +1,10 @@
-
-
 module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
     jshint: {
-      files: ["gruntfile.js", "index.js", "lib/**/*.js","test/**/*.js"],
+      files: ["gruntfile.js", "index.js", "lib/**/*.js", "test/**/*.js"],
       options: {
         globals: {
           console: true,
@@ -14,11 +12,19 @@ module.exports = function(grunt) {
         }
       }
     },
+    spawn: {
+      test: {
+        command: "mocha",
+        arguments: ["--reporter", "spec", "{0}"],
+        directory: "./tests",
+        pattern: "**/*.js"
+      }
+    },
     release: {
       options: {
         bump: true, //default: true
         file: "package.json", //default: package.json
-        add: true, 
+        add: true,
         commit: true,
         tag: true,
         push: true,
@@ -36,36 +42,38 @@ module.exports = function(grunt) {
         dest: './dist/scarlet.js'
       },
       options: {
-        standalone:'scarlet'
+        standalone: 'scarlet'
       }
     },
     mox: {
       documentationByCategoryTag: {
-        sourceFiles : ['./lib/'],
+        sourceFiles: ['./lib/'],
         options: {
-          name : "Scarlet",
-          template:"category",
-          outputFile : "doc/README.md",
-          moxFile :"doc/mox.json"
+          name: "Scarlet",
+          template: "category",
+          outputFile: "doc/README.md",
+          moxFile: "doc/mox.json"
         }
       }
     }
   });
 
   grunt.loadNpmTasks("grunt-mox");
+  grunt.loadNpmTasks("grunt-spawn");
   grunt.loadNpmTasks("grunt-release");
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
 
   grunt.registerTask("doc", ["mox"]);
-  grunt.registerTask("default", ["jshint","mox"]);
-  grunt.registerTask("deploy", ["mox","browserify","release", "scarlet-bump"]);
+  grunt.registerTask("test", ["spawn:test"]);
+  grunt.registerTask("default", ["jshint", "mox"]);
+  grunt.registerTask("deploy", ["mox", "browserify", "release", "scarlet-bump"]);
 
-  grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function(){
+  grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function() {
 
     var done = this.async();
-    
+
     var fs = require("fs");
     require("string-format");
     var http = require("http");
@@ -79,7 +87,7 @@ module.exports = function(grunt) {
 
     prompt.start();
 
-    prompt.get(["password"], function(err, result){
+    prompt.get(["password"], function(err, result) {
       var req = http.get("http://www.scarletjs.com/release/bump?project={0}&version={1}&auth={2}".format(project, version, result.password), function(res) {
         console.log("Scarletjs.com: " + res.statusCode);
         console.log("Scarletjs.com: " + JSON.stringify(res.headers));

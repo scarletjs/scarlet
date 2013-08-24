@@ -22,7 +22,8 @@
     "grunt-browserify": "~1.2.0",
     "hooks": "~0.3.0",
     "html-md": "~2.1.1",
-    "grunt-mox": "~0.0.6"
+    "grunt-mox": "~0.0.6",
+    "grunt-spawn": "1.0.*"
   },
   "browserDependencies": {},
   "keywords": [
@@ -48,7 +49,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "mocha tests/* --reporter spec"
+    "test": "grunt test"
   },
   "license": "MIT"
 }

@@ -23,8 +23,7 @@
     "grunt-release": "~0.3.3",
     "grunt-browserify": "~1.2.0",
     "hooks": "~0.3.0",
-    "html-md": "~2.1.1",
-    "grunt-mox": "~0.0.6",
+    "grunt-mox": "~0.0.8",
     "grunt-spawn": "*"
   },
   "browserDependencies": {},
@@ -51,7 +50,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "./node_modules/grunt-cli/bin/grunt test"
+    "test": "grunt test"
   },
   "license": "MIT"
 }

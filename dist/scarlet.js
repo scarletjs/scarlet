@@ -1,110 +1,154 @@
 (function(e){if("function"==typeof bootstrap)bootstrap("scarlet",e);else if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else if("undefined"!=typeof ses){if(!ses.ok())return;ses.makeScarlet=e}else"undefined"!=typeof window?window.scarlet=e():global.scarlet=e()})(function(){var define,ses,bootstrap,module,exports;
-return (function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
+return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = require("./lib/scarlet.js");
 module.exports.Interceptor = require("./lib/interceptor.js");
 
-},{"./lib/scarlet.js":2,"./lib/interceptor.js":3}],2:[function(require,module,exports){
-var assert = require("assert");
-
-/**
- * Creates a Scarlet Instance
- *
- * #### Example:
- *
- * ```javascript
- * Scarlet
- *     .intercept(someFunction)
- *     .using(someInterceptorFunction);
- * ```
- * 
- * @category Interception Methods
- * @class Scarlet
- * @constructor
- * @param {Array} pluginArr - optional array of plugins to load
-**/
-function Scarlet(pluginArr) {
-
-	"use strict";
+},{"./lib/interceptor.js":6,"./lib/scarlet.js":12}],2:[function(require,module,exports){
+function Enumerable() {
 
 	var self = this;
-	self.plugins = {};
-	self.lib = require("./index");
 
-	/**
-	 * Creates a Scarlet interceptor.
-	 *
-	 * ####Example:
-	 *
-	 * Basic interceptor
-	 * ```javascript
-	 * Scarlet.intercept(someFunction);
-	 * ```
-	 * 
-	 * interceptor with events
-	 * ```javascript
-	 * Scarlet.intercept(someFunction)
-	 *        .on('before', beforeFunction)
-	 *        .on('after', afterFunction)
-	 *        .on('done', doneFunction);
-	 * ```
-	 * 
-	 * @category Interception Methods
-	 * @method intercept
-	 * @param {Function|Object} typeOrInstance the type or instance to be intercepted
-	 * @return {Function} A Scarlet interceptor object.
-	**/
-	self.intercept = function(typeOrInstance, memberName) {
-
-		assert(typeOrInstance, "Cannot have null type or instance");
-		assert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');
-
-		var self = this;
-
-		var _interceptor = new self.lib.Interceptor(typeOrInstance);
-
-
-		if(typeOrInstance.hasOwnProperty(memberName))
-			return _interceptor.forMember(memberName);
-		
-		if (typeOrInstance.prototype)
-			return  _interceptor.forType();		
-
-		return _interceptor.forObject();
+	self.arrayFor = function(array, callback) {
+		for (var i = 0; i < array.length; i++) {
+			callback(array[i], i, array);
+		}
 	};
 
-	/**
-	 * loads a plugin
-	 *
-	 * #### Example:
-	 *
-	 * ```javascript
-	 * Scarlet.loadPlugin(someScarletPlugin);
-	 * ```
-	 * 
-	 * @category Interception Methods
-	 * @method loadPlugin
-	 * @param {Function|Object} pluginPath the plugin to be loaded
-	 * @return {Function} A reference to scarlet(self)
-	 * @chainable
-	**/
-	self.loadPlugin = function(pluginPath) {
-		self.lib.Plugins.loadPlugin(self, pluginPath);
-		return self;
+	self.funcFor = function(object, callback) {
+		for (var key in object) {
+			callback(object[key], key, object);
+		}
 	};
 
-	if(pluginArr){
-		if (pluginArr.length) {
-			pluginArr.forEach(function(plugin){
-				self.loadPlugin(plugin);
-			});
-		}		
-	}
+	self.stringFor = function(string, callback) {
+		self.arrayFor(string.split(""), function(chr, index) {
+			callback(chr, index, string);
+		});
+	};
+
+	self.allEach = function(object, callback) {
+		Object.getOwnPropertyNames(object).forEach(function(property) {
+			callback(object[property], property, object);
+		});
+	};
+
+	self.forEach = function(object, callback) {
+		if (object) {
+			var resolve = self.funcFor;
+			if (object instanceof Function) {
+				resolve = self.funcFor;
+			} else if (typeof object == "string") {
+				resolve = self.stringFor;
+			} else if (typeof object.length == "number") {
+				resolve = self.arrayFor;
+			}
+			resolve(object, callback);
+		}
+	};
 
 }
 
-module.exports = Scarlet;
+module.exports = new Enumerable();
+},{}],3:[function(require,module,exports){
+module.exports = function(ctor, superCtor) {
+	ctor.super_ = superCtor;
+	ctor.prototype = Object.create(superCtor.prototype, {
+		constructor: {
+			value: ctor,
+			enumerable: false,
+			writable: true,
+			configurable: true
+		}
+	});
+};
+},{}],4:[function(require,module,exports){
+function Series(){
+	var self = this;
 
-},{"assert":4,"./index":5}],3:[function(require,module,exports){
+	self.targets = [];
+	self.onDone = null;
+
+	self.invoke = function(invocation,onAllTargetsCalled) {
+		var didComplete = false;
+
+		self.callAllTargets(invocation,function(){
+			if(!didComplete){
+				onAllTargetsCalled();
+				didComplete = true;
+			}
+
+			if(self.onDone)
+				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);
+
+		});
+
+		if(!didComplete){
+			onAllTargetsCalled();
+			didComplete = true;
+		}
+
+		return;
+	};
+
+	self.callAllTargets = function(invocation,onComplete) {
+		var currentTarget  = 0;
+
+		var next = function(error, result){
+			
+			if(currentTarget >= self.targets.length){
+				onComplete();
+				return;				
+			}
+
+			var targetMethod = self.targets[currentTarget];
+			currentTarget++;
+			targetCall(targetMethod);
+
+			return;
+		};
+
+		var targetCall = function(target){
+			target.targetMethod.apply(target.targetThisContext,[next,invocation]);
+		};
+
+		next();
+	};
+
+	self.addTarget = function(targetMethod,targetThisContext){
+		var target = {
+			targetMethod : targetMethod,
+			targetThisContext : targetThisContext
+		};
+
+		self.targets.push(target);
+	};
+
+	self.addOnDone = function(targetMethod,targetThisContext){
+		var target = {
+			targetMethod : targetMethod,
+			targetThisContext : targetThisContext
+		};
+
+		self.onDone = target;
+	};
+	
+}
+
+module.exports = Series;
+},{}],5:[function(require,module,exports){
+module.exports = {
+	Util: require("util"),
+	Assert: require("assert"),
+	Plugins: require("./plugins"),
+	Invocation: require("./invocation"),
+	Interceptor: require("./interceptor"),
+	ProxyInstance: require("./proxy-instance"),
+	ProxyPrototype: require("./proxy-prototype"),
+	Enumerable: require("./extensions/enumerable")
+};
+
+
+},{"./extensions/enumerable":2,"./interceptor":6,"./invocation":7,"./plugins":8,"./proxy-instance":9,"./proxy-prototype":11,"assert":13,"util":16}],6:[function(require,module,exports){
 var assert = require("assert");
 var events = require('events');
 var Invocation = require("./invocation");
@@ -273,81 +317,7 @@ function Interceptor(typeOrInstance) {
 Interceptor.prototype = events.EventEmitter.prototype;
 
 module.exports = Interceptor;
-},{"assert":4,"events":6,"./invocation":7,"./proxy-instance":8,"./proxy-prototype":9,"./proxy-member":10,"./extensions/series":11}],11:[function(require,module,exports){
-function Series(){
-	var self = this;
-
-	self.targets = [];
-	self.onDone = null;
-
-	self.invoke = function(invocation,onAllTargetsCalled) {
-		var didComplete = false;
-
-		self.callAllTargets(invocation,function(){
-			if(!didComplete){
-				onAllTargetsCalled();
-				didComplete = true;
-			}
-
-			if(self.onDone)
-				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);
-
-		});
-
-		if(!didComplete){
-			onAllTargetsCalled();
-			didComplete = true;
-		}
-
-		return;
-	};
-
-	self.callAllTargets = function(invocation,onComplete) {
-		var currentTarget  = 0;
-
-		var next = function(error, result){
-			
-			if(currentTarget >= self.targets.length){
-				onComplete();
-				return;				
-			}
-
-			var targetMethod = self.targets[currentTarget];
-			currentTarget++;
-			targetCall(targetMethod);
-
-			return;
-		};
-
-		var targetCall = function(target){
-			target.targetMethod.apply(target.targetThisContext,[next,invocation]);
-		};
-
-		next();
-	};
-
-	self.addTarget = function(targetMethod,targetThisContext){
-		var target = {
-			targetMethod : targetMethod,
-			targetThisContext : targetThisContext
-		};
-
-		self.targets.push(target);
-	};
-
-	self.addOnDone = function(targetMethod,targetThisContext){
-		var target = {
-			targetMethod : targetMethod,
-			targetThisContext : targetThisContext
-		};
-
-		self.onDone = target;
-	};
-	
-}
-
-module.exports = Series;
-},{}],7:[function(require,module,exports){
+},{"./extensions/series":4,"./invocation":7,"./proxy-instance":9,"./proxy-member":10,"./proxy-prototype":11,"assert":13,"events":14}],7:[function(require,module,exports){
 var assert = require("assert");
 
 function Invocation(object, method, args) {
@@ -405,20 +375,31 @@ function Invocation(object, method, args) {
 }
 
 module.exports = Invocation;
-},{"assert":4}],5:[function(require,module,exports){
-module.exports = {
-	Util: require("util"),
-	Assert: require("assert"),
-	Plugins: require("./plugins"),
-	Invocation: require("./invocation"),
-	Interceptor: require("./interceptor"),
-	ProxyInstance: require("./proxy-instance"),
-	ProxyPrototype: require("./proxy-prototype"),
-	Enumerable: require("./extensions/enumerable")
-};
+},{"assert":13}],8:[function(require,module,exports){
+var __dirname="/lib";var path = require("path");
+var assert = require("assert");
 
+function Plugins() {
 
-},{"util":12,"assert":4,"./plugins":13,"./invocation":7,"./interceptor":3,"./proxy-instance":8,"./proxy-prototype":9,"./extensions/enumerable":14}],8:[function(require,module,exports){
+	var self = this;
+	
+	self.loadPlugin = function($scarlet, pluginPath) {
+
+		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
+		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+
+		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
+		var plugin = require(fullPath);
+
+		pluginObject = new plugin($scarlet);
+		pluginObject.initialize();
+
+	};
+
+}
+
+module.exports = new Plugins();
+},{"assert":13,"path":15}],9:[function(require,module,exports){
 var ProxyMember = require("./proxy-member");
 var enumerable = require("./extensions/enumerable");
 
@@ -461,60 +442,7 @@ function ProxyInstance(instance) {
 }
 
 module.exports = ProxyInstance;
-},{"./proxy-member":10,"./extensions/enumerable":14}],9:[function(require,module,exports){
-var assert = require("assert");
-var ProxyInstance = require("./proxy-instance");
-var inherits = require("./extensions/inherits");
-var enumerable = require("./extensions/enumerable");
-
-function ProxyPrototype(instance) {
-
-	var self = this;
-
-	self.inheritedType = null;
-	self.instance = instance;
-
-	self.whenCalled = function(target) {
-
-		assert(instance, "Scarlet::Interceptor::type == null");
-		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
-
-		self.inheritedType = function(){
-
-			var self = this;
-
-			(function() {
-
-				var interceptorTypeConstructor = function(){
-					var parameters = Array.prototype.slice.call(arguments);
-					if(instance.apply)
-						instance.apply(self,parameters);
-
-					var proxy = new ProxyInstance(self);
-					proxy.whenCalled(target);
-				};
-
-				return target(self,interceptorTypeConstructor,arguments);
-
-			}());
-
-		};
-
-		inherits(self.inheritedType, instance);
-
-		return self.inheritedType;
-		
-	};
-
-	self.unwrap = function() {};
-
-	return self;
-
-}
-
-module.exports = ProxyPrototype;
-
-},{"assert":4,"./proxy-instance":8,"./extensions/inherits":15,"./extensions/enumerable":14}],10:[function(require,module,exports){
+},{"./extensions/enumerable":2,"./proxy-member":10}],10:[function(require,module,exports){
 var enumerable = require("./extensions/enumerable");
 
 
@@ -592,684 +520,162 @@ function ProxyMember(instance, memberName) {
 }
 
 module.exports = ProxyMember;
-},{"./extensions/enumerable":14}],14:[function(require,module,exports){
-function Enumerable() {
+},{"./extensions/enumerable":2}],11:[function(require,module,exports){
+var assert = require("assert");
+var ProxyInstance = require("./proxy-instance");
+var inherits = require("./extensions/inherits");
+var enumerable = require("./extensions/enumerable");
+
+function ProxyPrototype(instance) {
 
 	var self = this;
 
-	self.arrayFor = function(array, callback) {
-		for (var i = 0; i < array.length; i++) {
-			callback(array[i], i, array);
-		}
+	self.inheritedType = null;
+	self.instance = instance;
+
+	self.whenCalled = function(target) {
+
+		assert(instance, "Scarlet::Interceptor::type == null");
+		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
+
+		self.inheritedType = function(){
+
+			var self = this;
+
+			(function() {
+
+				var interceptorTypeConstructor = function(){
+					var parameters = Array.prototype.slice.call(arguments);
+					if(instance.apply)
+						instance.apply(self,parameters);
+
+					var proxy = new ProxyInstance(self);
+					proxy.whenCalled(target);
+				};
+
+				return target(self,interceptorTypeConstructor,arguments);
+
+			}());
+
+		};
+
+		inherits(self.inheritedType, instance);
+
+		return self.inheritedType;
+		
 	};
 
-	self.funcFor = function(object, callback) {
-		for (var key in object) {
-			callback(object[key], key, object);
-		}
-	};
+	self.unwrap = function() {};
 
-	self.stringFor = function(string, callback) {
-		self.arrayFor(string.split(""), function(chr, index) {
-			callback(chr, index, string);
-		});
-	};
-
-	self.allEach = function(object, callback) {
-		Object.getOwnPropertyNames(object).forEach(function(property) {
-			callback(object[property], property, object);
-		});
-	};
-
-	self.forEach = function(object, callback) {
-		if (object) {
-			var resolve = self.funcFor;
-			if (object instanceof Function) {
-				resolve = self.funcFor;
-			} else if (typeof object == "string") {
-				resolve = self.stringFor;
-			} else if (typeof object.length == "number") {
-				resolve = self.arrayFor;
-			}
-			resolve(object, callback);
-		}
-	};
+	return self;
 
 }
 
-module.exports = new Enumerable();
-},{}],15:[function(require,module,exports){
-module.exports = function(ctor, superCtor) {
-	ctor.super_ = superCtor;
-	ctor.prototype = Object.create(superCtor.prototype, {
-		constructor: {
-			value: ctor,
-			enumerable: false,
-			writable: true,
-			configurable: true
-		}
-	});
-};
-},{}],13:[function(require,module,exports){
-(function(__dirname){var path = require("path");
+module.exports = ProxyPrototype;
+
+},{"./extensions/enumerable":2,"./extensions/inherits":3,"./proxy-instance":9,"assert":13}],12:[function(require,module,exports){
 var assert = require("assert");
 
-function Plugins() {
+/**
+ * Creates a Scarlet Instance
+ *
+ * #### Example:
+ *
+ * ```javascript
+ * Scarlet
+ *     .intercept(someFunction)
+ *     .using(someInterceptorFunction);
+ * ```
+ * 
+ * @category Interception Methods
+ * @class Scarlet
+ * @constructor
+ * @param {Array} pluginArr - optional array of plugins to load
+**/
+function Scarlet(pluginArr) {
+
+	"use strict";
 
 	var self = this;
-	
-	self.loadPlugin = function($scarlet, pluginPath) {
+	self.plugins = {};
+	self.lib = require("./index");
 
-		assert($scarlet, "Scarlet::Plugins::loadPlugin::$scarlet == null");
-		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
+	/**
+	 * Creates a Scarlet interceptor.
+	 *
+	 * ####Example:
+	 *
+	 * Basic interceptor
+	 * ```javascript
+	 * Scarlet.intercept(someFunction);
+	 * ```
+	 * 
+	 * interceptor with events
+	 * ```javascript
+	 * Scarlet.intercept(someFunction)
+	 *        .on('before', beforeFunction)
+	 *        .on('after', afterFunction)
+	 *        .on('done', doneFunction);
+	 * ```
+	 * 
+	 * @category Interception Methods
+	 * @method intercept
+	 * @param {Function|Object} typeOrInstance the type or instance to be intercepted
+	 * @return {Function} A Scarlet interceptor object.
+	**/
+	self.intercept = function(typeOrInstance, memberName) {
 
-		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
+		assert(typeOrInstance, "Cannot have null type or instance");
+		assert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');
 
-		pluginObject = new plugin($scarlet);
-		pluginObject.initialize();
+		var self = this;
 
+		var _interceptor = new self.lib.Interceptor(typeOrInstance);
+
+
+		if(typeOrInstance.hasOwnProperty(memberName))
+			return _interceptor.forMember(memberName);
+		
+		if (typeOrInstance.prototype)
+			return  _interceptor.forType();		
+
+		return _interceptor.forObject();
 	};
 
+	/**
+	 * loads a plugin
+	 *
+	 * #### Example:
+	 *
+	 * ```javascript
+	 * Scarlet.loadPlugin(someScarletPlugin);
+	 * ```
+	 * 
+	 * @category Interception Methods
+	 * @method loadPlugin
+	 * @param {Function|Object} pluginPath the plugin to be loaded
+	 * @return {Function} A reference to scarlet(self)
+	 * @chainable
+	**/
+	self.loadPlugin = function(pluginPath) {
+		self.lib.Plugins.loadPlugin(self, pluginPath);
+		return self;
+	};
+
+	if(pluginArr){
+		if (pluginArr.length) {
+			pluginArr.forEach(function(plugin){
+				self.loadPlugin(plugin);
+			});
+		}		
+	}
+
 }
 
-module.exports = new Plugins();
-})("/lib")
-},{"path":16,"assert":4}],17:[function(require,module,exports){
-// shim for using process in browser
+module.exports = Scarlet;
 
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],6:[function(require,module,exports){
-(function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
-
-var EventEmitter = exports.EventEmitter = process.EventEmitter;
-var isArray = typeof Array.isArray === 'function'
-    ? Array.isArray
-    : function (xs) {
-        return Object.prototype.toString.call(xs) === '[object Array]'
-    }
-;
-function indexOf (xs, x) {
-    if (xs.indexOf) return xs.indexOf(x);
-    for (var i = 0; i < xs.length; i++) {
-        if (x === xs[i]) return i;
-    }
-    return -1;
-}
-
-// By default EventEmitters will print a warning if more than
-// 10 listeners are added to it. This is a useful default which
-// helps finding memory leaks.
-//
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-var defaultMaxListeners = 10;
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!this._events) this._events = {};
-  this._events.maxListeners = n;
-};
-
-
-EventEmitter.prototype.emit = function(type) {
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events || !this._events.error ||
-        (isArray(this._events.error) && !this._events.error.length))
-    {
-      if (arguments[1] instanceof Error) {
-        throw arguments[1]; // Unhandled 'error' event
-      } else {
-        throw new Error("Uncaught, unspecified 'error' event.");
-      }
-      return false;
-    }
-  }
-
-  if (!this._events) return false;
-  var handler = this._events[type];
-  if (!handler) return false;
-
-  if (typeof handler == 'function') {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        var args = Array.prototype.slice.call(arguments, 1);
-        handler.apply(this, args);
-    }
-    return true;
-
-  } else if (isArray(handler)) {
-    var args = Array.prototype.slice.call(arguments, 1);
-
-    var listeners = handler.slice();
-    for (var i = 0, l = listeners.length; i < l; i++) {
-      listeners[i].apply(this, args);
-    }
-    return true;
-
-  } else {
-    return false;
-  }
-};
-
-// EventEmitter is defined in src/node_events.cc
-// EventEmitter.prototype.emit() is also defined there.
-EventEmitter.prototype.addListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('addListener only takes instances of Function');
-  }
-
-  if (!this._events) this._events = {};
-
-  // To avoid recursion in the case that type == "newListeners"! Before
-  // adding it to the listeners, first emit "newListeners".
-  this.emit('newListener', type, listener);
-
-  if (!this._events[type]) {
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  } else if (isArray(this._events[type])) {
-
-    // Check for listener leak
-    if (!this._events[type].warned) {
-      var m;
-      if (this._events.maxListeners !== undefined) {
-        m = this._events.maxListeners;
-      } else {
-        m = defaultMaxListeners;
-      }
-
-      if (m && m > 0 && this._events[type].length > m) {
-        this._events[type].warned = true;
-        console.error('(node) warning: possible EventEmitter memory ' +
-                      'leak detected. %d listeners added. ' +
-                      'Use emitter.setMaxListeners() to increase limit.',
-                      this._events[type].length);
-        console.trace();
-      }
-    }
-
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  } else {
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  var self = this;
-  self.on(type, function g() {
-    self.removeListener(type, g);
-    listener.apply(this, arguments);
-  });
-
-  return this;
-};
-
-EventEmitter.prototype.removeListener = function(type, listener) {
-  if ('function' !== typeof listener) {
-    throw new Error('removeListener only takes instances of Function');
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (!this._events || !this._events[type]) return this;
-
-  var list = this._events[type];
-
-  if (isArray(list)) {
-    var i = indexOf(list, listener);
-    if (i < 0) return this;
-    list.splice(i, 1);
-    if (list.length == 0)
-      delete this._events[type];
-  } else if (this._events[type] === listener) {
-    delete this._events[type];
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  if (arguments.length === 0) {
-    this._events = {};
-    return this;
-  }
-
-  // does not use listeners(), so no side effect of creating _events[type]
-  if (type && this._events && this._events[type]) this._events[type] = null;
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  if (!this._events) this._events = {};
-  if (!this._events[type]) this._events[type] = [];
-  if (!isArray(this._events[type])) {
-    this._events[type] = [this._events[type]];
-  }
-  return this._events[type];
-};
-
-})(require("__browserify_process"))
-},{"__browserify_process":17}],12:[function(require,module,exports){
-var events = require('events');
-
-exports.isArray = isArray;
-exports.isDate = function(obj){return Object.prototype.toString.call(obj) === '[object Date]'};
-exports.isRegExp = function(obj){return Object.prototype.toString.call(obj) === '[object RegExp]'};
-
-
-exports.print = function () {};
-exports.puts = function () {};
-exports.debug = function() {};
-
-exports.inspect = function(obj, showHidden, depth, colors) {
-  var seen = [];
-
-  var stylize = function(str, styleType) {
-    // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-    var styles =
-        { 'bold' : [1, 22],
-          'italic' : [3, 23],
-          'underline' : [4, 24],
-          'inverse' : [7, 27],
-          'white' : [37, 39],
-          'grey' : [90, 39],
-          'black' : [30, 39],
-          'blue' : [34, 39],
-          'cyan' : [36, 39],
-          'green' : [32, 39],
-          'magenta' : [35, 39],
-          'red' : [31, 39],
-          'yellow' : [33, 39] };
-
-    var style =
-        { 'special': 'cyan',
-          'number': 'blue',
-          'boolean': 'yellow',
-          'undefined': 'grey',
-          'null': 'bold',
-          'string': 'green',
-          'date': 'magenta',
-          // "name": intentionally not styling
-          'regexp': 'red' }[styleType];
-
-    if (style) {
-      return '\033[' + styles[style][0] + 'm' + str +
-             '\033[' + styles[style][1] + 'm';
-    } else {
-      return str;
-    }
-  };
-  if (! colors) {
-    stylize = function(str, styleType) { return str; };
-  }
-
-  function format(value, recurseTimes) {
-    // Provide a hook for user-specified inspect functions.
-    // Check that value is an object with an inspect function on it
-    if (value && typeof value.inspect === 'function' &&
-        // Filter out the util module, it's inspect function is special
-        value !== exports &&
-        // Also filter out any prototype objects using the circular check.
-        !(value.constructor && value.constructor.prototype === value)) {
-      return value.inspect(recurseTimes);
-    }
-
-    // Primitive types cannot have properties
-    switch (typeof value) {
-      case 'undefined':
-        return stylize('undefined', 'undefined');
-
-      case 'string':
-        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                                 .replace(/'/g, "\\'")
-                                                 .replace(/\\"/g, '"') + '\'';
-        return stylize(simple, 'string');
-
-      case 'number':
-        return stylize('' + value, 'number');
-
-      case 'boolean':
-        return stylize('' + value, 'boolean');
-    }
-    // For some reason typeof null is "object", so special case here.
-    if (value === null) {
-      return stylize('null', 'null');
-    }
-
-    // Look up the keys of the object.
-    var visible_keys = Object_keys(value);
-    var keys = showHidden ? Object_getOwnPropertyNames(value) : visible_keys;
-
-    // Functions without properties can be shortcutted.
-    if (typeof value === 'function' && keys.length === 0) {
-      if (isRegExp(value)) {
-        return stylize('' + value, 'regexp');
-      } else {
-        var name = value.name ? ': ' + value.name : '';
-        return stylize('[Function' + name + ']', 'special');
-      }
-    }
-
-    // Dates without properties can be shortcutted
-    if (isDate(value) && keys.length === 0) {
-      return stylize(value.toUTCString(), 'date');
-    }
-
-    var base, type, braces;
-    // Determine the object type
-    if (isArray(value)) {
-      type = 'Array';
-      braces = ['[', ']'];
-    } else {
-      type = 'Object';
-      braces = ['{', '}'];
-    }
-
-    // Make functions say that they are functions
-    if (typeof value === 'function') {
-      var n = value.name ? ': ' + value.name : '';
-      base = (isRegExp(value)) ? ' ' + value : ' [Function' + n + ']';
-    } else {
-      base = '';
-    }
-
-    // Make dates with properties first say the date
-    if (isDate(value)) {
-      base = ' ' + value.toUTCString();
-    }
-
-    if (keys.length === 0) {
-      return braces[0] + base + braces[1];
-    }
-
-    if (recurseTimes < 0) {
-      if (isRegExp(value)) {
-        return stylize('' + value, 'regexp');
-      } else {
-        return stylize('[Object]', 'special');
-      }
-    }
-
-    seen.push(value);
-
-    var output = keys.map(function(key) {
-      var name, str;
-      if (value.__lookupGetter__) {
-        if (value.__lookupGetter__(key)) {
-          if (value.__lookupSetter__(key)) {
-            str = stylize('[Getter/Setter]', 'special');
-          } else {
-            str = stylize('[Getter]', 'special');
-          }
-        } else {
-          if (value.__lookupSetter__(key)) {
-            str = stylize('[Setter]', 'special');
-          }
-        }
-      }
-      if (visible_keys.indexOf(key) < 0) {
-        name = '[' + key + ']';
-      }
-      if (!str) {
-        if (seen.indexOf(value[key]) < 0) {
-          if (recurseTimes === null) {
-            str = format(value[key]);
-          } else {
-            str = format(value[key], recurseTimes - 1);
-          }
-          if (str.indexOf('\n') > -1) {
-            if (isArray(value)) {
-              str = str.split('\n').map(function(line) {
-                return '  ' + line;
-              }).join('\n').substr(2);
-            } else {
-              str = '\n' + str.split('\n').map(function(line) {
-                return '   ' + line;
-              }).join('\n');
-            }
-          }
-        } else {
-          str = stylize('[Circular]', 'special');
-        }
-      }
-      if (typeof name === 'undefined') {
-        if (type === 'Array' && key.match(/^\d+$/)) {
-          return str;
-        }
-        name = JSON.stringify('' + key);
-        if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-          name = name.substr(1, name.length - 2);
-          name = stylize(name, 'name');
-        } else {
-          name = name.replace(/'/g, "\\'")
-                     .replace(/\\"/g, '"')
-                     .replace(/(^"|"$)/g, "'");
-          name = stylize(name, 'string');
-        }
-      }
-
-      return name + ': ' + str;
-    });
-
-    seen.pop();
-
-    var numLinesEst = 0;
-    var length = output.reduce(function(prev, cur) {
-      numLinesEst++;
-      if (cur.indexOf('\n') >= 0) numLinesEst++;
-      return prev + cur.length + 1;
-    }, 0);
-
-    if (length > 50) {
-      output = braces[0] +
-               (base === '' ? '' : base + '\n ') +
-               ' ' +
-               output.join(',\n  ') +
-               ' ' +
-               braces[1];
-
-    } else {
-      output = braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-    }
-
-    return output;
-  }
-  return format(obj, (typeof depth === 'undefined' ? 2 : depth));
-};
-
-
-function isArray(ar) {
-  return ar instanceof Array ||
-         Array.isArray(ar) ||
-         (ar && ar !== Object.prototype && isArray(ar.__proto__));
-}
-
-
-function isRegExp(re) {
-  return re instanceof RegExp ||
-    (typeof re === 'object' && Object.prototype.toString.call(re) === '[object RegExp]');
-}
-
-
-function isDate(d) {
-  if (d instanceof Date) return true;
-  if (typeof d !== 'object') return false;
-  var properties = Date.prototype && Object_getOwnPropertyNames(Date.prototype);
-  var proto = d.__proto__ && Object_getOwnPropertyNames(d.__proto__);
-  return JSON.stringify(proto) === JSON.stringify(properties);
-}
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-exports.log = function (msg) {};
-
-exports.pump = null;
-
-var Object_keys = Object.keys || function (obj) {
-    var res = [];
-    for (var key in obj) res.push(key);
-    return res;
-};
-
-var Object_getOwnPropertyNames = Object.getOwnPropertyNames || function (obj) {
-    var res = [];
-    for (var key in obj) {
-        if (Object.hasOwnProperty.call(obj, key)) res.push(key);
-    }
-    return res;
-};
-
-var Object_create = Object.create || function (prototype, properties) {
-    // from es5-shim
-    var object;
-    if (prototype === null) {
-        object = { '__proto__' : null };
-    }
-    else {
-        if (typeof prototype !== 'object') {
-            throw new TypeError(
-                'typeof prototype[' + (typeof prototype) + '] != \'object\''
-            );
-        }
-        var Type = function () {};
-        Type.prototype = prototype;
-        object = new Type();
-        object.__proto__ = prototype;
-    }
-    if (typeof properties !== 'undefined' && Object.defineProperties) {
-        Object.defineProperties(object, properties);
-    }
-    return object;
-};
-
-exports.inherits = function(ctor, superCtor) {
-  ctor.super_ = superCtor;
-  ctor.prototype = Object_create(superCtor.prototype, {
-    constructor: {
-      value: ctor,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-};
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (typeof f !== 'string') {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(exports.inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j': return JSON.stringify(args[i++]);
-      default:
-        return x;
-    }
-  });
-  for(var x = args[i]; i < len; x = args[++i]){
-    if (x === null || typeof x !== 'object') {
-      str += ' ' + x;
-    } else {
-      str += ' ' + exports.inspect(x);
-    }
-  }
-  return str;
-};
-
-},{"events":6}],4:[function(require,module,exports){
-(function(){// UTILITY
+},{"./index":5,"assert":13}],13:[function(require,module,exports){
+// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
 var pSlice = Array.prototype.slice;
@@ -1308,6 +714,8 @@ assert.AssertionError = function AssertionError(options) {
     Error.captureStackTrace(this, stackStartFunction);
   }
 };
+
+// assert.AssertionError instanceof Error
 util.inherits(assert.AssertionError, Error);
 
 function replacer(key, value) {
@@ -1343,10 +751,6 @@ assert.AssertionError.prototype.toString = function() {
     ].join(' ');
   }
 };
-
-// assert.AssertionError instanceof Error
-
-assert.AssertionError.__proto__ = Error.prototype;
 
 // At present only the three keys mentioned above are used and
 // understood by the spec. Implementations or sub modules can pass
@@ -1584,9 +988,204 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 
 assert.ifError = function(err) { if (err) {throw err;}};
 
-})()
-},{"util":12,"buffer":18}],16:[function(require,module,exports){
-(function(process){function filter (xs, fn) {
+},{"buffer":18,"util":16}],14:[function(require,module,exports){
+var process=require("__browserify_process");if (!process.EventEmitter) process.EventEmitter = function () {};
+
+var EventEmitter = exports.EventEmitter = process.EventEmitter;
+var isArray = typeof Array.isArray === 'function'
+    ? Array.isArray
+    : function (xs) {
+        return Object.prototype.toString.call(xs) === '[object Array]'
+    }
+;
+function indexOf (xs, x) {
+    if (xs.indexOf) return xs.indexOf(x);
+    for (var i = 0; i < xs.length; i++) {
+        if (x === xs[i]) return i;
+    }
+    return -1;
+}
+
+// By default EventEmitters will print a warning if more than
+// 10 listeners are added to it. This is a useful default which
+// helps finding memory leaks.
+//
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+var defaultMaxListeners = 10;
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!this._events) this._events = {};
+  this._events.maxListeners = n;
+};
+
+
+EventEmitter.prototype.emit = function(type) {
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events || !this._events.error ||
+        (isArray(this._events.error) && !this._events.error.length))
+    {
+      if (arguments[1] instanceof Error) {
+        throw arguments[1]; // Unhandled 'error' event
+      } else {
+        throw new Error("Uncaught, unspecified 'error' event.");
+      }
+      return false;
+    }
+  }
+
+  if (!this._events) return false;
+  var handler = this._events[type];
+  if (!handler) return false;
+
+  if (typeof handler == 'function') {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        var args = Array.prototype.slice.call(arguments, 1);
+        handler.apply(this, args);
+    }
+    return true;
+
+  } else if (isArray(handler)) {
+    var args = Array.prototype.slice.call(arguments, 1);
+
+    var listeners = handler.slice();
+    for (var i = 0, l = listeners.length; i < l; i++) {
+      listeners[i].apply(this, args);
+    }
+    return true;
+
+  } else {
+    return false;
+  }
+};
+
+// EventEmitter is defined in src/node_events.cc
+// EventEmitter.prototype.emit() is also defined there.
+EventEmitter.prototype.addListener = function(type, listener) {
+  if ('function' !== typeof listener) {
+    throw new Error('addListener only takes instances of Function');
+  }
+
+  if (!this._events) this._events = {};
+
+  // To avoid recursion in the case that type == "newListeners"! Before
+  // adding it to the listeners, first emit "newListeners".
+  this.emit('newListener', type, listener);
+
+  if (!this._events[type]) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  } else if (isArray(this._events[type])) {
+
+    // Check for listener leak
+    if (!this._events[type].warned) {
+      var m;
+      if (this._events.maxListeners !== undefined) {
+        m = this._events.maxListeners;
+      } else {
+        m = defaultMaxListeners;
+      }
+
+      if (m && m > 0 && this._events[type].length > m) {
+        this._events[type].warned = true;
+        console.error('(node) warning: possible EventEmitter memory ' +
+                      'leak detected. %d listeners added. ' +
+                      'Use emitter.setMaxListeners() to increase limit.',
+                      this._events[type].length);
+        console.trace();
+      }
+    }
+
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  } else {
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  var self = this;
+  self.on(type, function g() {
+    self.removeListener(type, g);
+    listener.apply(this, arguments);
+  });
+
+  return this;
+};
+
+EventEmitter.prototype.removeListener = function(type, listener) {
+  if ('function' !== typeof listener) {
+    throw new Error('removeListener only takes instances of Function');
+  }
+
+  // does not use listeners(), so no side effect of creating _events[type]
+  if (!this._events || !this._events[type]) return this;
+
+  var list = this._events[type];
+
+  if (isArray(list)) {
+    var i = indexOf(list, listener);
+    if (i < 0) return this;
+    list.splice(i, 1);
+    if (list.length == 0)
+      delete this._events[type];
+  } else if (this._events[type] === listener) {
+    delete this._events[type];
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  if (arguments.length === 0) {
+    this._events = {};
+    return this;
+  }
+
+  // does not use listeners(), so no side effect of creating _events[type]
+  if (type && this._events && this._events[type]) this._events[type] = null;
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  if (!this._events) this._events = {};
+  if (!this._events[type]) this._events[type] = [];
+  if (!isArray(this._events[type])) {
+    this._events[type] = [this._events[type]];
+  }
+  return this._events[type];
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  var ret;
+  if (!emitter._events || !emitter._events[type])
+    ret = 0;
+  else if (typeof emitter._events[type] === 'function')
+    ret = 1;
+  else
+    ret = emitter._events[type].length;
+  return ret;
+};
+
+},{"__browserify_process":20}],15:[function(require,module,exports){
+var process=require("__browserify_process");function filter (xs, fn) {
     var res = [];
     for (var i = 0; i < xs.length; i++) {
         if (fn(xs[i], i, xs)) res.push(xs[i]);
@@ -1762,8 +1361,356 @@ exports.relative = function(from, to) {
   return outputParts.join('/');
 };
 
-})(require("__browserify_process"))
-},{"__browserify_process":17}],19:[function(require,module,exports){
+exports.sep = '/';
+
+},{"__browserify_process":20}],16:[function(require,module,exports){
+var events = require('events');
+
+exports.isArray = isArray;
+exports.isDate = function(obj){return Object.prototype.toString.call(obj) === '[object Date]'};
+exports.isRegExp = function(obj){return Object.prototype.toString.call(obj) === '[object RegExp]'};
+
+
+exports.print = function () {};
+exports.puts = function () {};
+exports.debug = function() {};
+
+exports.inspect = function(obj, showHidden, depth, colors) {
+  var seen = [];
+
+  var stylize = function(str, styleType) {
+    // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+    var styles =
+        { 'bold' : [1, 22],
+          'italic' : [3, 23],
+          'underline' : [4, 24],
+          'inverse' : [7, 27],
+          'white' : [37, 39],
+          'grey' : [90, 39],
+          'black' : [30, 39],
+          'blue' : [34, 39],
+          'cyan' : [36, 39],
+          'green' : [32, 39],
+          'magenta' : [35, 39],
+          'red' : [31, 39],
+          'yellow' : [33, 39] };
+
+    var style =
+        { 'special': 'cyan',
+          'number': 'blue',
+          'boolean': 'yellow',
+          'undefined': 'grey',
+          'null': 'bold',
+          'string': 'green',
+          'date': 'magenta',
+          // "name": intentionally not styling
+          'regexp': 'red' }[styleType];
+
+    if (style) {
+      return '\u001b[' + styles[style][0] + 'm' + str +
+             '\u001b[' + styles[style][1] + 'm';
+    } else {
+      return str;
+    }
+  };
+  if (! colors) {
+    stylize = function(str, styleType) { return str; };
+  }
+
+  function format(value, recurseTimes) {
+    // Provide a hook for user-specified inspect functions.
+    // Check that value is an object with an inspect function on it
+    if (value && typeof value.inspect === 'function' &&
+        // Filter out the util module, it's inspect function is special
+        value !== exports &&
+        // Also filter out any prototype objects using the circular check.
+        !(value.constructor && value.constructor.prototype === value)) {
+      return value.inspect(recurseTimes);
+    }
+
+    // Primitive types cannot have properties
+    switch (typeof value) {
+      case 'undefined':
+        return stylize('undefined', 'undefined');
+
+      case 'string':
+        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                                 .replace(/'/g, "\\'")
+                                                 .replace(/\\"/g, '"') + '\'';
+        return stylize(simple, 'string');
+
+      case 'number':
+        return stylize('' + value, 'number');
+
+      case 'boolean':
+        return stylize('' + value, 'boolean');
+    }
+    // For some reason typeof null is "object", so special case here.
+    if (value === null) {
+      return stylize('null', 'null');
+    }
+
+    // Look up the keys of the object.
+    var visible_keys = Object_keys(value);
+    var keys = showHidden ? Object_getOwnPropertyNames(value) : visible_keys;
+
+    // Functions without properties can be shortcutted.
+    if (typeof value === 'function' && keys.length === 0) {
+      if (isRegExp(value)) {
+        return stylize('' + value, 'regexp');
+      } else {
+        var name = value.name ? ': ' + value.name : '';
+        return stylize('[Function' + name + ']', 'special');
+      }
+    }
+
+    // Dates without properties can be shortcutted
+    if (isDate(value) && keys.length === 0) {
+      return stylize(value.toUTCString(), 'date');
+    }
+
+    var base, type, braces;
+    // Determine the object type
+    if (isArray(value)) {
+      type = 'Array';
+      braces = ['[', ']'];
+    } else {
+      type = 'Object';
+      braces = ['{', '}'];
+    }
+
+    // Make functions say that they are functions
+    if (typeof value === 'function') {
+      var n = value.name ? ': ' + value.name : '';
+      base = (isRegExp(value)) ? ' ' + value : ' [Function' + n + ']';
+    } else {
+      base = '';
+    }
+
+    // Make dates with properties first say the date
+    if (isDate(value)) {
+      base = ' ' + value.toUTCString();
+    }
+
+    if (keys.length === 0) {
+      return braces[0] + base + braces[1];
+    }
+
+    if (recurseTimes < 0) {
+      if (isRegExp(value)) {
+        return stylize('' + value, 'regexp');
+      } else {
+        return stylize('[Object]', 'special');
+      }
+    }
+
+    seen.push(value);
+
+    var output = keys.map(function(key) {
+      var name, str;
+      if (value.__lookupGetter__) {
+        if (value.__lookupGetter__(key)) {
+          if (value.__lookupSetter__(key)) {
+            str = stylize('[Getter/Setter]', 'special');
+          } else {
+            str = stylize('[Getter]', 'special');
+          }
+        } else {
+          if (value.__lookupSetter__(key)) {
+            str = stylize('[Setter]', 'special');
+          }
+        }
+      }
+      if (visible_keys.indexOf(key) < 0) {
+        name = '[' + key + ']';
+      }
+      if (!str) {
+        if (seen.indexOf(value[key]) < 0) {
+          if (recurseTimes === null) {
+            str = format(value[key]);
+          } else {
+            str = format(value[key], recurseTimes - 1);
+          }
+          if (str.indexOf('\n') > -1) {
+            if (isArray(value)) {
+              str = str.split('\n').map(function(line) {
+                return '  ' + line;
+              }).join('\n').substr(2);
+            } else {
+              str = '\n' + str.split('\n').map(function(line) {
+                return '   ' + line;
+              }).join('\n');
+            }
+          }
+        } else {
+          str = stylize('[Circular]', 'special');
+        }
+      }
+      if (typeof name === 'undefined') {
+        if (type === 'Array' && key.match(/^\d+$/)) {
+          return str;
+        }
+        name = JSON.stringify('' + key);
+        if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+          name = name.substr(1, name.length - 2);
+          name = stylize(name, 'name');
+        } else {
+          name = name.replace(/'/g, "\\'")
+                     .replace(/\\"/g, '"')
+                     .replace(/(^"|"$)/g, "'");
+          name = stylize(name, 'string');
+        }
+      }
+
+      return name + ': ' + str;
+    });
+
+    seen.pop();
+
+    var numLinesEst = 0;
+    var length = output.reduce(function(prev, cur) {
+      numLinesEst++;
+      if (cur.indexOf('\n') >= 0) numLinesEst++;
+      return prev + cur.length + 1;
+    }, 0);
+
+    if (length > 50) {
+      output = braces[0] +
+               (base === '' ? '' : base + '\n ') +
+               ' ' +
+               output.join(',\n  ') +
+               ' ' +
+               braces[1];
+
+    } else {
+      output = braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+    }
+
+    return output;
+  }
+  return format(obj, (typeof depth === 'undefined' ? 2 : depth));
+};
+
+
+function isArray(ar) {
+  return Array.isArray(ar) ||
+         (typeof ar === 'object' && Object.prototype.toString.call(ar) === '[object Array]');
+}
+
+
+function isRegExp(re) {
+  typeof re === 'object' && Object.prototype.toString.call(re) === '[object RegExp]';
+}
+
+
+function isDate(d) {
+  return typeof d === 'object' && Object.prototype.toString.call(d) === '[object Date]';
+}
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+exports.log = function (msg) {};
+
+exports.pump = null;
+
+var Object_keys = Object.keys || function (obj) {
+    var res = [];
+    for (var key in obj) res.push(key);
+    return res;
+};
+
+var Object_getOwnPropertyNames = Object.getOwnPropertyNames || function (obj) {
+    var res = [];
+    for (var key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) res.push(key);
+    }
+    return res;
+};
+
+var Object_create = Object.create || function (prototype, properties) {
+    // from es5-shim
+    var object;
+    if (prototype === null) {
+        object = { '__proto__' : null };
+    }
+    else {
+        if (typeof prototype !== 'object') {
+            throw new TypeError(
+                'typeof prototype[' + (typeof prototype) + '] != \'object\''
+            );
+        }
+        var Type = function () {};
+        Type.prototype = prototype;
+        object = new Type();
+        object.__proto__ = prototype;
+    }
+    if (typeof properties !== 'undefined' && Object.defineProperties) {
+        Object.defineProperties(object, properties);
+    }
+    return object;
+};
+
+exports.inherits = function(ctor, superCtor) {
+  ctor.super_ = superCtor;
+  ctor.prototype = Object_create(superCtor.prototype, {
+    constructor: {
+      value: ctor,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+};
+
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (typeof f !== 'string') {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(exports.inspect(arguments[i]));
+    }
+    return objects.join(' ');
+  }
+
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j': return JSON.stringify(args[i++]);
+      default:
+        return x;
+    }
+  });
+  for(var x = args[i]; i < len; x = args[++i]){
+    if (x === null || typeof x !== 'object') {
+      str += ' ' + x;
+    } else {
+      str += ' ' + exports.inspect(x);
+    }
+  }
+  return str;
+};
+
+},{"events":14}],17:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1850,7 +1797,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
 };
 
 },{}],18:[function(require,module,exports){
-(function(){var assert = require('assert');
+var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
 Buffer.poolSize = 8192;
@@ -2932,8 +2879,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
   writeDouble(this, value, offset, true, noAssert);
 };
 
-})()
-},{"assert":4,"./buffer_ieee754":19,"base64-js":20}],20:[function(require,module,exports){
+},{"./buffer_ieee754":17,"assert":13,"base64-js":19}],19:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -3018,6 +2964,60 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 	module.exports.toByteArray = b64ToByteArray;
 	module.exports.fromByteArray = uint8ToBase64;
 }());
+
+},{}],20:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            if (ev.source === window && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
 
 },{}]},{},[1])(1)
 });

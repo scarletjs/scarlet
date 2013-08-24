@@ -74,7 +74,7 @@ function someFunction(){
 	var self = this;
     
 	self.memberFunction1 = function(){};
-	self.memberFunction1 = function(){};
+	self.memberFunction2 = function(){};
 }
 
 scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercepted
@@ -127,9 +127,9 @@ var min = Math.min(1,2,3); //-> will return 1;
 
 Scarlet provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
 
-* result -> result of the method called (populated after main method gets called)
-* args -> the arguments passed into the method
-* object -> the *this* context of the called method
+* args - the arguments passed into the method
+* object - the *this* context of the called method
+* result - result of the method called (populated after main method gets called)
 
 Here is an example of how to get result and args from the invocation object:
 

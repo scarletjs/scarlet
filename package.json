@@ -1,7 +1,7 @@
 {
   "name": "scarlet",
   "description": "The simple fast javascript interceptor for methods and properties.",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>",
   "repository": {
     "type": "git",

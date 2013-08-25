@@ -15,7 +15,7 @@ module.exports = function(grunt) {
     spawn: {
       test: {
         command: "mocha",
-        arguments: ["--reporter", "spec", "{0}"],
+        "arguments": ["--reporter", "spec", "{0}"],
         directory: "./tests",
         pattern: "**/*.js"
       }

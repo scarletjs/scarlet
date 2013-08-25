@@ -4,10 +4,10 @@ var assert = require("assert");
 
 var scarlet = new (require("../lib/scarlet"))();
 
-ObjectLiteral = require("./dummies/object-literal");
-NamedFunction = require("./dummies/named-function");
-UnnamedFunction = require("./dummies/unnamed-function");
-PrototypeFunction = require("./dummies/prototype-function");
+var ObjectLiteral = require("./dummies/object-literal");
+var NamedFunction = require("./dummies/named-function");
+var UnnamedFunction = require("./dummies/unnamed-function");
+var PrototypeFunction = require("./dummies/prototype-function");
 
 describe("Given we are intercepting", function() {
 

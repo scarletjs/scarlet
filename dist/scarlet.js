@@ -233,7 +233,7 @@ function Interceptor(typeOrInstance) {
 		self.series.addOnDone(function(invocation){ self.emit('done',invocation); }, self);
 
 		self.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {
-			
+
 			var _invocation = new Invocation(instance, method, args);
 
 			self.emit('before',_invocation);
@@ -322,7 +322,6 @@ var assert = require("assert");
 
 function Invocation(object, method, args) {
 
-	assert(args, "Scarlet::Invocation::args == null");
 	assert(object, "Scarlet::Invocation::object == null");
 	assert(method, "Scarlet::Invocation::method == null");
 
@@ -415,6 +414,11 @@ function ProxyInstance(instance) {
 			instance.__scarlet = {};
 
 			enumerable.forEach(instance, function(member, memberName) {
+				
+				if(memberName === "__scarlet")
+					return;
+
+				//console.log(memberName);
 				var proxy = new ProxyMember(instance,memberName);
 				proxy.whenCalled(target);
 			});
@@ -457,9 +461,10 @@ function ProxyMember(instance, memberName) {
 
 		instance.__scarlet[memberName] = instance[memberName];
 
-		createPropertyProxy(instance[memberName], memberName, target);
-
-		createFunctionProxy(instance[memberName], memberName, target);
+		if(instance[memberName] instanceof(Function))
+			createFunctionProxy(instance[memberName], memberName, target);
+		else
+			createPropertyProxy(instance[memberName], memberName, target);
 
 		return instance;
 
@@ -468,7 +473,7 @@ function ProxyMember(instance, memberName) {
 	var createPropertyProxy = function(member,memberName,target){
 		if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName !== "__scarlet") && (memberName !== "__typename")) {
 
-			instance[memberName] = Object.defineProperty(instance, memberName, {
+			instance = Object.defineProperty(instance, memberName, {
 
 				configurable: true,
 
@@ -485,6 +490,7 @@ function ProxyMember(instance, memberName) {
 				}
 				
 			});
+
 		} else if (instance.hasOwnProperty(memberName) && !(member instanceof(Function)) && (memberName === "__typename")) {
 			instance.__typename = instance.__scarlet.__typename;
 		}
@@ -601,7 +607,7 @@ function Scarlet(pluginArr) {
 	self.lib = require("./index");
 
 	/**
-	 * Creates a Scarlet interceptor.
+	 * Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.
 	 *
 	 * ####Example:
 	 *

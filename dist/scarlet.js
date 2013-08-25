@@ -5,6 +5,8 @@ module.exports.Interceptor = require("./lib/interceptor.js");
 
 },{"./lib/interceptor.js":6,"./lib/scarlet.js":12}],2:[function(require,module,exports){
 function Enumerable() {
+	
+	"use strict";
 
 	var self = this;
 
@@ -63,42 +65,44 @@ module.exports = function(ctor, superCtor) {
 };
 },{}],4:[function(require,module,exports){
 function Series(){
+	"use strict";
+	
 	var self = this;
 
 	self.targets = [];
 	self.onDone = null;
 
-	self.invoke = function(invocation,onAllTargetsCalled) {
+	self.invoke = function(parameters,onAllTargetsCalled) {
 		var didComplete = false;
 
-		self.callAllTargets(invocation,function(){
+		self.callAllTargets(parameters,function(){
+
 			if(!didComplete){
 				onAllTargetsCalled();
 				didComplete = true;
 			}
 
 			if(self.onDone)
-				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);
+				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[parameters]);
 
+			return;
 		});
 
 		if(!didComplete){
 			onAllTargetsCalled();
 			didComplete = true;
 		}
-
+		
 		return;
 	};
 
-	self.callAllTargets = function(invocation,onComplete) {
+	self.callAllTargets = function(parameters,onComplete) {
 		var currentTarget  = 0;
 
 		var next = function(error, result){
-			
-			if(currentTarget >= self.targets.length){
-				onComplete();
-				return;				
-			}
+
+			if(currentTarget >= self.targets.length)
+				return onComplete();
 
 			var targetMethod = self.targets[currentTarget];
 			currentTarget++;
@@ -108,7 +112,7 @@ function Series(){
 		};
 
 		var targetCall = function(target){
-			target.targetMethod.apply(target.targetThisContext,[next,invocation]);
+			target.targetMethod.apply(target.targetThisContext,[next,parameters]);
 		};
 
 		next();
@@ -152,10 +156,11 @@ module.exports = {
 var assert = require("assert");
 var events = require('events');
 var Invocation = require("./invocation");
-var ProxyInstance = require("./proxy-instance");
-var ProxyPrototype = require("./proxy-prototype");
 var ProxyMember = require("./proxy-member");
 var Series = require("./extensions/series");
+var ProxyInstance = require("./proxy-instance");
+var ProxyPrototype = require("./proxy-prototype");
+
 
 /**
  * A Scarlet interceptor that emits events.
@@ -190,6 +195,8 @@ var Series = require("./extensions/series");
  * @return {Function} A Scarlet interceptor object.
 **/
 function Interceptor(typeOrInstance) {
+	
+	"use strict";
 
 	assert(typeOrInstance, "Scarlet::Interceptor::typeOrInstance == null");
 
@@ -321,6 +328,8 @@ module.exports = Interceptor;
 var assert = require("assert");
 
 function Invocation(object, method, args) {
+	
+	"use strict";
 
 	assert(object, "Scarlet::Invocation::object == null");
 	assert(method, "Scarlet::Invocation::method == null");
@@ -379,6 +388,8 @@ var __dirname="/lib";var path = require("path");
 var assert = require("assert");
 
 function Plugins() {
+	
+	"use strict";
 
 	var self = this;
 	
@@ -388,9 +399,9 @@ function Plugins() {
 		assert(pluginPath, "Scarlet::Plugins::loadPlugin::pluginPath == null");
 
 		fullPath = path.normalize(__dirname + "/../../" + pluginPath);
-		var plugin = require(fullPath);
+		var ScarletPlugin = require(fullPath);
 
-		pluginObject = new plugin($scarlet);
+		pluginObject = new ScarletPlugin($scarlet);
 		pluginObject.initialize();
 
 	};
@@ -403,6 +414,8 @@ var ProxyMember = require("./proxy-member");
 var enumerable = require("./extensions/enumerable");
 
 function ProxyInstance(instance) {
+	
+	"use strict";
 
 	var self = this;
 
@@ -418,7 +431,6 @@ function ProxyInstance(instance) {
 				if(memberName === "__scarlet")
 					return;
 
-				//console.log(memberName);
 				var proxy = new ProxyMember(instance,memberName);
 				proxy.whenCalled(target);
 			});
@@ -451,6 +463,8 @@ var enumerable = require("./extensions/enumerable");
 
 
 function ProxyMember(instance, memberName) {
+	
+	"use strict";
 
 	var self = this;
 
@@ -533,6 +547,8 @@ var inherits = require("./extensions/inherits");
 var enumerable = require("./extensions/enumerable");
 
 function ProxyPrototype(instance) {
+	
+	"use strict";
 
 	var self = this;
 

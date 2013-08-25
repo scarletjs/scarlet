@@ -105,22 +105,33 @@ var min = Math.min(1,2,3);
 
 ### Creation of asynchronous interceptors
 
-Scarlet allows you to create **asynchronous** interceptors on **synchronous** calls without having to change a method to contain a callback. here is an example
+Scarlet allows you to create **asynchronous** interceptors, that will call the *intercepted* method once all the interceptors have completed.  here is an example
 
 ```javascript
 function asyncInterceptor(proceed){
 	setTimeout(function(){ 
-        console.log("completed long running function");
-        
-        proceed(); //-> proceeds to the next interceptor if one exists
+        console.log("completed interceptor long running function");
+
+        //-> proceeds to the next interceptor if one exists
+        proceed(); 
      }, 10);
 }
 
-scarlet.intercept(Math,"min")
+function asyncMethod(){
+    console.log("Async method called");
+
+    setTimeout(function(){
+        console.log("Async method Completed");
+    },10);
+}
+
+scarlet.interceptAsync(asyncMethod)
         .using(asyncInterceptor);
         
-var min = Math.min(1,2,3); //-> will return 1;
-//-> ~10 ms laster --> outputs "completed long running function"
+asyncMethod();
+//-> 1. ~10 ms later --> outputs "completed interceptor long running function"
+//-> 2. outputs "Async method called"
+//-> 3. ~10 ms later --> outputs "Async method Completed"
 ```
 
 ### Access to intercpted method details (arguments, result, etc)
@@ -230,21 +241,30 @@ var min = Math.min(1,2,3);
 ### Async Interceptor
 
 ```javascript
-var scarlet = require('scarlet');
-
 function asyncInterceptor(proceed){
-	setTimeout(function(){ 
-        console.log("completed long running function");
-        
-        proceed(); //-> proceeds to the next interceptor if one exists
+    setTimeout(function(){ 
+        console.log("completed interceptor long running function");
+
+        //-> proceeds to the next interceptor if one exists
+        proceed(); 
      }, 10);
 }
 
-scarlet.intercept(Math,"min")
+function asyncMethod(){
+    console.log("Async method called");
+
+    setTimeout(function(){
+        console.log("Async method Completed");
+    },10);
+}
+
+scarlet.interceptAsync(asyncMethod)
         .using(asyncInterceptor);
         
-var min = Math.min(1,2,3); //-> will return 1;
-//-> 10 ms laster --> outputs "completed long running function"
+asyncMethod();
+//-> 1. ~10 ms later --> outputs "completed interceptor long running function"
+//-> 2. outputs "Async method called"
+//-> 3. ~10 ms later --> outputs "Async method Completed"
 ```
 
 ### Using the invocation object

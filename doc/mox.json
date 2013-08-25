@@ -1,24 +1,6 @@
 {
     "comments": [
         {
-            "tags": [],
-            "description": {
-                "full": "",
-                "summary": "",
-                "body": ""
-            },
-            "isPrivate": false,
-            "code": "module.exports = {\n\tUtil: require(\"util\"),\n\tAssert: require(\"assert\"),\n\tPlugins: require(\"./plugins\"),\n\tInvocation: require(\"./invocation\"),\n\tInterceptor: require(\"./interceptor\"),\n\tProxyInstance: require(\"./proxy-instance\"),\n\tProxyPrototype: require(\"./proxy-prototype\"),\n\tEnumerable: require(\"./extensions/enumerable\")\n};",
-            "ctx": {
-                "type": "property",
-                "receiver": "module",
-                "name": "exports",
-                "value": "{",
-                "string": "module.exports"
-            },
-            "fileName": "lib/index.js"
-        },
-        {
             "tags": [
                 {
                     "type": "category",
@@ -52,7 +34,7 @@
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "function Interceptor(typeOrInstance) {\n\t\n\t\"use strict\";\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.proxy = null;\n\tself.series = new Series();\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\tevents.EventEmitter.call(this);\n\n\tself.forType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forMember = function(memberName) {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\t\tassert(memberName !== null, \"When defining a member Interceptor must define a member property to intercept\");\n\n\t\tself.proxy = new ProxyMember(self.instance,memberName);\n\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\t\t\n\t\tself.series.addOnDone(function(invocation){ self.emit('done',invocation); }, self);\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {\n\n\t\t\tvar _invocation = new Invocation(instance, method, args);\n\n\t\t\tself.emit('before',_invocation);\n\t\t\tself.series.invoke(_invocation,_invocation.proceed);\n\t\t\tself.emit('after',_invocation);\n\t\t\t\n\t\t\treturn _invocation.result;\n\t\t});\n\t};",
+            "code": "function Interceptor(typeOrInstance) {\n\t\n\t\"use strict\";\n\n\tassert(typeOrInstance, \"Scarlet::Interceptor::typeOrInstance == null\");\n\n\tvar self = this;\n\n\tself.proxy = null;\n\tself.isAsync = false;\n\tself.series = new Series();\n\tself.proxiedInstance = null;\n\tself.instance = typeOrInstance;\n\tevents.EventEmitter.call(this);\n\n\tself.asAsync = function(){\n\t\tself.isAsync = true;\n\t};\n\n\tself.forType = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyPrototype(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forObject = function() {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\n\t\tself.proxy = new ProxyInstance(self.instance);\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tself.forMember = function(memberName) {\n\t\tassert(self.proxy === null, \"Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'\");\n\t\tassert(memberName !== null, \"When defining a member Interceptor must define a member property to intercept\");\n\n\t\tself.proxy = new ProxyMember(self.instance,memberName);\n\n\t\tinitProxy();\n\t\treturn self;\n\t};\n\n\tvar initProxy = function(){\n\t\tassert(self.proxy, \"Please make sure you use the 'asObject()' or 'asType()' method before initializing a proxy\");\n\t\t\n\t\tself.series.addOnDone(function(invocation){ self.emit('done',invocation); }, self);\n\n\t\tself.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {\n\n\t\t\tvar _invocation = new Invocation(instance, method, args);\n\n\t\t\tself.emit('before',_invocation);\n\n\t\t\tif(self.isAsync)\n\t\t\t\tself.series.invokeAsync(_invocation,_invocation.proceed);\n\t\t\telse\n\t\t\t\tself.series.invoke(_invocation,_invocation.proceed);\n\t\t\t\n\t\t\tself.emit('after',_invocation);\n\t\t\t\n\t\t\treturn _invocation.result;\n\t\t});\n\t};",
             "ctx": {
                 "type": "function",
                 "name": "Interceptor",
@@ -147,6 +129,24 @@
                 "string": "self.resolve()"
             },
             "fileName": "lib/interceptor.js"
+        },
+        {
+            "tags": [],
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
+            },
+            "isPrivate": false,
+            "code": "module.exports = {\n\tUtil: require(\"util\"),\n\tAssert: require(\"assert\"),\n\tPlugins: require(\"./plugins\"),\n\tInvocation: require(\"./invocation\"),\n\tInterceptor: require(\"./interceptor\"),\n\tProxyInstance: require(\"./proxy-instance\"),\n\tProxyPrototype: require(\"./proxy-prototype\"),\n\tEnumerable: require(\"./extensions/enumerable\")\n};",
+            "ctx": {
+                "type": "property",
+                "receiver": "module",
+                "name": "exports",
+                "value": "{",
+                "string": "module.exports"
+            },
+            "fileName": "lib/index.js"
         },
         {
             "tags": [
@@ -443,12 +443,55 @@
             },
             "isPrivate": false,
             "ignore": false,
-            "code": "self.intercept = function(typeOrInstance, memberName) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\t\tassert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');\n\n\t\tvar self = this;\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\n\t\tif(typeOrInstance.hasOwnProperty(memberName))\n\t\t\treturn _interceptor.forMember(memberName);\n\t\t\n\t\tif (typeOrInstance.prototype)\n\t\t\treturn  _interceptor.forType();\t\t\n\n\t\treturn _interceptor.forObject();\n\t};",
+            "code": "self.intercept = function(typeOrInstance, memberName, asAsync) {\n\n\t\tassert(typeOrInstance, \"Cannot have null type or instance\");\n\t\tassert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');\n\n\t\tvar self = this;\n\n\t\tvar _interceptor = new self.lib.Interceptor(typeOrInstance);\n\n\t\tif(asAsync)\n\t\t\t_interceptor.asAsync();\n\n\t\tif(typeOrInstance.hasOwnProperty(memberName))\n\t\t\treturn _interceptor.forMember(memberName);\n\t\t\n\t\tif (typeOrInstance.prototype)\n\t\t\treturn  _interceptor.forType();\t\t\n\n\t\treturn _interceptor.forObject();\n\t};",
             "ctx": {
                 "type": "method",
                 "receiver": "self",
                 "name": "intercept",
                 "string": "self.intercept()"
+            },
+            "fileName": "lib/scarlet.js"
+        },
+        {
+            "tags": [
+                {
+                    "type": "category",
+                    "string": "Interception Methods"
+                },
+                {
+                    "type": "method",
+                    "string": "intercept"
+                },
+                {
+                    "type": "param",
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                },
+                {
+                    "type": "return",
+                    "types": [
+                        "Function"
+                    ],
+                    "description": "A Scarlet interceptor object."
+                }
+            ],
+            "description": {
+                "full": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
+                "body": "<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
+            },
+            "isPrivate": false,
+            "ignore": false,
+            "code": "self.interceptAsync = function(typeOrInstance, memberName) {\n\n\t\treturn self.intercept(typeOrInstance,memberName,true);\n\t};",
+            "ctx": {
+                "type": "method",
+                "receiver": "self",
+                "name": "interceptAsync",
+                "string": "self.interceptAsync()"
             },
             "fileName": "lib/scarlet.js"
         },
@@ -556,7 +599,7 @@
                 "body": ""
             },
             "isPrivate": false,
-            "code": "function Series(){\n\t\"use strict\";\n\t\n\tvar self = this;\n\n\tself.targets = [];\n\tself.onDone = null;\n\n\tself.invoke = function(invocation,onAllTargetsCalled) {\n\t\tvar didComplete = false;\n\n\t\tself.callAllTargets(invocation,function(){\n\t\t\tif(!didComplete){\n\t\t\t\tonAllTargetsCalled();\n\t\t\t\tdidComplete = true;\n\t\t\t}\n\n\t\t\tif(self.onDone)\n\t\t\t\tself.onDone.targetMethod.apply(self.onDone.targetThisContext,[invocation]);\n\n\t\t});\n\n\t\tif(!didComplete){\n\t\t\tonAllTargetsCalled();\n\t\t\tdidComplete = true;\n\t\t}\n\n\t\treturn;\n\t};\n\n\tself.callAllTargets = function(invocation,onComplete) {\n\t\tvar currentTarget  = 0;\n\n\t\tvar next = function(error, result){\n\t\t\t\n\t\t\tif(currentTarget >= self.targets.length){\n\t\t\t\tonComplete();\n\t\t\t\treturn;\t\t\t\t\n\t\t\t}\n\n\t\t\tvar targetMethod = self.targets[currentTarget];\n\t\t\tcurrentTarget++;\n\t\t\ttargetCall(targetMethod);\n\n\t\t\treturn;\n\t\t};\n\n\t\tvar targetCall = function(target){\n\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,invocation]);\n\t\t};\n\n\t\tnext();\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n\tself.addOnDone = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.onDone = target;\n\t};\n\t\n}\n\nmodule.exports = Series;",
+            "code": "function Series(){\n\t\"use strict\";\n\t\n\tvar self = this;\n\n\tself.targets = [];\n\tself.onDone = null;\n\n\tself.invokeAsync = function(parameters,onAllTargetsCalled) {\n\n\t\tself.callAllTargets(parameters,function(){\n\n\t\t\tif(onAllTargetsCalled)\n\t\t\t\tonAllTargetsCalled();\n\n\t\t\tif(self.onDone)\n\t\t\t\tself.onDone.targetMethod.apply(self.onDone.targetThisContext,[parameters]);\n\n\t\t});\n\t\t\n\t};\n\n\tself.invoke = function(parameters,onAllTargetsCalled) {\n\t\tvar didComplete = false;\n\n\t\tself.callAllTargets(parameters,function(){\n\n\t\t\tif(!didComplete){\n\t\t\t\tonAllTargetsCalled();\n\t\t\t\tdidComplete = true;\n\t\t\t}\n\n\t\t\tif(self.onDone)\n\t\t\t\tself.onDone.targetMethod.apply(self.onDone.targetThisContext,[parameters]);\n\n\t\t\treturn;\n\t\t});\n\n\t\tif(!didComplete){\n\t\t\tonAllTargetsCalled();\n\t\t\tdidComplete = true;\n\t\t}\n\t\t\n\t\treturn;\n\t};\n\n\tself.callAllTargets = function(parameters,onComplete) {\n\t\tvar currentTarget  = 0;\n\n\t\tvar next = function(error, result){\n\n\t\t\tif(currentTarget >= self.targets.length)\n\t\t\t\treturn onComplete();\n\n\t\t\tvar targetMethod = self.targets[currentTarget];\n\t\t\tcurrentTarget++;\n\t\t\ttargetCall(targetMethod);\n\n\t\t\treturn;\n\t\t};\n\n\t\tvar targetCall = function(target){\n\t\t\ttarget.targetMethod.apply(target.targetThisContext,[next,parameters]);\n\t\t};\n\n\t\tnext();\n\t};\n\n\tself.addTarget = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.targets.push(target);\n\t};\n\n\tself.addOnDone = function(targetMethod,targetThisContext){\n\t\tvar target = {\n\t\t\ttargetMethod : targetMethod,\n\t\t\ttargetThisContext : targetThisContext\n\t\t};\n\n\t\tself.onDone = target;\n\t};\n\t\n}\n\nmodule.exports = Series;",
             "ctx": {
                 "type": "function",
                 "name": "Series",
@@ -582,17 +625,6 @@
         }
     ],
     "mox": [
-        {
-            "params": [],
-            "name": "exports",
-            "type": "property",
-            "fileName": "lib/index.js",
-            "description": {
-                "full": "",
-                "summary": "",
-                "body": ""
-            }
-        },
         {
             "params": [
                 {
@@ -673,6 +705,17 @@
                     "Function"
                 ],
                 "description": "A reference to the function being intercepted"
+            }
+        },
+        {
+            "params": [],
+            "name": "exports",
+            "type": "property",
+            "fileName": "lib/index.js",
+            "description": {
+                "full": "",
+                "summary": "",
+                "body": ""
             }
         },
         {
@@ -843,6 +886,34 @@
                 "full": "<p>Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
                 "summary": "<p>Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
                 "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
+            },
+            "category": "Interception Methods",
+            "method": "intercept",
+            "return": {
+                "types": [
+                    "Function"
+                ],
+                "description": "A Scarlet interceptor object."
+            }
+        },
+        {
+            "params": [
+                {
+                    "types": [
+                        "Function",
+                        "Object"
+                    ],
+                    "name": "typeOrInstance",
+                    "description": "the type or instance to be intercepted"
+                }
+            ],
+            "name": "interceptAsync",
+            "type": "method",
+            "fileName": "lib/scarlet.js",
+            "description": {
+                "full": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
+                "summary": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
+                "body": "<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
             },
             "category": "Interception Methods",
             "method": "intercept",
@@ -1081,6 +1152,34 @@
                                 "Function",
                                 "Object"
                             ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "interceptAsync",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
+                        "body": "<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A Scarlet interceptor object."
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
                             "name": "pluginPath",
                             "description": "the plugin to be loaded"
                         }
@@ -1197,22 +1296,6 @@
     ],
     "files": [
         {
-            "tag": "lib/index.js",
-            "moxComments": [
-                {
-                    "params": [],
-                    "name": "exports",
-                    "type": "property",
-                    "fileName": "lib/index.js",
-                    "description": {
-                        "full": "",
-                        "summary": "",
-                        "body": ""
-                    }
-                }
-            ]
-        },
-        {
             "tag": "lib/interceptor.js",
             "moxComments": [
                 {
@@ -1295,6 +1378,22 @@
                             "Function"
                         ],
                         "description": "A reference to the function being intercepted"
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "lib/index.js",
+            "moxComments": [
+                {
+                    "params": [],
+                    "name": "exports",
+                    "type": "property",
+                    "fileName": "lib/index.js",
+                    "description": {
+                        "full": "",
+                        "summary": "",
+                        "body": ""
                     }
                 }
             ]
@@ -1495,6 +1594,34 @@
                         "full": "<p>Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
                         "summary": "<p>Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
                         "body": "<h4>Example:</h4>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction);\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
+                    },
+                    "category": "Interception Methods",
+                    "method": "intercept",
+                    "return": {
+                        "types": [
+                            "Function"
+                        ],
+                        "description": "A Scarlet interceptor object."
+                    }
+                },
+                {
+                    "params": [
+                        {
+                            "types": [
+                                "Function",
+                                "Object"
+                            ],
+                            "name": "typeOrInstance",
+                            "description": "the type or instance to be intercepted"
+                        }
+                    ],
+                    "name": "interceptAsync",
+                    "type": "method",
+                    "fileName": "lib/scarlet.js",
+                    "description": {
+                        "full": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>\n\n<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>",
+                        "summary": "<p>Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.</p>",
+                        "body": "<h4>Example:</h4>\n\n<p>Given an asynchronous interceptor:</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">function asyncInterceptor(proceed){\n    setTimeout(function(){\n        //done with long task\n        proceed\n    },10);\n}\n</pre></div>\n\n<p>Basic interceptor</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.interceptAsync(someFunction)\n       .using(asyncInterceptor)\n</pre></div>\n\n<p>interceptor with events</p>\n\n<div class=\"highlight\"><pre lang=\"javascript\">Scarlet.intercept(someFunction)\n       .using(asyncInterceptor)\n       .on('before', beforeFunction)\n       .on('after', afterFunction)\n       .on('done', doneFunction);\n</pre></div>"
                     },
                     "category": "Interception Methods",
                     "method": "intercept",

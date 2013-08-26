@@ -72,6 +72,20 @@ function Series(){
 	self.targets = [];
 	self.onDone = null;
 
+	self.invokeAsync = function(parameters,onAllTargetsCalled) {
+
+		self.callAllTargets(parameters,function(){
+
+			if(onAllTargetsCalled)
+				onAllTargetsCalled();
+
+			if(self.onDone)
+				self.onDone.targetMethod.apply(self.onDone.targetThisContext,[parameters]);
+
+		});
+		
+	};
+
 	self.invoke = function(parameters,onAllTargetsCalled) {
 		var didComplete = false;
 
@@ -203,10 +217,15 @@ function Interceptor(typeOrInstance) {
 	var self = this;
 
 	self.proxy = null;
+	self.isAsync = false;
 	self.series = new Series();
 	self.proxiedInstance = null;
 	self.instance = typeOrInstance;
 	events.EventEmitter.call(this);
+
+	self.asAsync = function(){
+		self.isAsync = true;
+	};
 
 	self.forType = function() {
 		assert(self.proxy === null, "Interceptor proxy should only be defined one time using 'asObject()' or 'asType()'");
@@ -244,7 +263,12 @@ function Interceptor(typeOrInstance) {
 			var _invocation = new Invocation(instance, method, args);
 
 			self.emit('before',_invocation);
-			self.series.invoke(_invocation,_invocation.proceed);
+
+			if(self.isAsync)
+				self.series.invokeAsync(_invocation,_invocation.proceed);
+			else
+				self.series.invoke(_invocation,_invocation.proceed);
+			
 			self.emit('after',_invocation);
 			
 			return _invocation.result;
@@ -645,7 +669,7 @@ function Scarlet(pluginArr) {
 	 * @param {Function|Object} typeOrInstance the type or instance to be intercepted
 	 * @return {Function} A Scarlet interceptor object.
 	**/
-	self.intercept = function(typeOrInstance, memberName) {
+	self.intercept = function(typeOrInstance, memberName, asAsync) {
 
 		assert(typeOrInstance, "Cannot have null type or instance");
 		assert((typeOrInstance.__scarlet === null || typeof typeOrInstance.__scarlet === 'undefined'), 'Type or instance already contains a scarlet interceptor');
@@ -654,6 +678,8 @@ function Scarlet(pluginArr) {
 
 		var _interceptor = new self.lib.Interceptor(typeOrInstance);
 
+		if(asAsync)
+			_interceptor.asAsync();
 
 		if(typeOrInstance.hasOwnProperty(memberName))
 			return _interceptor.forMember(memberName);
@@ -662,6 +688,46 @@ function Scarlet(pluginArr) {
 			return  _interceptor.forType();		
 
 		return _interceptor.forObject();
+	};
+
+	/**
+	 * Creates a Asynchronous Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.
+	 *
+	 * ####Example:
+	 *
+	 * Given an asynchronous interceptor:
+	 * ```javascript
+	 * function asyncInterceptor(proceed){
+	 *     setTimeout(function(){
+	 *         //done with long task
+	 *         proceed
+	 *     },10);
+	 * }
+	 * ```
+	 * 
+	 * Basic interceptor
+	 * ```javascript
+	 * Scarlet.interceptAsync(someFunction)
+	 *        .using(asyncInterceptor)
+	 * ```
+	 * 
+	 * interceptor with events
+	 * ```javascript
+	 * Scarlet.intercept(someFunction)
+	 *        .using(asyncInterceptor)
+	 *        .on('before', beforeFunction)
+	 *        .on('after', afterFunction)
+	 *        .on('done', doneFunction);
+	 * ```
+	 * 
+	 * @category Interception Methods
+	 * @method intercept
+	 * @param {Function|Object} typeOrInstance the type or instance to be intercepted
+	 * @return {Function} A Scarlet interceptor object.
+	**/
+	self.interceptAsync = function(typeOrInstance, memberName) {
+
+		return self.intercept(typeOrInstance,memberName,true);
 	};
 
 	/**

@@ -51,8 +51,7 @@ module.exports = function(grunt) {
         options: {
           name: "Scarlet",
           template: "category",
-          outputFile: "doc/README.md",
-          moxFile: "doc/mox.json"
+          outputFile: "doc/README.md"
         }
       }
     }
@@ -68,7 +67,7 @@ module.exports = function(grunt) {
   grunt.registerTask("doc", ["mox"]);
   grunt.registerTask("test", ["spawn:test"]);
   grunt.registerTask("default", ["jshint", "mox"]);
-  grunt.registerTask("deploy", ["mox", "browserify", "release", "scarlet-bump"]);
+  grunt.registerTask("deploy", ["jshint","mox", "browserify", "release", "scarlet-bump"]);
 
   grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function() {
 

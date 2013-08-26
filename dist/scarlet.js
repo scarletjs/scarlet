@@ -258,9 +258,9 @@ function Interceptor(typeOrInstance) {
 		
 		self.series.addOnDone(function(invocation){ self.emit('done',invocation); }, self);
 
-		self.proxiedInstance = self.proxy.whenCalled(function(instance,method, args) {
+		self.proxiedInstance = self.proxy.whenCalled(function(instance, member, args, memberName) {
 
-			var _invocation = new Invocation(instance, method, args);
+			var _invocation = new Invocation(instance, member, args, memberName);
 
 			self.emit('before',_invocation);
 
@@ -351,7 +351,7 @@ module.exports = Interceptor;
 },{"./extensions/series":4,"./invocation":7,"./proxy-instance":9,"./proxy-member":10,"./proxy-prototype":11,"assert":13,"events":14}],7:[function(require,module,exports){
 var assert = require("assert");
 
-function Invocation(object, method, args) {
+function Invocation(object, method, args, methodName) {
 	
 	"use strict";
 
@@ -377,6 +377,14 @@ function Invocation(object, method, args) {
 	self.object = object;
 
 	/**
+	 * The result of the method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Any}
+	 */
+	self.result = null;
+
+	/**
 	 * The method being intercepted
 	 * 
 	 * @category Invocation Attributes
@@ -385,12 +393,28 @@ function Invocation(object, method, args) {
 	self.method = method;
 
 	/**
-	 * The result of the method being intercepted
+	 * Gets the name of the intercepted method
 	 * 
 	 * @category Invocation Attributes
-	 * @type {Any}
+     * @type {String}
+     */
+	self.methodName = methodName;
+
+	/**
+	 * The start date time when the method was invoked
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Date}
 	 */
-	self.result = null;
+	self.executionStartDate = null;
+
+	/**
+	 * The end date time when the method was invoked
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Date}
+	 */
+	self.executionEndDate = null;
 
 	/**
 	 * Calls the intercepted method
@@ -401,7 +425,11 @@ function Invocation(object, method, args) {
      */
 	self.proceed = function() {
 		var parameters = Array.prototype.slice.call(args);
+		
+		self.executionStartDate = new Date();
 		self.result = self.method.apply(self.object, parameters);
+		self.executionEndDate = new Date();
+
 		return self.result;
 	};
 }
@@ -518,13 +546,13 @@ function ProxyMember(instance, memberName) {
 				get: function(){
 					return target(instance,function(){
 						return instance.__scarlet[memberName];
-					}, instance.__scarlet[memberName]);
+					}, instance.__scarlet[memberName], memberName);
 				},
 				
 				set: function(value){
 					target(instance,function(){
 						instance.__scarlet[memberName] = value;	
-					}, value);
+					}, value, memberName);
 				}
 				
 			});
@@ -539,7 +567,7 @@ function ProxyMember(instance, memberName) {
 			var originalMethod = instance.__scarlet[memberName];
 			
 			instance[memberName] = function() {
-				return target(instance,instance.__scarlet[memberName], arguments);
+				return target(instance,instance.__scarlet[memberName], arguments, memberName);
 			};
 		}
 	};

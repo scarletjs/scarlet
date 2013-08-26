@@ -483,65 +483,69 @@ describe("Given we are intercepting", function() {
 
 	describe("When using the invocation object", function() {
 
-		describe("When getting method name for a named function", function() {
+		describe("When intercepting  a named function", function() {
+			var resultInvocation = null;
 
 			var instance = new NamedFunction();
 
-			it("Should return name of intercepted function", function(done) {
-				var interceptor = function(proceed, invocation) {
+			var interceptor = function(proceed, invocation) {
+				resultInvocation = invocation;
+			};
 
-					assert(invocation.methodName === 'methodWithReturn');
-					done();
-				};
+			scarlet.intercept(instance)
+					.using(interceptor);
 
-				scarlet.intercept(instance)
-						.using(interceptor);
+			instance.methodWithReturn();
 
-				instance.methodWithReturn();
+			it("Should return name of intercepted function", function() {
+				assert(resultInvocation.methodName === 'methodWithReturn');
 
+			});
+
+			it("Should return name of intercepted object", function() {
+				assert(resultInvocation.objectName === 'NamedFunction');
 			});
 
 		});
 		describe("When getting method name for a prototype named function", function() {
-
+			var resultInvocation = null;
 			var instance = new PrototypeFunction();
+			var interceptor = function(proceed, invocation) {
+				resultInvocation = invocation;
+			};
 
-			it("Should return name of intercepted function", function(done) {
+			scarlet.intercept(instance)
+					.using(interceptor);
 
-				var interceptor = function(proceed, invocation) {
+			instance.method();
 
-					assert(invocation.methodName === 'method');
-					done();
-				};
-
-				scarlet.intercept(instance)
-						.using(interceptor);
-
-				instance.method();
-
+			it("Should return name of intercepted function", function() {
+				assert(resultInvocation.methodName === 'method');
 			});
 
+			it("Should return name of intercepted object", function() {
+				assert(resultInvocation.objectName === 'PrototypeFunction');
+			});
 		});
 
 		describe("When getting method name for a prototype named function", function() {
-
+			var resultInvocation = null;
 			var instance = new UnnamedFunction();
+			var interceptor = function(proceed, invocation) {
+				resultInvocation = invocation;
+			};
 
-			it("Should return name of intercepted function", function(done) {
+			scarlet.intercept(instance)
+					.using(interceptor);
 
-				var interceptor = function(proceed, invocation) {
-
-					assert(invocation.methodName === 'method');
-					done();
-				};
-
-				scarlet.intercept(instance)
-						.using(interceptor);
-
-				instance.method();
-
+			instance.method();
+			it("Should return name of intercepted function", function() {
+				assert(resultInvocation.methodName === 'method');				
 			});
 
+			it("Should return Function as the intercepted object name", function() {
+				assert(resultInvocation.objectName === 'Object');
+			});
 		});
 
 		describe("When getting method name for a named function interceptor", function() {
@@ -602,27 +606,6 @@ describe("Given we are intercepting", function() {
 		});
 
 	});
-
-		describe("When working with a simple object", function() {
-
-			it("Should intercept correctly", function() {
-				function someInterceptor(proceed, invocation){
-					proceed();
-				    
-				    console.log("intercepted method("+invocation.methodName+") returned:"+invocation.result);
-				    
-				    var parameters = Array.prototype.slice.call(invocation.args);
-				    console.log("given the following parameters:["+parameters+"]");
-				}
-
-				scarlet.intercept(Math,'min')
-						.using(someInterceptor);
-
-				Math.min(1,5,9);
-
-			});
-
-		});
 
 });
 

@@ -141,6 +141,7 @@ Scarlet provides interceptors with a view into the main method being called.  Wh
 * args - the arguments passed into the method
 * methodName - the method name being intercepted
 * object - the *this* context of the called method
+* objectName - the name of the *this* context object
 * executionEndDate - the start datetime of the method execution
 * executionStartDate - the start datetime of the method execution
 * result - result of the method called (populated after main method gets called)
@@ -277,7 +278,8 @@ The following properties are available on the invocation(second argument to the 
 * args - the arguments passed into the method
 * methodName - the method name being intercepted
 * object - the *this* context of the called method
-* executionEndDate - the start datetime of the method execution
+* objectName - the name of the *this* context object
+* executionEndDate - the end datetime of the method execution
 * executionStartDate - the start datetime of the method execution
 * result - result of the method called (populated after main method gets called)
 

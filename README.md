@@ -63,7 +63,7 @@ Scarlet was written to elimante the complexities with creating interceptors.  Th
 * Intercept all object members
 * Creation of interception events
 * Creation of asynchronous interceptors
-* Access to intercpted method details (arguments, result, etc)
+* Access to intercpted method details (method name,arguments, result, execution start and end date)
 
 ### Intercept all object members
 
@@ -139,7 +139,10 @@ asyncMethod();
 Scarlet provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
 
 * args - the arguments passed into the method
+* methodName - the method name being intercepted
 * object - the *this* context of the called method
+* executionEndDate - the start datetime of the method execution
+* executionStartDate - the start datetime of the method execution
 * result - result of the method called (populated after main method gets called)
 
 Here is an example of how to get result and args from the invocation object:
@@ -148,7 +151,7 @@ Here is an example of how to get result and args from the invocation object:
 function someInterceptor(proceed, invocation){
 	proceed();
     
-    console.log("intercepted method returned:"+invocation.result);
+    console.log("intercepted method("+invocation.methodName+") returned:"+invocation.result);
     
     var parameters = Array.prototype.slice.call(invocation.args);
     console.log("given the following parameters:["+parameters+"]");
@@ -160,7 +163,7 @@ scarlet.intercept(Math,'min')
 Math.min(1,2,3);
 //-> 1. someInterceptor called
 //-> 2. Math.min will be called as normal and will return 1
-//-> 3. Outputs --> "intercepted method returned:1"
+//-> 3. Outputs --> "intercepted method(min) returned:1"
 //-> 4. Outputs --> "given the following parameters:[1,2,3]"
 ```
 
@@ -269,26 +272,33 @@ asyncMethod();
 
 ### Using the invocation object
 
-```javascript
-var scarlet = require('scarlet');
+The following properties are available on the invocation(second argument to the interceptor)
 
+* args - the arguments passed into the method
+* methodName - the method name being intercepted
+* object - the *this* context of the called method
+* executionEndDate - the start datetime of the method execution
+* executionStartDate - the start datetime of the method execution
+* result - result of the method called (populated after main method gets called)
+
+```javascript
 function someInterceptor(proceed, invocation){
-	proceed();
+    proceed();
     
-    console.log("intercepted method returned::"+invocation.result);
+    console.log("intercepted method("+invocation.methodName+") returned:"+invocation.result);
     
-    var paramaters = Array.prototype.slice.call(invocation.args);
-    console.log("given the following paramaters:["+paramaters+"]");
+    var parameters = Array.prototype.slice.call(invocation.args);
+    console.log("given the following parameters:["+parameters+"]");
 }
 
 scarlet.intercept(Math,'min')
-		.using(someInterceptor);
+        .using(someInterceptor);
 
 Math.min(1,2,3);
-//-> 1. interceptor called
+//-> 1. someInterceptor called
 //-> 2. Math.min will be called as normal and will return 1
-//-> 3. Outputs --> "intercepted method returned:1"
-//-> 4. Outputs --> "given the following paramaters:[1,2,3]"
+//-> 3. Outputs --> "intercepted method(min) returned:1"
+//-> 4. Outputs --> "given the following parameters:[1,2,3]"
 ```
 
 ### Browser Example

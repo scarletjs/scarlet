@@ -16,16 +16,17 @@
 * [`object`][8]
 * [`result`][9]
 * [`method`][10]
-* [`methodName`][11]
-* [`executionStartDate`][12]
-* [`executionEndDate`][13]
-* [`proceed`][14]
+* [`objectName`][11]
+* [`methodName`][12]
+* [`executionStartDate`][13]
+* [`executionEndDate`][14]
+* [`proceed`][15]
 
 ## `Interception Methods`
 
 ### `Interceptor`
 
-[\#][0] [Ⓣ][15]
+[\#][0] [Ⓣ][16]
 
 #### Emited Events
 
@@ -61,7 +62,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `using`
 
-[\#][1] [Ⓣ][15]
+[\#][1] [Ⓣ][16]
 
 #### Example:
 
@@ -89,7 +90,7 @@ _(Function)_ - A reference to the current interceptor(self)
 
 ### `resolve`
 
-[\#][2] [Ⓣ][15]
+[\#][2] [Ⓣ][16]
 
 #### Example:
 
@@ -110,7 +111,7 @@ _(Function)_ - A reference to the function being intercepted
 
 ### `Scarlet`
 
-[\#][3] [Ⓣ][15]
+[\#][3] [Ⓣ][16]
 
 #### Example:
 
@@ -127,7 +128,7 @@ _(Function)_ - A reference to the function being intercepted
 
 ### `intercept`
 
-[\#][4] [Ⓣ][15]
+[\#][4] [Ⓣ][16]
 
 #### Example:
 
@@ -156,7 +157,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `interceptAsync`
 
-[\#][5] [Ⓣ][15]
+[\#][5] [Ⓣ][16]
 
 #### Example:
 
@@ -197,7 +198,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `loadPlugin`
 
-[\#][6] [Ⓣ][15]
+[\#][6] [Ⓣ][16]
 
 #### Example:
 
@@ -218,7 +219,7 @@ _(Function)_ - A reference to scarlet(self)
 
 ### `args`
 
-[\#][7] [Ⓣ][16]
+[\#][7] [Ⓣ][17]
 
 #### Types
 
@@ -230,7 +231,7 @@ The original arguments passed into the function being intercepted
 
 ### `object`
 
-[\#][8] [Ⓣ][16]
+[\#][8] [Ⓣ][17]
 
 #### Types
 
@@ -242,7 +243,7 @@ The reference to self for the original/called methd
 
 ### `result`
 
-[\#][9] [Ⓣ][16]
+[\#][9] [Ⓣ][17]
 
 #### Types
 
@@ -254,7 +255,7 @@ The result of the method being intercepted
 
 ### `method`
 
-[\#][10] [Ⓣ][16]
+[\#][10] [Ⓣ][17]
 
 #### Types
 
@@ -264,9 +265,21 @@ The method being intercepted
 
 ---
 
+### `objectName`
+
+[\#][11] [Ⓣ][17]
+
+#### Types
+
+  * _String_
+
+Gets the name of the intercepted object
+
+---
+
 ### `methodName`
 
-[\#][11] [Ⓣ][16]
+[\#][12] [Ⓣ][17]
 
 #### Types
 
@@ -278,7 +291,7 @@ Gets the name of the intercepted method
 
 ### `executionStartDate`
 
-[\#][12] [Ⓣ][16]
+[\#][13] [Ⓣ][17]
 
 #### Types
 
@@ -290,7 +303,7 @@ The start date time when the method was invoked
 
 ### `executionEndDate`
 
-[\#][13] [Ⓣ][16]
+[\#][14] [Ⓣ][17]
 
 #### Types
 
@@ -302,7 +315,7 @@ The end date time when the method was invoked
 
 ### `proceed`
 
-[\#][14] [Ⓣ][16]
+[\#][15] [Ⓣ][17]
 
 Calls the intercepted method
 
@@ -325,9 +338,10 @@ _(Function | Object)_ - of the result of the original method call
 [8]: #object
 [9]: #result
 [10]: #method
-[11]: #methodname
-[12]: #executionstartdate
-[13]: #executionenddate
-[14]: #proceed
-[15]: #interception-methods
-[16]: #invocation-attributes
+[11]: #objectname
+[12]: #methodname
+[13]: #executionstartdate
+[14]: #executionenddate
+[15]: #proceed
+[16]: #interception-methods
+[17]: #invocation-attributes

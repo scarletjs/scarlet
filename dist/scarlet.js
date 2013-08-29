@@ -288,14 +288,19 @@ function Interceptor(typeOrInstance) {
 
 			var invocation = new Invocation(instance, member, args, memberName,self.instanceName);
 
-			self.emit('before',invocation);
+			try{
+				self.emit('before',invocation);
 
-			if(self.isAsync)
-				self.series.invokeAsync(invocation,invocation.proceed);
-			else
-				self.series.invoke(invocation,invocation.proceed);
-			
-			self.emit('after',invocation);
+				if(self.isAsync)
+					self.series.invokeAsync(invocation,invocation.proceed);
+				else
+					self.series.invoke(invocation,invocation.proceed);
+				
+				self.emit('after',invocation);
+			}catch(exception){
+				self.emit('error',exception);
+				throw exception;
+			}	
 			
 			return invocation.result;
 		});
@@ -724,6 +729,36 @@ function Scarlet(pluginArr) {
 	var self = this;
 	self.plugins = {};
 	self.lib = require("./index");
+
+	/**
+	 * Extneds the Scarlet properties onto a target object.
+	 *
+	 * ####Example:
+	 *
+	 * 
+	 * ```javascript
+	 * scarlet.extend(someObject);
+	 * //-> someObject can now invoke and call scarlet members
+	 * ```
+	 * 
+	 * @category Interception Methods
+	 * @method extend
+	 * @param {Function|Object} target the object to put the scarlet properties on
+	 * @return {Function} A Scarlet interceptor object.
+	**/
+	self.extend = function(target){
+		function addScarletMemberToTarget(member){
+			target[member] = function(){
+				return self[member].apply(self,arguments);
+			};
+		}
+
+		for(var member in self){
+			addScarletMemberToTarget(member);
+		}
+
+		return self;
+	};
 
 	/**
 	 * Creates a Scarlet interceptor. All Scarlet interceptors are instances of EventEmitter.

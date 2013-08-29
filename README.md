@@ -89,12 +89,14 @@ Scarlet interceptors emit the following events:
 * before - emitted before *interceptors* are called
 * after - emitted after *intercepted* method
 * done - emitted after all *interceptors* and *intercepted* method called
+* error - emitted if an error occurs
 
 ```javascript
 Scarlet.intercept(Math, 'min')
         .on('before', beforeFunction)
         .on('after', afterFunction)
-        .on('done', doneFunction);
+        .on('done', doneFunction)
+        .on('error', errorFunction);
         
 var min = Math.min(1,2,3);
 //-> 1. beforeFunction called
@@ -216,7 +218,8 @@ Scarlet interceptors emit the following events:
 Scarlet.intercept(Math, 'min')
         .on('before', beforeFunction)
         .on('after', afterFunction)
-        .on('done', doneFunction);
+        .on('done', doneFunction)
+        .on('error', errorFunction);
         
 var min = Math.min(1,2,3);
 //-> 1. beforeFunction called

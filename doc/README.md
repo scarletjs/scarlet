@@ -6,27 +6,28 @@
 * [`using`][1]
 * [`resolve`][2]
 * [`Scarlet`][3]
-* [`intercept`][4]
-* [`interceptAsync`][5]
-* [`loadPlugin`][6]
+* [`extend`][4]
+* [`intercept`][5]
+* [`interceptAsync`][6]
+* [`loadPlugin`][7]
 
 ## `Invocation Attributes`
 
-* [`args`][7]
-* [`object`][8]
-* [`result`][9]
-* [`method`][10]
-* [`objectName`][11]
-* [`methodName`][12]
-* [`executionStartDate`][13]
-* [`executionEndDate`][14]
-* [`proceed`][15]
+* [`args`][8]
+* [`object`][9]
+* [`result`][10]
+* [`method`][11]
+* [`objectName`][12]
+* [`methodName`][13]
+* [`executionStartDate`][14]
+* [`executionEndDate`][15]
+* [`proceed`][16]
 
 ## `Interception Methods`
 
 ### `Interceptor`
 
-[\#][0] [Ⓣ][16]
+[\#][0] [Ⓣ][17]
 
 #### Emited Events
 
@@ -62,7 +63,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `using`
 
-[\#][1] [Ⓣ][16]
+[\#][1] [Ⓣ][17]
 
 #### Example:
 
@@ -90,7 +91,7 @@ _(Function)_ - A reference to the current interceptor(self)
 
 ### `resolve`
 
-[\#][2] [Ⓣ][16]
+[\#][2] [Ⓣ][17]
 
 #### Example:
 
@@ -111,7 +112,7 @@ _(Function)_ - A reference to the function being intercepted
 
 ### `Scarlet`
 
-[\#][3] [Ⓣ][16]
+[\#][3] [Ⓣ][17]
 
 #### Example:
 
@@ -126,9 +127,29 @@ _(Function)_ - A reference to the function being intercepted
 
 ---
 
+### `extend`
+
+[\#][4] [Ⓣ][17]
+
+#### Example:
+
+    scarlet.extend(someObject);
+    //-> someObject can now invoke and call scarlet members
+    
+
+#### Arguments
+
+1. `target` _(Function | Object)_ - the object to put the scarlet properties on
+
+#### Returns  
+  
+_(Function)_ - A Scarlet interceptor object.
+
+---
+
 ### `intercept`
 
-[\#][4] [Ⓣ][16]
+[\#][5] [Ⓣ][17]
 
 #### Example:
 
@@ -157,7 +178,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `interceptAsync`
 
-[\#][5] [Ⓣ][16]
+[\#][6] [Ⓣ][17]
 
 #### Example:
 
@@ -198,7 +219,7 @@ _(Function)_ - A Scarlet interceptor object.
 
 ### `loadPlugin`
 
-[\#][6] [Ⓣ][16]
+[\#][7] [Ⓣ][17]
 
 #### Example:
 
@@ -219,7 +240,7 @@ _(Function)_ - A reference to scarlet(self)
 
 ### `args`
 
-[\#][7] [Ⓣ][17]
+[\#][8] [Ⓣ][18]
 
 #### Types
 
@@ -231,7 +252,7 @@ The original arguments passed into the function being intercepted
 
 ### `object`
 
-[\#][8] [Ⓣ][17]
+[\#][9] [Ⓣ][18]
 
 #### Types
 
@@ -243,7 +264,7 @@ The reference to self for the original/called methd
 
 ### `result`
 
-[\#][9] [Ⓣ][17]
+[\#][10] [Ⓣ][18]
 
 #### Types
 
@@ -255,7 +276,7 @@ The result of the method being intercepted
 
 ### `method`
 
-[\#][10] [Ⓣ][17]
+[\#][11] [Ⓣ][18]
 
 #### Types
 
@@ -267,7 +288,7 @@ The method being intercepted
 
 ### `objectName`
 
-[\#][11] [Ⓣ][17]
+[\#][12] [Ⓣ][18]
 
 #### Types
 
@@ -279,7 +300,7 @@ Gets the name of the intercepted object
 
 ### `methodName`
 
-[\#][12] [Ⓣ][17]
+[\#][13] [Ⓣ][18]
 
 #### Types
 
@@ -291,7 +312,7 @@ Gets the name of the intercepted method
 
 ### `executionStartDate`
 
-[\#][13] [Ⓣ][17]
+[\#][14] [Ⓣ][18]
 
 #### Types
 
@@ -303,7 +324,7 @@ The start date time when the method was invoked
 
 ### `executionEndDate`
 
-[\#][14] [Ⓣ][17]
+[\#][15] [Ⓣ][18]
 
 #### Types
 
@@ -315,7 +336,7 @@ The end date time when the method was invoked
 
 ### `proceed`
 
-[\#][15] [Ⓣ][17]
+[\#][16] [Ⓣ][18]
 
 Calls the intercepted method
 
@@ -331,17 +352,18 @@ _(Function | Object)_ - of the result of the original method call
 [1]: #using
 [2]: #resolve
 [3]: #scarlet
-[4]: #intercept
-[5]: #interceptasync
-[6]: #loadplugin
-[7]: #args
-[8]: #object
-[9]: #result
-[10]: #method
-[11]: #objectname
-[12]: #methodname
-[13]: #executionstartdate
-[14]: #executionenddate
-[15]: #proceed
-[16]: #interception-methods
-[17]: #invocation-attributes
+[4]: #extend
+[5]: #intercept
+[6]: #interceptasync
+[7]: #loadplugin
+[8]: #args
+[9]: #object
+[10]: #result
+[11]: #method
+[12]: #objectname
+[13]: #methodname
+[14]: #executionstartdate
+[15]: #executionenddate
+[16]: #proceed
+[17]: #interception-methods
+[18]: #invocation-attributes

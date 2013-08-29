@@ -210,6 +210,7 @@ Scarlet interceptors emit the following events:
 * before - emitted before *interceptors* are called
 * after - emitted after *intercepted* method
 * done - emitted after all *interceptors* and *intercepted* method called
+* error - emitted if an error occurs
 
 ```javascript
 Scarlet.intercept(Math, 'min')

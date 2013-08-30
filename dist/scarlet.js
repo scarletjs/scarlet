@@ -668,18 +668,19 @@ function ProxyPrototype(instance) {
 		assert(instance.prototype, "Cannot use 'asType()' for this object because it does not have a prototype");
 
 		self.inheritedType = function(){
-
-			var self = this;
 			
+			var self = this;
+			var args = arguments;
+			var parameters = Array.prototype.slice.call(arguments);
+
 			(function() {
 
 
 				var interceptorTypeConstructor = function(){
 
-					var parameters = Array.prototype.slice.call(arguments);
 					if(instance.apply)
 						instance.apply(self,parameters);
-					
+
 					if(!self)
 						return;
 
@@ -687,7 +688,7 @@ function ProxyPrototype(instance) {
 					proxy.whenCalled(target);
 				};
 
-				return target(self,interceptorTypeConstructor,arguments);
+				return target(self,interceptorTypeConstructor,args);
 
 			}());
 

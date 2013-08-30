@@ -479,6 +479,24 @@ describe("Given we are intercepting", function() {
 			assert(methodWasCalled);
 		});
 
+		describe("When member doesn't exist on intercepted object", function() {
+
+			var InterObjectLiteral = Object.create(ObjectLiteral);
+
+			it("should throw error",function(){
+				var didThrowException = false;
+				try{
+					scarlet.intercept(InterObjectLiteral,"unknownMethod")
+							.using(interceptor);
+				}catch(exception){
+					didThrowException = true;
+				}
+				assert(didThrowException);
+			});
+
+
+		});
+
 	});
 
 	describe("When using the invocation object", function() {
@@ -577,7 +595,7 @@ describe("Given we are intercepting", function() {
 	describe("When intercepting a function with no instance methods", function() {
 
 		var f1 = function(){};
-		f1 = scarlet.intercept(f1,'method')
+		f1 = scarlet.intercept(f1)
 					.using(interceptor).resolve();
 
 		it("Should intercept function", function() {
@@ -609,6 +627,8 @@ describe("Given we are intercepting", function() {
 		});
 
 	});
+
+
 
 	describe("When doing an object interceptor", function() {
 

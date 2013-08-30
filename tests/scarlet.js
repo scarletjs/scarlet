@@ -573,6 +573,43 @@ describe("Given we are intercepting", function() {
 
 	});
 
+
+	describe("When intercepting a function with no instance methods", function() {
+
+		var f1 = function(){};
+		f1 = scarlet.intercept(f1,'method')
+					.using(interceptor).resolve();
+
+		it("Should intercept function", function() {
+			f1();
+			assert(methodWasCalled);
+		});
+
+	});
+
+
+	describe("When intercepting a function that has arguments", function() {
+
+		var f1 = function(myarg){};
+
+		it("Should intercept function", function() {
+			f1 = scarlet.intercept(f1)
+						.using(interceptor).resolve();
+			f1();
+			assert(methodWasCalled);
+		});
+
+		it("Should intercept function", function() {
+			var interceptor = function(proceed, invocation) {
+				assert(invocation.args.length === 1);
+			};
+			f1 = scarlet.intercept(f1)
+						.using(interceptor).resolve();
+			f1(111);
+		});
+
+	});
+
 	describe("When doing an object interceptor", function() {
 
 		describe("When working with a simple object", function() {

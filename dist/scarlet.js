@@ -386,7 +386,6 @@ function Invocation(object, method, args, methodName, objectName) {
 	
 	"use strict";
 
-	assert(object, "Scarlet::Invocation::object == null");
 	assert(method, "Scarlet::Invocation::method == null");
 
 	var self = this;
@@ -674,10 +673,15 @@ function ProxyPrototype(instance) {
 			
 			(function() {
 
+
 				var interceptorTypeConstructor = function(){
+
 					var parameters = Array.prototype.slice.call(arguments);
 					if(instance.apply)
 						instance.apply(self,parameters);
+					
+					if(!self)
+						return;
 
 					var proxy = new ProxyInstance(self);
 					proxy.whenCalled(target);

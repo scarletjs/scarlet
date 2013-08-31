@@ -15,7 +15,7 @@ module.exports = function(grunt) {
     spawn: {
       test: {
         command: "mocha",
-        "arguments": ["--reporter", "spec", "{0}"],
+        commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
         pattern: "**/*.js"
       }
@@ -64,36 +64,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
 
+  grunt.loadTasks("./tasks");
+
   grunt.registerTask("doc", ["mox"]);
   grunt.registerTask("test", ["spawn:test"]);
   grunt.registerTask("default", ["jshint", "mox"]);
   grunt.registerTask("deploy", ["jshint","mox", "browserify", "release", "scarlet-bump"]);
 
-  grunt.registerTask("scarlet-bump", "A task for bumping release announcements to twitter", function() {
-
-    var done = this.async();
-
-    var fs = require("fs");
-    require("string-format");
-    var http = require("http");
-    var prompt = require("prompt");
-
-    var project = "scarlet";
-    var package = fs.readFileSync("./package.json");
-    var version = JSON.parse(package).version;
-
-    console.log("Please enter the scarlet twitter password to bump the release annnouncement:");
-
-    prompt.start();
-
-    prompt.get(["password"], function(err, result) {
-      var req = http.get("http://www.scarletjs.com/release/bump?project={0}&version={1}&auth={2}".format(project, version, result.password), function(res) {
-        console.log("Scarletjs.com: " + res.statusCode);
-        console.log("Scarletjs.com: " + JSON.stringify(res.headers));
-        done();
-      });
-
-    });
-
-  });
 };

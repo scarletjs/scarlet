@@ -71,5 +71,4 @@ module.exports = function(grunt) {
   grunt.registerTask("default", ["jshint", "mox"]);
   grunt.registerTask("deploy", ["jshint","mox", "browserify", "release", "scarlet-bump"]);
 
-
 };

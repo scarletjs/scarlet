@@ -5,6 +5,8 @@ The simple fast javascript interceptor for methods and properties.
 
 [![Build Status](https://travis-ci.org/scarletjs/scarlet.png?branch=0.0.24)](https://travis-ci.org/scarletjs/scarlet)
 
+[![NPM](https://nodei.co/npm/scarlet.png?downloads=true)](https://nodei.co/npm/scarlet/)
+
 ![Scarlet!](http://www.scarletjs.com/img/scarlet.png)
 
 ## Installation

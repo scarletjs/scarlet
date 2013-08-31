@@ -10,6 +10,21 @@ function Enumerable() {
 
 	var self = this;
 
+	self.hasMember = function(object, memberName){
+
+		if(object.hasOwnProperty(memberName))
+			return true;
+		else{
+			for(var enumerableProperty in object){
+				if(enumerableProperty === memberName){
+					return true;
+				}
+			}
+		}
+
+		return false;
+	};
+
 	self.arrayFor = function(array, callback) {
 		for (var i = 0; i < array.length; i++) {
 			callback(array[i], i, array);
@@ -710,6 +725,7 @@ module.exports = ProxyPrototype;
 
 },{"./extensions/enumerable":2,"./extensions/inherits":3,"./proxy-instance":10,"assert":14}],13:[function(require,module,exports){
 var assert = require("assert");
+var enumerable = require("./extensions/enumerable");
 
 /**
  * Creates a Scarlet Instance
@@ -800,8 +816,13 @@ function Scarlet(pluginArr) {
 		if(asAsync)
 			_interceptor.asAsync();
 
-		if(typeOrInstance.hasOwnProperty(memberName))
-			return _interceptor.forMember(memberName);
+		if(memberName){
+			if(enumerable.hasMember(typeOrInstance,memberName))
+				return _interceptor.forMember(memberName);
+
+			throw new Error("Intercepted Object Doesn't have method/property specfied:"+memberName);
+		}
+
 		
 		if (typeOrInstance.prototype)
 			return  _interceptor.forType();		
@@ -881,7 +902,7 @@ function Scarlet(pluginArr) {
 
 module.exports = Scarlet;
 
-},{"./index":6,"assert":14}],14:[function(require,module,exports){
+},{"./extensions/enumerable":2,"./index":6,"assert":14}],14:[function(require,module,exports){
 // UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;

@@ -890,6 +890,9 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
+	if(pluginArr instanceof String)
+		pluginArr = [pluginArr];
+
 	if(pluginArr){
 		if (pluginArr.length) {
 			pluginArr.forEach(function(plugin){

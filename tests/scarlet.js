@@ -1,8 +1,6 @@
-var l = console.log;
-var i = require("util").inspect;
-var assert = require("assert");
+require("../include");
 
-var scarlet = new (require("../lib/scarlet"))();
+var scarlet = new(require("../lib/scarlet"))();
 
 var ObjectLiteral = require("./dummies/object-literal");
 var NamedFunction = require("./dummies/named-function");
@@ -13,7 +11,7 @@ describe("Given we are intercepting", function() {
 
 	var methodWasCalled = false;
 
-	function interceptor(proceed,invocation) {
+	function interceptor(proceed, invocation) {
 
 		var result = proceed();
 		methodWasCalled = true;
@@ -33,72 +31,10 @@ describe("Given we are intercepting", function() {
 		method2WasCalled = false;
 	});
 
-	describe("When using interceptor events", function() {
-
-		var doneEventWasCalled = false;
-		var afterEventWasCalled = false;
-		var beforeEventWasCalled = false;
-
-		beforeEach(function() {
-			doneEventWasCalled = false;
-			afterEventWasCalled = false;
-			beforeEventWasCalled = false;
-		});
-
-		describe("When using beforeEvent", function() {
-			var instance = new NamedFunction();
-
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('before',function(invocation){
-					beforeEventWasCalled = true;
-				});
-
-			it("Then should call before event", function() {
-				var result = instance.method();
-				assert(beforeEventWasCalled);
-			});
-		});
-
-		describe("When using afterEvent", function() {
-			var instance = new NamedFunction();
-
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('after',function(invocation){
-					afterEventWasCalled = true;
-				});
-
-			it("Then should call after event", function() {
-				var result = instance.method();
-				assert(afterEventWasCalled);
-			});
-		});
-
-		describe("When using doneEvent", function() {
-			var instance = new NamedFunction();
-
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('done',function(invocation){
-					doneEventWasCalled = true;
-				});
-
-			it("Then should call after event", function() {
-				var result = instance.method();
-				assert(doneEventWasCalled);
-			});
-		});
-
-	});
-
 	describe("When interceptor is asynchronous and scarlet interceptor is asynchronous", function() {
 		var asyncInterceptorWasCalled = false;
 
-		var asyncInterceptor = function(proceed,invocation) {
+		var asyncInterceptor = function(proceed, invocation) {
 			setTimeout(function() {
 				proceed();
 				asyncInterceptorWasCalled = true;
@@ -114,13 +50,13 @@ describe("Given we are intercepting", function() {
 		scarlet
 			.interceptAsync(instance)
 			.using(asyncInterceptor);
-		
+
 		it("Then should call interceptor", function(done) {
 			var result = instance.methodWithReturn();
 
 			setTimeout(function() {
 				assert(asyncInterceptorWasCalled);
-				done();	
+				done();
 			}, 10);
 
 		});
@@ -137,7 +73,7 @@ describe("Given we are intercepting", function() {
 	describe("When interceptor is asynchronous and scarlet interceptor is synchronous", function() {
 		var asyncInterceptorWasCalled = false;
 
-		var asyncInterceptor = function(proceed,invocation) {
+		var asyncInterceptor = function(proceed, invocation) {
 			setTimeout(function() {
 				proceed();
 				asyncInterceptorWasCalled = true;
@@ -153,13 +89,13 @@ describe("Given we are intercepting", function() {
 		scarlet
 			.intercept(instance)
 			.using(asyncInterceptor);
-		
+
 		it("Then should call interceptor", function(done) {
 			var result = instance.methodWithReturn();
 
 			setTimeout(function() {
 				assert(asyncInterceptorWasCalled);
-				done();	
+				done();
 			}, 10);
 
 		});
@@ -196,28 +132,22 @@ describe("Given we are intercepting", function() {
 
 		scarlet
 			.intercept(instance)
-			.using(interceptor);	
+			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
-
 			var result = instance.property;
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-
 			var result = instance.methodWithReturn();
 			assert(methodWasCalled);
 			assert(result);
-
 		});
 
 	});
@@ -231,25 +161,19 @@ describe("Given we are intercepting", function() {
 			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
-
 			var result = instance.property;
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-
 			var result = instance.methodWithReturn();
 			assert(methodWasCalled);
 			assert(result);
-
 		});
 
 	});
@@ -257,38 +181,30 @@ describe("Given we are intercepting", function() {
 	describe("When we have a named function type", function() {
 
 		var InterNamedFunction = scarlet.intercept(NamedFunction)
-								.using(interceptor)
-								.resolve();
+			.using(interceptor)
+			.resolve();
 
 		var instance = new InterNamedFunction();
 
 		it("Then should be able to intercept the constructor", function() {
-			
 			var constructorInstance = new InterNamedFunction();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept the property getter", function() {
-
 			var result = instance.property;
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-
 			var result = instance.methodWithReturn();
 			assert(methodWasCalled);
 			assert(result);
-
 		});
 
 	});
@@ -302,25 +218,19 @@ describe("Given we are intercepting", function() {
 			.using(interceptor);
 
 		it("Then should be able to intercept the property getter", function() {
-
 			var result = instance.property;
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-
 			var result = instance.methodWithReturn();
 			assert(methodWasCalled);
 			assert(result);
-
 		});
 
 	});
@@ -328,8 +238,8 @@ describe("Given we are intercepting", function() {
 	describe("When we have an unnamed function type", function() {
 
 		var InterUnnamedFunction = scarlet.intercept(UnnamedFunction)
-											.using(interceptor)
-											.resolve();
+			.using(interceptor)
+			.resolve();
 
 		var instance = new InterUnnamedFunction();
 
@@ -384,8 +294,8 @@ describe("Given we are intercepting", function() {
 	describe("When we have a prototype function type", function() {
 
 		var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
-									.using(interceptor)
-									.resolve();
+			.using(interceptor)
+			.resolve();
 
 		var instance = new InterPrototypeFunc();
 
@@ -408,8 +318,8 @@ describe("Given we are intercepting", function() {
 		describe("When intercepted method uses an instance property", function() {
 
 			var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
-										.using(interceptor)
-										.resolve();
+				.using(interceptor)
+				.resolve();
 
 			var instance = new InterPrototypeFunc();
 
@@ -417,65 +327,58 @@ describe("Given we are intercepting", function() {
 
 				var result = instance.methodUsingInstanceProperty();
 
-				assert.equal(result,instance.anyInstanceProperty);
-				assert.notEqual(result,undefined);
+				assert.equal(result, instance.anyInstanceProperty);
+				assert.notEqual(result, undefined);
 			});
 		});
 
 	});
 
-	describe('When defining an interceptor for a method that is already intercepted', function(){
+	describe('When defining an interceptor for a method that is already intercepted', function() {
 		var instance = new PrototypeFunction();
 
-		scarlet.intercept(instance)
-				.using(interceptor);
+		scarlet.intercept(instance).using(interceptor);
 
-		it('should throw an exception',function(){
-
+		it('should throw an exception', function() {
 			var didThrowException = false;
-
-			try{
-				scarlet.intercept(instance)
-						.using(interceptor);
-
-			}catch(exception){
+			try {
+				scarlet.intercept(instance).using(interceptor);
+			} catch (exception) {
 				didThrowException = true;
 			}
-
 			assert(didThrowException);
 		});
 	});
 
 	describe("When we have a prototype function instance", function() {
+		
 		describe("When intercepted method uses an instance property", function() {
-			
+
 			var instance = new PrototypeFunction();
 
 			scarlet.intercept(instance)
-					.using(interceptor);
+				.using(interceptor);
 
 
 			it("Then should be able to use it", function() {
-
 				var result = instance.methodUsingInstanceProperty();
-
-				assert.equal(result,instance.anyInstanceProperty);
-				assert.notEqual(result,undefined);
+				assert.equal(result, instance.anyInstanceProperty);
+				assert.notEqual(result, undefined);
 			});
 		});
 
 	});
-	
+
 	describe("When intercepting specific members", function() {
 		var InterObjectLiteral = Object.create(ObjectLiteral);
 
-		var memberInterceptor = scarlet.intercept(InterObjectLiteral,"methodWithReturn")
-										.using(interceptor);
+		var memberInterceptor =
+			scarlet.intercept(InterObjectLiteral, "methodWithReturn")
+			.using(interceptor);
 
-		it("should intercept correctly",function(){
-
+		it("should intercept correctly", function() {
 			var result = InterObjectLiteral.methodWithReturn();
-			assert.equal(result,"any");
+			assert.equal(result, "any");
 			assert(methodWasCalled);
 		});
 
@@ -483,12 +386,11 @@ describe("Given we are intercepting", function() {
 
 			var InterObjectLiteral = Object.create(ObjectLiteral);
 
-			it("should throw error",function(){
+			it("should throw error", function() {
 				var didThrowException = false;
-				try{
-					scarlet.intercept(InterObjectLiteral,"unknownMethod")
-							.using(interceptor);
-				}catch(exception){
+				try {
+					scarlet.intercept(InterObjectLiteral, "unknownMethod").using(interceptor);
+				} catch (exception) {
 					didThrowException = true;
 				}
 				assert(didThrowException);
@@ -502,6 +404,7 @@ describe("Given we are intercepting", function() {
 	describe("When using the invocation object", function() {
 
 		describe("When intercepting  a named function", function() {
+			
 			var resultInvocation = null;
 
 			var instance = new NamedFunction();
@@ -511,13 +414,12 @@ describe("Given we are intercepting", function() {
 			};
 
 			scarlet.intercept(instance)
-					.using(interceptor);
+				.using(interceptor);
 
 			instance.methodWithReturn();
 
 			it("Should return name of intercepted function", function() {
 				assert(resultInvocation.methodName === 'methodWithReturn');
-
 			});
 
 			it("Should return name of intercepted object", function() {
@@ -533,7 +435,7 @@ describe("Given we are intercepting", function() {
 			};
 
 			scarlet.intercept(instance)
-					.using(interceptor);
+				.using(interceptor);
 
 			instance.method();
 
@@ -554,11 +456,11 @@ describe("Given we are intercepting", function() {
 			};
 
 			scarlet.intercept(instance)
-					.using(interceptor);
+				.using(interceptor);
 
 			instance.method();
 			it("Should return name of intercepted function", function() {
-				assert(resultInvocation.methodName === 'method');				
+				assert(resultInvocation.methodName === 'method');
 			});
 
 			it("Should return Function as the intercepted object name", function() {
@@ -568,22 +470,20 @@ describe("Given we are intercepting", function() {
 
 		describe("When getting method name for a named function interceptor", function() {
 
-			var NamedFunctionInter = function(){}
-			NamedFunctionInter.method = function(){};
+			var NamedFunctionInter = function() {}
+			NamedFunctionInter.method = function() {};
 
 			it("Should return name of intercepted function", function(done) {
 
 				var interceptor = function(proceed, invocation) {
-
 					assert(invocation.methodName === 'method');
 					done();
 				};
 
-				scarlet.intercept(NamedFunctionInter,'method')
-						.using(interceptor);
+				scarlet.intercept(NamedFunctionInter, 'method')
+					.using(interceptor);
 
 				NamedFunctionInter.method();
-
 			});
 
 		});
@@ -594,9 +494,9 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting a function with no instance methods", function() {
 
-		var f1 = function(){};
+		var f1 = function() {};
 		f1 = scarlet.intercept(f1)
-					.using(interceptor).resolve();
+			.using(interceptor).resolve();
 
 		it("Should intercept function", function() {
 			f1();
@@ -608,11 +508,11 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting a function that has arguments", function() {
 
-		var f1 = function(myarg){};
+		var f1 = function(myarg) {};
 
 		it("Should intercept function", function() {
 			f1 = scarlet.intercept(f1)
-						.using(interceptor).resolve();
+				.using(interceptor).resolve();
 			f1();
 			assert(methodWasCalled);
 		});
@@ -622,7 +522,7 @@ describe("Given we are intercepting", function() {
 				assert(invocation.args.length === 1);
 			};
 			f1 = scarlet.intercept(f1)
-						.using(interceptor).resolve();
+				.using(interceptor).resolve();
 			f1(111);
 		});
 
@@ -635,24 +535,17 @@ describe("Given we are intercepting", function() {
 		describe("When working with a simple object", function() {
 
 			it("Should intercept correctly", function() {
-
 				var interceptor = function(proceed) {
-
 					proceed();
-
 				};
-
 				function AnyObject() {
-
 					var self = this;
-
-					self.method = function() {
-					};
+					self.method = function() {};
 				};
 
 				var AnyObject = scarlet.intercept(AnyObject)
-									.using(interceptor)
-									.resolve();
+					.using(interceptor)
+					.resolve();
 
 				var anyObject = new AnyObject();
 
@@ -665,5 +558,3 @@ describe("Given we are intercepting", function() {
 	});
 
 });
-
-

@@ -20,38 +20,6 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-	describe("When intercepting specific members", function() {
-		var InterObjectLiteral = Object.create(ObjectLiteral);
-
-		var memberInterceptor =
-			scarlet.intercept(InterObjectLiteral, "methodWithReturn")
-			.using(interceptor);
-
-		it("should intercept correctly", function() {
-			var result = InterObjectLiteral.methodWithReturn();
-			assert.equal(result, "any");
-			assert(methodWasCalled);
-		});
-
-		describe("When member doesn't exist on intercepted object", function() {
-
-			var InterObjectLiteral = Object.create(ObjectLiteral);
-
-			it("should throw error", function() {
-				var didThrowException = false;
-				try {
-					scarlet.intercept(InterObjectLiteral, "unknownMethod").using(interceptor);
-				} catch (exception) {
-					didThrowException = true;
-				}
-				assert(didThrowException);
-			});
-
-
-		});
-
-	});
-
 	describe("When using the invocation object", function() {
 
 		describe("When intercepting a named function", function() {

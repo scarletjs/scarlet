@@ -43,4 +43,21 @@ describe("Given we are using more than one interceptor", function() {
 		});
 
 	});
+
+	describe("When attempting to intercept already intercepted objects", function() {
+		
+		it("Then it should throw an exception", function() {
+			var exceptionThrown = false;
+			try {
+				scarlet
+					.intercept(instance)
+					.using(firstInterceptor);
+			} catch (ex) {
+				exceptionThrown = true;
+			}
+			assert(exceptionThrown);
+		});
+	
+	});
+
 });

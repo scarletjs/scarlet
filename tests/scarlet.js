@@ -12,41 +12,14 @@ describe("Given we are intercepting", function() {
 	var methodWasCalled = false;
 
 	function interceptor(proceed, invocation) {
-
-		var result = proceed();
 		methodWasCalled = true;
-		return result;
-	};
-
-	var method2WasCalled = false;
-
-	function interceptor2(proceed, invocation) {
-		var result = proceed();
-		method2WasCalled = true;
-		return result;
+		return proceed();
 	};
 
 	beforeEach(function() {
 		methodWasCalled = false;
-		method2WasCalled = false;
 	});
 
-
-	describe("When using multiple interceptors", function() {
-
-		var instance = new NamedFunction();
-
-		scarlet
-			.intercept(instance)
-			.using(interceptor);
-
-		it("Then should be able to intercept", function() {
-			var result = instance.method();
-			assert(methodWasCalled);
-
-		});
-
-	});
 
 	describe("When we have an object literal instance", function() {
 
@@ -171,32 +144,24 @@ describe("Given we are intercepting", function() {
 		var instance = new InterUnnamedFunction();
 
 		it("Then should be able to intercept the constructor", function() {
-
 			var constructorInstance = new InterUnnamedFunction();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept the property getter", function() {
-
 			var result = instance.property;
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-
 			var result = instance.methodWithReturn();
 			assert(methodWasCalled);
 			assert(result);
-
 		});
 
 	});
@@ -210,50 +175,48 @@ describe("Given we are intercepting", function() {
 			.using(interceptor);
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 	});
 
 	describe("When we have a prototype function type", function() {
 
-		var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
-			.using(interceptor)
-			.resolve();
+		var InterPrototypeFunc = 
+			scarlet
+				.intercept(PrototypeFunction)
+				.using(interceptor)
+				.resolve();
 
 		var instance = new InterPrototypeFunc();
 
 		it("Then should be able to intercept the constructor", function() {
 			var constructorInstance = new InterPrototypeFunc();
 			assert(methodWasCalled);
-
 		});
 
 		it("Then should be able to intercept method", function() {
-
 			instance.method();
 			assert(methodWasCalled);
-
 		});
 
 	});
 
 	describe("When we have a prototype function instance", function() {
+		
 		describe("When intercepted method uses an instance property", function() {
 
-			var InterPrototypeFunc = scarlet.intercept(PrototypeFunction)
-				.using(interceptor)
-				.resolve();
+			var InterPrototypeFunc = 
+				scarlet
+					.intercept(PrototypeFunction)
+					.using(interceptor)
+					.resolve();
 
 			var instance = new InterPrototypeFunc();
 
 			it("Then should be able to use it", function() {
-
 				var result = instance.methodUsingInstanceProperty();
-
 				assert.equal(result, instance.anyInstanceProperty);
 				assert.notEqual(result, undefined);
 			});
@@ -262,9 +225,12 @@ describe("Given we are intercepting", function() {
 	});
 
 	describe('When defining an interceptor for a method that is already intercepted', function() {
+		
 		var instance = new PrototypeFunction();
-
-		scarlet.intercept(instance).using(interceptor);
+		
+		scarlet
+			.intercept(instance)
+			.using(interceptor);
 
 		it('should throw an exception', function() {
 			var didThrowException = false;

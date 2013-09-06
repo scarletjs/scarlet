@@ -9,40 +9,38 @@ var PrototypeFunction = require("./dummies/prototype-function");
 
 describe("Given we are using scarlet events", function() {
 
-	var methodWasCalled = false;
+	var interceptorCalled = false;
 
 	function interceptor(proceed, invocation) {
-
 		var result = proceed();
-		methodWasCalled = true;
+		interceptorCalled = true;
 		return result;
 	};
 
 	describe("When using interceptor events", function() {
 
-		var doneEventWasCalled = false;
-		var afterEventWasCalled = false;
-		var beforeEventWasCalled = false;
+		var doneEventCalled = false;
+		var afterEventCalled = false;
+		var beforeEventCalled = false;
 
 		beforeEach(function() {
-			doneEventWasCalled = false;
-			afterEventWasCalled = false;
-			beforeEventWasCalled = false;
+			doneEventCalled = false;
+			afterEventCalled = false;
+			beforeEventCalled = false;
 		});
 
 		describe("When using beforeEvent", function() {
 			var instance = new NamedFunction();
-
 			scarlet
 				.intercept(instance)
 				.using(interceptor)
 				.on('before', function(invocation) {
-					beforeEventWasCalled = true;
+					beforeEventCalled = true;
 				});
 
 			it("Then should call before event", function() {
 				var result = instance.method();
-				assert(beforeEventWasCalled);
+				assert(beforeEventCalled);
 			});
 		});
 
@@ -53,12 +51,12 @@ describe("Given we are using scarlet events", function() {
 				.intercept(instance)
 				.using(interceptor)
 				.on('after', function(invocation) {
-					afterEventWasCalled = true;
+					afterEventCalled = true;
 				});
 
 			it("Then should call after event", function() {
 				var result = instance.method();
-				assert(afterEventWasCalled);
+				assert(afterEventCalled);
 			});
 		});
 
@@ -69,12 +67,12 @@ describe("Given we are using scarlet events", function() {
 				.intercept(instance)
 				.using(interceptor)
 				.on('done', function(invocation) {
-					doneEventWasCalled = true;
+					doneEventCalled = true;
 				});
 
 			it("Then should call after event", function() {
 				var result = instance.method();
-				assert(doneEventWasCalled);
+				assert(doneEventCalled);
 			});
 		});
 

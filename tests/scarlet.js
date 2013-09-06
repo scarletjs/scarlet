@@ -20,65 +20,6 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-	describe("When we have a named function instance", function() {
-
-		var instance = new NamedFunction();
-
-		scarlet
-			.intercept(instance)
-			.using(interceptor);
-
-		it("Then should be able to intercept the property getter", function() {
-			var result = instance.property;
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method", function() {
-			instance.method();
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method with return value", function() {
-			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
-		});
-
-	});
-
-	describe("When we have a named function type", function() {
-
-		var InterNamedFunction = 
-			scarlet
-				.intercept(NamedFunction)
-				.using(interceptor)
-				.resolve();
-
-		var instance = new InterNamedFunction();
-
-		it("Then should be able to intercept the constructor", function() {
-			var constructorInstance = new InterNamedFunction();
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept the property getter", function() {
-			var result = instance.property;
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method", function() {
-			instance.method();
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method with return value", function() {
-			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
-		});
-
-	});
-
 	describe("When we have an unnamed function instance", function() {
 
 		var instance = new UnnamedFunction();

@@ -9,71 +9,50 @@ var PrototypeFunction = require("./dummies/prototype-function");
 
 describe("Given we are using scarlet events", function() {
 
+	var doneEventCalled = false;
+	var afterEventCalled = false;
+	var beforeEventCalled = false;
 	var interceptorCalled = false;
+	var instance = new NamedFunction();
 
 	function interceptor(proceed, invocation) {
-		var result = proceed();
 		interceptorCalled = true;
-		return result;
+		return proceed();
 	};
 
-	describe("When using interceptor events", function() {
-
-		var doneEventCalled = false;
-		var afterEventCalled = false;
-		var beforeEventCalled = false;
-
-		beforeEach(function() {
-			doneEventCalled = false;
-			afterEventCalled = false;
-			beforeEventCalled = false;
+	scarlet
+		.intercept(instance)
+		.using(interceptor)
+		.on("before", function(invocation) {
+			beforeEventCalled = true;
+			ll("Before Event Called");
+			ll(beforeEventCalled);
+		}).on("after", function(invocation) {
+			afterEventCalled = true;
+			ll("After Event Called");
+		}).on("done", function(invocation) {
+			doneEventCalled = true;
+			ll("Done Event Called");
 		});
 
-		describe("When using beforeEvent", function() {
-			var instance = new NamedFunction();
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('before', function(invocation) {
-					beforeEventCalled = true;
-				});
+	describe("When subcribing to events", function() {
 
-			it("Then should call before event", function() {
-				var result = instance.method();
-				assert(beforeEventCalled);
-			});
+		var result = instance.method();
+
+		it("Then the 'before' event should be called", function() {
+			assert(beforeEventCalled);
 		});
 
-		describe("When using afterEvent", function() {
-			var instance = new NamedFunction();
-
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('after', function(invocation) {
-					afterEventCalled = true;
-				});
-
-			it("Then should call after event", function() {
-				var result = instance.method();
-				assert(afterEventCalled);
-			});
+		it("Then the 'after' event should be called", function() {
+			assert(afterEventCalled);
 		});
 
-		describe("When using doneEvent", function() {
-			var instance = new NamedFunction();
+		it("Then the 'done' event should be called", function() {
+			assert(doneEventCalled);
+		});
 
-			scarlet
-				.intercept(instance)
-				.using(interceptor)
-				.on('done', function(invocation) {
-					doneEventCalled = true;
-				});
-
-			it("Then should call after event", function() {
-				var result = instance.method();
-				assert(doneEventCalled);
-			});
+		it("Then the interceptor should be called", function() {
+			assert(interceptorCalled);
 		});
 
 	});

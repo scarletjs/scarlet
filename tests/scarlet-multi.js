@@ -7,46 +7,39 @@ var NamedFunction = require("./dummies/named-function");
 var UnnamedFunction = require("./dummies/unnamed-function");
 var PrototypeFunction = require("./dummies/prototype-function");
 
-describe("Given we are intercepting", function() {
+describe("Given we are using more than one interceptor", function() {
 
 	var firstMethodCalled = false;
 
 	function firstInterceptor(proceed, invocation) {
-		var result = proceed();
 		firstMethodCalled = true;
-		return result;
+		return proceed();
 	};
 
 	var secondMethodCalled = false;
 
 	function secondInterceptor(proceed, invocation) {
-		var result = proceed();
-		method2WasCalled = true;
-		return result;
+		secondMethodCalled = true;
+		return proceed();
 	};
-
-	beforeEach(function() {
-		firstMethodCalled = false;
-		secondMethodCalled = false;
-	});
 
 	var instance = new NamedFunction();
 
 	scarlet
 		.intercept(instance)
-		.using(interceptor);
+		.using(firstInterceptor)
+		.using(secondInterceptor);
 
-	describe("When using multiple interceptors", function() {
+	describe("When executing an intance method", function() {
 
-		var instance = new NamedFunction();
+		var result = instance.method();
 
-		scarlet
-			.intercept(instance)
-			.using(interceptor);
+		it("Then the first interceptor should be called", function() {
+			assert(firstMethodCalled);
+		});
 
-		it("Then should be able to intercept", function() {
-			var result = instance.method();
-			assert(methodWasCalled);
+		it("Then the second interceptor should be called", function() {
+			assert(secondMethodCalled);
 		});
 
 	});

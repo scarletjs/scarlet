@@ -20,34 +20,6 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-
-	describe("When we have an object literal instance", function() {
-
-		var instance = Object.create(ObjectLiteral);
-		instance.property = ObjectLiteral.property;
-
-		scarlet
-			.intercept(instance)
-			.using(interceptor);
-
-		it("Then should be able to intercept the property getter", function() {
-			var result = instance.property;
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method", function() {
-			instance.method();
-			assert(methodWasCalled);
-		});
-
-		it("Then should be able to intercept method with return value", function() {
-			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
-		});
-
-	});
-
 	describe("When we have a named function instance", function() {
 
 		var instance = new NamedFunction();

@@ -1,6 +1,6 @@
-require("../include");
+require("../../include");
 
-var scarlet = new(require("../lib/scarlet"))();
+var scarlet = new(require("../../lib/scarlet"))();
 
 var ObjectLiteral = require("./dummies/object-literal");
 var NamedFunction = require("./dummies/named-function");
@@ -20,9 +20,9 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-	describe("When we have a named function instance", function() {
+	describe("When we have an unnamed function instance", function() {
 
-		var instance = new NamedFunction();
+		var instance = new UnnamedFunction();
 
 		scarlet
 			.intercept(instance)
@@ -46,18 +46,18 @@ describe("Given we are intercepting", function() {
 
 	});
 
-	describe("When we have a named function type", function() {
+	describe("When we have an unnamed function type", function() {
 
-		var InterNamedFunction = 
+		var InterUnnamedFunction = 
 			scarlet
-				.intercept(NamedFunction)
+				.intercept(UnnamedFunction)
 				.using(interceptor)
 				.resolve();
 
-		var instance = new InterNamedFunction();
+		var instance = new InterUnnamedFunction();
 
 		it("Then should be able to intercept the constructor", function() {
-			var constructorInstance = new InterNamedFunction();
+			var constructorInstance = new InterUnnamedFunction();
 			assert(methodWasCalled);
 		});
 

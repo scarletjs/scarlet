@@ -1,6 +1,6 @@
-require("../include");
+require("../../../include");
 
-var Dispatcher = require("../lib/dispatcher");
+var Dispatcher = require("../../../lib/dispatcher");
 
 describe("Given we are using a dispatcher", function(){
 
@@ -100,7 +100,6 @@ describe("Given we are using a dispatcher", function(){
 			firstThisContext = this;
 			firstMethodCalled = true;
 			firstInvocation = invocation;
-			ll("First callback issued");
 		};
 
 		dispatcher.subscribeCall(firstCallback);
@@ -113,7 +112,6 @@ describe("Given we are using a dispatcher", function(){
 			secondThisContext = this;
 			secondMethodCalled = true;
 			secondInvocation = invocation;
-			ll("Second callback issued");
 		};
 
 		dispatcher.subscribeCall(secondCallback);
@@ -149,7 +147,6 @@ describe("Given we are using a dispatcher", function(){
 		var firstMethodCalled = false;
 		var firstCallback = function(proceed, invocation, done){
 			process.nextTick(function(){
-				ll("First method called");
 				firstMethodCalled = true;
 				done();
 			});
@@ -160,7 +157,6 @@ describe("Given we are using a dispatcher", function(){
 		var secondMethodCalled = false;
 		var secondCallback = function(proceed, invocation, done){
 			process.nextTick(function(){
-				ll("Second method called");
 				secondMethodCalled = true;
 				done();
 			});

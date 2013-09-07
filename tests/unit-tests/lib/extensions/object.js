@@ -1,10 +1,10 @@
-require("../../include");
+require("../../../../include");
 
-describe("Given we are using an object", function(){
+describe("Given lib/extensions/Object", function(){
 
-	var ext = require("../../lib/extensions");
+	var ext = require("../../../../lib/extensions");
 
-	describe("When discovering function parameters", function(){
+	describe("When #getParameterNames()", function(){
 
 		it("Then it should be able to discover the paramters", function(){
 			var interceptor = function(proceed, invocation, done) {};
@@ -16,12 +16,16 @@ describe("Given we are using an object", function(){
 
 	});
 
-	describe("When checking for null objects", function(){
+	describe("When #isNull()", function(){
 
 		var nullObj = null;
 
 		it("Then should return true for null reference", function(){
-			assert(ext.object.isNull(nullObj))
+			assert(ext.object.isNull(nullObj));
+		});
+
+		it("Then should return false for non null reference", function(){
+			assert(!ext.object.isNull(new function(){}));
 		});
 
 	});

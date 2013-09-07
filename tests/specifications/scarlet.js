@@ -1,6 +1,6 @@
-require("../include");
+require("../../include");
 
-var scarlet = new(require("../lib/scarlet"))();
+var scarlet = new(require("../../lib/scarlet"))();
 
 var ObjectLiteral = require("./dummies/object-literal");
 var NamedFunction = require("./dummies/named-function");
@@ -107,9 +107,7 @@ describe("Given we are intercepting", function() {
 
 		});
 
-
 	});
-
 
 	describe("When intercepting a function with no instance methods", function() {
 
@@ -123,7 +121,6 @@ describe("Given we are intercepting", function() {
 		});
 
 	});
-
 
 	describe("When intercepting a function that has arguments", function() {
 

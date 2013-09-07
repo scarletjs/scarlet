@@ -1,10 +1,10 @@
-require("../../include");
+require("../../../../include");
 
-describe("Given we are using a linked array", function() {
+describe("Given lib/extensions/LinkedArray", function() {
 
-	var ext = require("../../lib/extensions");
+	var ext = require("../../../../lib/extensions");
 
-	describe("When building linked arrays from callbacks", function() {
+	describe("When #build(array)", function() {
 
 		var elementArray = [{
 			method: function() {
@@ -21,12 +21,10 @@ describe("Given we are using a linked array", function() {
 		}];
 
 		it("Then it should build the linked array correctly", function() {
-
 			var result = ext.linkedArray.build(elementArray);
 			assert(result.method() == "One");
 			assert(result.next().method() == "Two");
 			assert(result.next().next().method() == "Three");
-
 		});
 
 	});

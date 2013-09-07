@@ -14,10 +14,6 @@ describe("Given lib/extensions", function(){
 			assert(ext.object != null, "Could not find extended object instance");
 		});
 
-		it("Then should have an series instance", function(){
-			assert(ext.series != null, "Could not find series instance");
-		});
-
 		it("Then should have an enumerable instance", function(){
 			assert(ext.enumerable != null, "Could not find enumerable instance");
 		});

@@ -88,7 +88,7 @@ describe("Given we are using a dispatcher", function(){
 
 	});
 
-	describe("When #dispatch()", function(){
+	describe("When #dispatch() using synchronous callbacks", function(){
 
 		var dispatcher = new Dispatcher();
 		
@@ -100,6 +100,7 @@ describe("Given we are using a dispatcher", function(){
 			firstThisContext = this;
 			firstMethodCalled = true;
 			firstInvocation = invocation;
+			ll("First callback issued");
 		};
 
 		dispatcher.subscribeCall(firstCallback);
@@ -112,6 +113,7 @@ describe("Given we are using a dispatcher", function(){
 			secondThisContext = this;
 			secondMethodCalled = true;
 			secondInvocation = invocation;
+			ll("Second callback issued");
 		};
 
 		dispatcher.subscribeCall(secondCallback);
@@ -136,6 +138,51 @@ describe("Given we are using a dispatcher", function(){
 		it("Then should use the same invocation object instance", function(){
 			assert(firstInvocation === invocation);
 			assert(secondInvocation === invocation);
+		});
+
+	});
+
+	describe("When #dispatch() using asynchronous callbacks", function(){
+
+		var dispatcher = new Dispatcher();
+
+		var firstMethodCalled = false;
+		var firstCallback = function(proceed, invocation, done){
+			process.nextTick(function(){
+				ll("First method called");
+				firstMethodCalled = true;
+				done();
+			});
+		};
+
+		dispatcher.subscribeCall(firstCallback);
+
+		var secondMethodCalled = false;
+		var secondCallback = function(proceed, invocation, done){
+			process.nextTick(function(){
+				ll("Second method called");
+				secondMethodCalled = true;
+				done();
+			});
+		};
+
+		dispatcher.subscribeCall(secondCallback);
+
+		it("Then should call both methods synchronously", function(done){
+
+			dispatcher.onComplete(function(){
+				assert(firstMethodCalled);
+				assert(secondMethodCalled);
+				done();
+			});
+
+			var invocation = {
+				object: new function() { this.name = "anyObject" },
+				proceed: function(){}
+			};
+
+			dispatcher.dispatch(invocation);
+
 		});
 
 	});

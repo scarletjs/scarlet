@@ -7,7 +7,7 @@ var NamedFunction = require("./dummies/named-function");
 var UnnamedFunction = require("./dummies/unnamed-function");
 var PrototypeFunction = require("./dummies/prototype-function");
 
-describe("Given we are using an asynchronous interceptor", function() {
+describe("Given we are using interceptors", function() {
 
 	var interceptorCalled = false;
 
@@ -27,7 +27,7 @@ describe("Given we are using an asynchronous interceptor", function() {
 		var instance = new NamedFunction();
 
 		scarlet
-			.interceptAsync(instance)
+			.intercept(instance)
 			.using(asyncInterceptor);
 
 		it("Then it should be called", function(done) {

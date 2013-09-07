@@ -22,15 +22,9 @@ describe("Given we are using a dispatcher", function(){
 
 	describe("When #getChainedCalls", function(){
 
-		var firstCall = function(proceed, invocation, done){
-			ll("first call");
-		};
-		var secondCall = function(proceed, invocation, done){
-			ll("second call");
-		};
-		var thirdCall = function(proceeed, invocation, done){
-			ll("third call");
-		};
+		var firstCall = function(proceed, invocation, done){};
+		var secondCall = function(proceed, invocation, done){};
+		var thirdCall = function(proceeed, invocation, done){};
 
 		var dispatcher = new Dispatcher();
 		dispatcher.subscribeCall(firstCall);

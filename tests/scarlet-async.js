@@ -7,22 +7,25 @@ var NamedFunction = require("./dummies/named-function");
 var UnnamedFunction = require("./dummies/unnamed-function");
 var PrototypeFunction = require("./dummies/prototype-function");
 
-describe("Given we are using interceptors", function() {
+describe("Given we are using async interceptors", function() {
 
+	var invocationObject = null;
 	var interceptorCalled = false;
 
 	beforeEach(function() {
 		interceptorCalled = false;
 	});
 
-	var asyncInterceptor = function(proceed, invocation) {
+	var asyncInterceptor = function(proceed, invocation, done) {
+		invocationObject = invocation;
 		process.nextTick(function(){
 			interceptorCalled = true;
-			proceed();
+			var result = proceed();
+			done(result);
 		});
 	};
 
-	describe("When telling scarlet it is asynchronous", function() {
+	describe("When calling done from an async interceptor", function() {
 
 		var instance = new NamedFunction();
 
@@ -38,9 +41,17 @@ describe("Given we are using interceptors", function() {
 			}, 10);
 		});
 
-		it("Then it should not have a result", function() {
+		it("Then it should not have an immediate result", function() {
 			var result = instance.methodWithReturn();
 			assert(result == null);
+		});
+
+		it("Then it should have an eventual result", function(done) {
+			var result = instance.methodWithReturn();
+			setTimeout(function() {
+				assert(invocationObject.result == "any");
+				done();
+			}, 10);
 		});
 
 		it("Then it should not execute immediately", function(){
@@ -50,27 +61,35 @@ describe("Given we are using interceptors", function() {
 
 	});
 
-	describe("When telling scarlet it is synchronous", function() {
+	describe("When not calling done from an interceptor", function(){
 
+		var firstMethodCalled = false;
+		var secondMethodCalled = false;
 		var instance = new NamedFunction();
+
+		var firstInterceptor = function(proceed, invocation, done) {
+			firstMethodCalled = true;
+			return proceed();
+		};
+
+		var secondInterceptor = function(proceed, invocation, done) {
+			secondMethodCalled = true;
+		};
 
 		scarlet
 			.intercept(instance)
-			.using(asyncInterceptor);
+			.using(firstInterceptor)
+			.using(secondInterceptor);
 
-		it("Then it should be called", function(done) {
-			var result = instance.methodWithReturn();
-			setTimeout(function() {
-				assert(interceptorCalled);
-				done();
-			}, 10);
-		});
+		var result = instance.methodWithReturn();
 
-		it("Then there should always be a result", function() {
-			var result = instance.methodWithReturn();
-			assert(result === "any");
-			assert(!interceptorCalled);
-		});
+		it("Then should only call the first method", function(){
+			assert(result == "any");
+			setTimeout(function(){
+				assert(firstMethodCalled);
+				assert(!secondMethodCalled);
+			}, 10)
+		})
 
 	});
 

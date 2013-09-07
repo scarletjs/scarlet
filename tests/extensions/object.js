@@ -16,4 +16,14 @@ describe("Given we are using an object", function(){
 
 	});
 
+	describe("When checking for null objects", function(){
+
+		var nullObj = null;
+
+		it("Then should return true for null reference", function(){
+			assert(ext.object.isNull(nullObj))
+		});
+
+	});
+
 });

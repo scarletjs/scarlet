@@ -6,13 +6,32 @@ describe("Given we are using a dispatcher", function(){
 
 	describe("When #subscribeCall()", function(){
 
-		var dispatcher = new Dispatcher();
-
-		var callback = function(proceed, invocation) {};
-
 		it("Then should enlist callback into array", function(){
+			var dispatcher = new Dispatcher();
+			var callback = function(proceed, invocation) {};
 			dispatcher.subscribeCall(callback);
 			assert(dispatcher.methodCalls.length == 1);
+		});
+
+		it("Then should be able to override the context of 'this'", function(){
+			
+			var resultThisContext = null;
+			var dispatcher = new Dispatcher();
+			var thisContext = new function(){};
+
+			var callback = function(proceed, invocation) {
+				resultThisContext = this;
+			};
+
+			var invocation = {
+				object: new function() { this.name = "anyObject" },
+				proceed: function(){}
+			};
+
+			dispatcher.subscribeCall(callback, thisContext);
+			dispatcher.dispatch(invocation);
+
+			assert(resultThisContext === thisContext);
 		});
 
 	});
@@ -77,7 +96,6 @@ describe("Given we are using a dispatcher", function(){
 		});
 
 		it("Then should use the same invocation object instance", function(){
-			ll(firstInvocation);
 			assert(firstInvocation === invocation);
 			assert(secondInvocation === invocation);
 		});

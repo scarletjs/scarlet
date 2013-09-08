@@ -20,12 +20,14 @@ describe("Given /lib/ProxyInstance", function(){
 			var _args = null;
 			var _instance = null;
 			var _memberName = null;
+			
 			proxyInstance.whenCalled(function(instance, member, args, memberName){
 				_args = args;
 				_instance = instance;
 				_memberName = memberName;
 				return member.call(instance, args);
 			});
+			
 			var result = instance.anyMethod("apple", "pear", "banana");
 			assert(result === 9);
 			assert(_args.length === 3);

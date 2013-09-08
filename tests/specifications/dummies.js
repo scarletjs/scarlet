@@ -12,9 +12,7 @@ describe("Given we are working with dummies", function() {
 		var instance = ObjectLiteral;
 
 		it("Then it should not be null", function(){
-
 			assert(instance);
-
 		});
 
 	});
@@ -24,9 +22,7 @@ describe("Given we are working with dummies", function() {
 		var instance = new NamedFunction();
 
 		it("Then it should not be null", function(){
-
 			assert(instance);
-
 		});
 
 	});
@@ -36,9 +32,7 @@ describe("Given we are working with dummies", function() {
 		var instance = new UnnamedFunction();
 
 		it("Then it should not be null", function(){
-
 			assert(instance);
-
 		});
 
 	});
@@ -48,9 +42,7 @@ describe("Given we are working with dummies", function() {
 		var instance = new PrototypeFunction();
 
 		it("Then it should not be null", function(){
-
 			assert(instance);
-
 		});
 
 	});

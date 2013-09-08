@@ -17,7 +17,13 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "**/*.js"
+        pattern: "**/*.js", 
+        ignore: [
+          "dummies/named-function.js",
+          "dummies/object-literal.js",
+          "dummies/prototype-function.js",
+          "dummies/unnamed-function.js"
+        ]
       }
     },
     release: {

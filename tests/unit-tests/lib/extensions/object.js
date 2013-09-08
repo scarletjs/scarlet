@@ -73,7 +73,7 @@ describe("Given lib/extensions/Object", function(){
 
 	});
 
-	describe("When #hasProeprty() for classes", function(){
+	describe("When #hasProperty() for classes", function(){
 
 		var anyClass = function(){
 			var self = this;

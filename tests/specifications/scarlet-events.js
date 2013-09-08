@@ -25,14 +25,10 @@ describe("Given we are using scarlet events", function() {
 		.using(interceptor)
 		.on("before", function(invocation) {
 			beforeEventCalled = true;
-			ll("Before Event Called");
-			ll(beforeEventCalled);
 		}).on("after", function(invocation) {
 			afterEventCalled = true;
-			ll("After Event Called");
 		}).on("done", function(invocation) {
 			doneEventCalled = true;
-			ll("Done Event Called");
 		});
 
 	describe("When subcribing to events", function() {

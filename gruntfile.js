@@ -19,12 +19,6 @@ module.exports = function(grunt) {
         directory: "./tests",
         pattern: "**/*.js", 
         ignore: [
-          "scarlet.js",
-          "scarlet-invocation.js", 
-          "scarlet-named-function.js",
-          "scarlet-unamed-function.js",
-          "scarlet-prototype-function.js",
-          "scarlet-object-literal.js",
           "dummies/named-function.js",
           "dummies/object-literal.js",
           "dummies/prototype-function.js",

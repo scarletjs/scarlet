@@ -35,7 +35,6 @@ describe("Given we are intercepting", function() {
 		});
 
 		it("Then should return name of intercepted object", function() {
-			ll(interceptedObj);
 			assert(interceptedObj == instance);
 		});
 

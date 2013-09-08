@@ -1,6 +1,5 @@
 require("../../../include");
 
-
 module.exports = function($scarlet){
 
 	var self = this;
@@ -20,7 +19,6 @@ describe("Given /lib/Plugins", function(){
 	describe("When #loadPlugin()", function(){
 
 		var $scarlet = new Scarlet();
-
 		pluginManager.setPluginPath(__dirname + "/");
 
 		it("Then should load and call initialize", function(){

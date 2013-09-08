@@ -18,6 +18,14 @@ describe("Given we are using a dispatcher", function(){
 			assert(!dispatcher.isAsynchronous(interceptor));
 		});
 
+		it("Then should not return true if 'done' is not a function", function(){
+			assert(false);
+		})
+
+		it("Then should allow the 3rd parameter to be any name", function(){
+			assert(false);
+		});
+
 	});
 
 	describe("When #getChainedCalls", function(){

@@ -53,7 +53,7 @@ describe("Given lib/extensions/Object", function(){
 
 	});
 
-	describe("When #hasMember for instances", function(){
+	describe("When #hasMember() for instances", function(){
 
 		var anyClass = function(){
 			var self = this;
@@ -69,6 +69,24 @@ describe("Given lib/extensions/Object", function(){
 
 		it("Then it should be able to find a property", function(){
 			assert(ext.object.hasMember(anyInstance, "anyProperty"));
+		});
+
+	});
+
+	describe("When #hasProeprty() for classes", function(){
+
+		var anyClass = function(){
+			var self = this;
+			self.anyProperty = "foo";
+			self.anyMethod = function(){};
+		};
+
+		it("Then it should recognise 'anyProperty' as a valid property", function(){
+			assert(ext.object.hasProperty(anyClass, "anyProperty"));
+		});
+
+		it("Then it should recognise 'anyMethod' as an invalid property", function(){
+			assert(ext.object.hasProperty(anyClass, "anyMethod") == false);
 		});
 
 	});

@@ -27,8 +27,9 @@ describe("Given /lib/ProxyInstance", function(){
 				_memberName = memberName;
 				return member.call(instance, args);
 			});
-			
+
 			var result = instance.anyMethod("apple", "pear", "banana");
+			
 			assert(result === 9);
 			assert(_args.length === 3);
 			assert(_args[0] === "apple");

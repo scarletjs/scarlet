@@ -17,7 +17,31 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "**/*.js", 
+        pattern: "tests/**/*.js", 
+        ignore: [
+          "dummies/named-function.js",
+          "dummies/object-literal.js",
+          "dummies/prototype-function.js",
+          "dummies/unnamed-function.js"
+        ]
+      }, 
+      unittest: {
+        command: "mocha",
+        commandArgs: ["--reporter", "spec", "{0}"],
+        directory: "./tests",
+        pattern: "tests/unit-tests/**/*.js", 
+        ignore: [
+          "dummies/named-function.js",
+          "dummies/object-literal.js",
+          "dummies/prototype-function.js",
+          "dummies/unnamed-function.js"
+        ]
+      },
+      bddtest: {
+        command: "mocha",
+        commandArgs: ["--reporter", "spec", "{0}"],
+        directory: "./tests",
+        pattern: "tests/specifications/**/*.js", 
         ignore: [
           "dummies/named-function.js",
           "dummies/object-literal.js",
@@ -74,6 +98,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask("doc", ["mox"]);
   grunt.registerTask("test", ["spawn:test"]);
+  grunt.registerTask("bddtest", ["spawn:bddtest"]);
+  grunt.registerTask("unittest", ["spawn:unittest"]);
   grunt.registerTask("default", ["jshint", "mox"]);
   grunt.registerTask("deploy", ["jshint","mox", "browserify", "release", "scarlet-bump"]);
 

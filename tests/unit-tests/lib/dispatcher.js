@@ -6,25 +6,23 @@ describe("Given we are using a dispatcher", function(){
 
 	describe("When #isAsynchronous()", function(){
 
-		it("Then should return 'true' if interceptor has 'done' parameter", function(){
+		it("Then should return 'true' if interceptor has any 3rd parameter", function(){
 			var dispatcher = new Dispatcher();
 			var interceptor = function(proceed, invocation, done){};
 			assert(dispatcher.isAsynchronous(interceptor));
 		});
 
-		it("Then should return 'false' if the interceptor does not have 'done' parameter", function(){
+		it("Then should return 'false' if the interceptor only has 2 parameters", function(){
 			var dispatcher = new Dispatcher();
 			var interceptor = function(proceed, invocation){};
 			assert(!dispatcher.isAsynchronous(interceptor));
 		});
 
-		it("Then should not return true if 'done' is not a function", function(){
-			assert(false);
-		})
-
-		it("Then should allow the 3rd parameter to be any name", function(){
-			assert(false);
-		});
+		it("Then should return 'false' if the interceptor only has 1 parameters", function(){
+			var dispatcher = new Dispatcher();
+			var interceptor = function(proceed){};
+			assert(!dispatcher.isAsynchronous(interceptor));
+		});		
 
 	});
 

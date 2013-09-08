@@ -1,6 +1,6 @@
 require("../../../../include");
 
-describe("Given lib/extensions", function(){
+describe("Given lib/extensions/", function(){
 
 	describe("When #require()", function(){
 

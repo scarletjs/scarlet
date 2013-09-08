@@ -2,7 +2,7 @@ require("../../../include");
 
 var Dispatcher = require("../../../lib/dispatcher");
 
-describe("Given we are using a dispatcher", function(){
+describe("Given /lib/Dispatcher()", function(){
 
 	describe("When #isAsynchronous()", function(){
 

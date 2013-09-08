@@ -67,6 +67,19 @@ Scarlet was written to elimante the complexities with creating interceptors.  Th
 * Creation of asynchronous interceptors
 * Access to intercpted method details (method name,arguments, result, execution start and end date)
 
+## Plugins
+
+Scarlet allows for easy integration of plugins.  
+
+Here are a few you might find useful:
+* scarlet-winston - Scarlet plugin for using Winston with method and property event interception
+* scarlet-ioc - A Javascript IoC container
+
+### Creating a plugin
+
+The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) project to get the project setup.
+
+
 ### Intercept all object members
 
 One of the main benefits is that you can intercept all **enumerable** members for an object as follows:
@@ -86,11 +99,13 @@ This stops you from writing each member when setting up an interceptor. It allow
 
 ### Creation of interception events
 
-Scarlet interceptors emit the following events:
+Scarlet interceptors emit the following events with the `invocation` object:
 
 * before - emitted before *interceptors* are called
 * after - emitted after *intercepted* method
 * done - emitted after all *interceptors* and *intercepted* method called
+
+If an error occurs in an interceptor, scarlet will emit an error event with the error data:
 * error - emitted if an error occurs
 
 ```javascript
@@ -209,11 +224,13 @@ scarlet.intercept(someFunction)
 
 ### Creation of interception events
 
-Scarlet interceptors emit the following events:
+Scarlet interceptors emit the following events with the `invocation` object:
 
 * before - emitted before *interceptors* are called
 * after - emitted after *intercepted* method
 * done - emitted after all *interceptors* and *intercepted* method called
+
+If an error occurs in an interceptor, scarlet will emit an error event with the error data:
 * error - emitted if an error occurs
 
 ```javascript

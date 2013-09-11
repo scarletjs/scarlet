@@ -9,47 +9,44 @@ var PrototypeFunction = require("./dummies/prototype-function");
 
 describe("Given we are intercepting", function() {
 
-	describe("When intercepting a named function", function() {
+	var invocationObj = null;
+	var interceptedObj = null;
+	var methodWasCalled = false;
+
+	function interceptor(proceed, invocation) {
+		interceptedObj = this;
+		invocationObj = invocation;
+		methodWasCalled = true;
+		return proceed();
+	};
+
+	beforeEach(function() {
+		invocationObj = null;
+		interceptedObj = null;
+		methodWasCalled = false;
+	});
+
+	describe("When intercepting a named function instance", function() {
 		
-		var invocationObj = null;
-		var interceptedObj = null;
-		var methodWasCalled = false;
-
-		function interceptor(proceed, invocation) {
-			interceptedObj = this;
-			invocationObj = invocation;
-			methodWasCalled = true;
-			return proceed();
-		};
-
 		var instance = new NamedFunction();
 
 		scarlet
 			.intercept(instance)
 			.using(interceptor);
 
-		instance.methodWithReturn();
-
 		it("Then should return name of intercepted function", function() {
-			assert(invocationObj.methodName === 'methodWithReturn');
+			instance.method();
+			assert(invocationObj.methodName === 'method');
 		});
 
 		it("Then should return name of intercepted object", function() {
-			assert(interceptedObj == instance);
+			instance.method();
+			assert(invocationObj.objectName == 'NamedFunction');
 		});
 
 	});
-	/*
-	describe("When intercepting a prototype function", function() {
 
-		var invocationObj = null;
-		var methodWasCalled = false;
-
-		function interceptor(proceed, invocation) {
-			invocationObj = invocation;
-			methodWasCalled = true;
-			return proceed();
-		};
+	describe("When intercepting a prototype function instance", function() {
 
 		var instance = new PrototypeFunction();
 
@@ -57,28 +54,19 @@ describe("Given we are intercepting", function() {
 			.intercept(instance)
 			.using(interceptor);
 
-		instance.method();
-
 		it("Then should return name of intercepted function", function() {
+			instance.method();
 			assert(invocationObj.methodName === 'method');
 		});
 
 		it("Then should return name of intercepted object", function() {
+			instance.method();
 			assert(invocationObj.objectName === 'PrototypeFunction');
 		});
 
 	});
 
-	describe("When intercepting an unamed function", function() {
-
-		var invocationObj = null;
-		var methodWasCalled = false;
-
-		function interceptor(proceed, invocation) {
-			invocationObj = invocation;
-			methodWasCalled = true;
-			return proceed();
-		};
+	describe("When intercepting an unamed function instance", function() {
 
 		var instance = new UnnamedFunction();
 
@@ -86,46 +74,75 @@ describe("Given we are intercepting", function() {
 			.intercept(instance)
 			.using(interceptor);
 
-		instance.method();
-
 		it("Then should return name of intercepted function", function() {
+			instance.method();
 			assert(invocationObj.methodName === 'method');
 		});
 
 		it("Then should return name of intercepted object", function() {
+			instance.method();
 			assert(invocationObj.objectName === 'Object');
 		});
 
 	});
 
-	describe("When getting method name using an unnamed interceptor", function() {
+	describe("When intercepting a specific member of a named function instance", function() {
 
-		var invocationObj = null;
-		var methodWasCalled = false;
+		var instance = new NamedFunction();
 
-		function interceptor(proceed, invocation) {
-			invocationObj = invocation;
-			methodWasCalled = true;
-			return proceed();
-		};
+		scarlet
+			.intercept(instance, 'method')
+			.using(interceptor);
 
-		var NamedFunctionInter = function() {}
-		NamedFunctionInter.method = function() {};
-
-		it("Then should return name of intercepted function", function(done) {
-
-			var interceptor = function(proceed, invocation) {
-				assert(invocation.methodName === 'method');
-				done();
-			};
-
-			scarlet
-				.intercept(NamedFunctionInter, 'method')
-				.using(interceptor);
-
-			NamedFunctionInter.method();
+		it("Then should return name of intercepted function", function() {
+			instance.method();
+			assert(invocationObj.methodName === 'method');
 		});
 
+		it("Then should return name of intercepted object", function() {
+			instance.method();
+			assert(invocationObj.objectName === 'NamedFunction');
+		});
 	});
-	*/
+
+	describe("When intercepting a named function", function() {
+
+		function functionWithName() {}
+
+		functionWithName = scarlet
+							.intercept(functionWithName)
+							.using(interceptor)
+							.resolve();
+
+		it("Then should return name of intercepted function", function() {
+			functionWithName();
+			assert(invocationObj.methodName === 'functionWithName');
+		});
+
+		it("Then should return name of intercepted function as object name", function() {
+			functionWithName();
+			assert(invocationObj.objectName === 'functionWithName');
+		});
+	});
+
+	describe("When intercepting an unnamed function", function() {
+
+		var unNamed = function() {}
+
+		unNamed = scarlet
+					.intercept(unNamed)
+					.using(interceptor)
+					.resolve();
+
+		it("Then should return default name for a function", function() {
+			unNamed();
+			assert(invocationObj.methodName === 'Function');
+		});
+
+		it("Then should return default name for a function as object name", function() {
+			unNamed();
+			assert(invocationObj.objectName === 'Function');
+		});
+	});
+
 });

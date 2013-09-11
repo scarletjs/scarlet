@@ -6,12 +6,6 @@ var scarlet = new(require("../../lib/scarlet"))();
 describe("Given we are intercepting", function() {
 	
 	var numberOfCalls = 0;
-
-	var functionWithReturn =function (){
-		numberOfCalls++;
-		return "any";
-	};
-
 	var methodWasCalled = false;
 
 	function interceptor(proceed, invocation) {
@@ -25,26 +19,62 @@ describe("Given we are intercepting", function() {
 		methodWasCalled = false;
 	});
 
-	describe("When we have a function with a return", function() {
+	describe("When we have a named function with a return", function() {
 
-		functionWithReturn = scarlet
-								.intercept(functionWithReturn)
+		function namedFunctionWithReturn(){
+			numberOfCalls++;
+			return "any";
+		};
+
+		namedFunctionWithReturn = scarlet
+								.intercept(namedFunctionWithReturn)
 								.using(interceptor)
 								.resolve();
 
 		it("Then should be able to intercept", function() {
-			functionWithReturn();
+			namedFunctionWithReturn();
 			assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-			var result = functionWithReturn();
+			var result = namedFunctionWithReturn();
 			assert(methodWasCalled);
 			assert(result);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
-			functionWithReturn();
+			namedFunctionWithReturn();
+			assert(methodWasCalled);
+			assert(numberOfCalls === 1);
+		});
+
+	});
+
+	describe("When we have an unnamed function with a return", function() {
+		
+		var unNamedFunctionWithReturn =function (){
+			numberOfCalls++;
+			return "any";
+		};
+
+		unNamedFunctionWithReturn = scarlet
+								.intercept(unNamedFunctionWithReturn)
+								.using(interceptor)
+								.resolve();
+
+		it("Then should be able to intercept", function() {
+			unNamedFunctionWithReturn();
+			assert(methodWasCalled);
+		});
+
+		it("Then should be able to intercept method with return value", function() {
+			var result = unNamedFunctionWithReturn();
+			assert(methodWasCalled);
+			assert(result);
+		});
+
+		it("Then should be able to intercept method with return value", function() {
+			unNamedFunctionWithReturn();
 			assert(methodWasCalled);
 			assert(numberOfCalls === 1);
 		});

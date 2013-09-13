@@ -35,6 +35,11 @@ describe("Given we are intercepting", function() {
 			assert(methodWasCalled);
 		});
 
+		it("Then should be able to get intercepted method as a string", function() {
+			var expectedToString = ObjectLiteral.methodWithReturn.toString();
+			var interceptedToString = InterObjectLiteral.methodWithReturn.toString();
+			assert(expectedToString === interceptedToString);
+		});
 	});
 
 	describe("When intercepting non-existent members", function() {

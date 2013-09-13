@@ -25,7 +25,7 @@ describe("Given we are intercepting", function() {
 			numberOfCalls++;
 			return "any";
 		};
-
+		var expectedToString = namedFunctionWithReturn.toString();
 		namedFunctionWithReturn = scarlet
 								.intercept(namedFunctionWithReturn)
 								.using(interceptor)
@@ -48,6 +48,11 @@ describe("Given we are intercepting", function() {
 			assert(numberOfCalls === 1);
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			var actualToString = namedFunctionWithReturn.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 	describe("When we have an unnamed function with a return", function() {
@@ -56,7 +61,7 @@ describe("Given we are intercepting", function() {
 			numberOfCalls++;
 			return "any";
 		};
-
+		var expectedToString = unNamedFunctionWithReturn.toString();
 		unNamedFunctionWithReturn = scarlet
 								.intercept(unNamedFunctionWithReturn)
 								.using(interceptor)
@@ -79,6 +84,10 @@ describe("Given we are intercepting", function() {
 			assert(numberOfCalls === 1);
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			var actualToString = unNamedFunctionWithReturn.toString();
+			assert(actualToString === expectedToString);
+		});
 	});
 
 });

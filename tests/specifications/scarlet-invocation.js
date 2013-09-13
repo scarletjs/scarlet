@@ -44,6 +44,14 @@ describe("Given we are intercepting", function() {
 			assert(invocationObj.objectName == 'NamedFunction');
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			instance.method();
+			var unInterceptedInstance = new NamedFunction();
+			var actualToString = invocationObj.method.toString();
+			var expectedToString = unInterceptedInstance.method.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 	describe("When intercepting a prototype function instance", function() {
@@ -62,6 +70,14 @@ describe("Given we are intercepting", function() {
 		it("Then should return name of intercepted object", function() {
 			instance.method();
 			assert(invocationObj.objectName === 'PrototypeFunction');
+		});
+
+		it("Then should be able to get the intercepted method as a string", function() {
+			instance.method();
+			var unInterceptedInstance = new PrototypeFunction();
+			var actualToString = invocationObj.method.toString();
+			var expectedToString = unInterceptedInstance.method.toString();
+			assert(actualToString === expectedToString);
 		});
 
 	});
@@ -84,6 +100,14 @@ describe("Given we are intercepting", function() {
 			assert(invocationObj.objectName === 'Object');
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			instance.method();
+			var unInterceptedInstance = new UnnamedFunction();
+			var actualToString = invocationObj.method.toString();
+			var expectedToString = unInterceptedInstance.method.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 	describe("When intercepting a specific member of a named function instance", function() {
@@ -103,11 +127,20 @@ describe("Given we are intercepting", function() {
 			instance.method();
 			assert(invocationObj.objectName === 'NamedFunction');
 		});
+
+		it("Then should be able to get the intercepted method as a string", function() {
+			instance.method();
+			var unInterceptedInstance = new NamedFunction();
+			var actualToString = invocationObj.method.toString();
+			var expectedToString = unInterceptedInstance.method.toString();
+			assert(actualToString === expectedToString);
+		});
 	});
 
 	describe("When intercepting a named function", function() {
 
 		function functionWithName() {}
+		var expectedToString = functionWithName.toString();
 
 		functionWithName = scarlet
 							.intercept(functionWithName)
@@ -123,11 +156,19 @@ describe("Given we are intercepting", function() {
 			functionWithName();
 			assert(invocationObj.objectName === 'functionWithName');
 		});
+
+		it("Then should be able to get the intercepted method as a string", function() {
+			functionWithName();
+			var actualToString = invocationObj.method.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 	describe("When intercepting an unnamed function", function() {
 
 		var unNamed = function() {}
+		var expectedToString = unNamed.toString();
 
 		unNamed = scarlet
 					.intercept(unNamed)
@@ -142,6 +183,12 @@ describe("Given we are intercepting", function() {
 		it("Then should return default name for a function as object name", function() {
 			unNamed();
 			assert(invocationObj.objectName === 'Function');
+		});
+
+		it("Then should be able to get the intercepted method as a string", function() {
+			unNamed();
+			var actualToString = invocationObj.method.toString();
+			assert(actualToString === expectedToString);
 		});
 	});
 

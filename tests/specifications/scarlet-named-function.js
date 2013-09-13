@@ -44,6 +44,13 @@ describe("Given we are intercepting", function() {
 			assert(result);
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			var unInterceptedInstance = new NamedFunction();
+			var actualToString = instance.method.toString();
+			var expectedToString = unInterceptedInstance.method.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 	describe("When we have a named function type", function() {
@@ -77,6 +84,11 @@ describe("Given we are intercepting", function() {
 			assert(result);
 		});
 
+		it("Then should be able to get intercepted method as a string", function() {
+			var expectedToString = NamedFunction.toString();
+			var interceptedToString = InterNamedFunction.toString();
+			assert(expectedToString === interceptedToString);
+		});
 	});
 
 });

@@ -45,6 +45,12 @@ describe("Given we are intercepting", function() {
 			assert(result);
 		});
 
+		it("Then should be able to get the intercepted method as a string", function() {
+			var actualToString = instance.method.toString();
+			var expectedToString = ObjectLiteral.method.toString();
+			assert(actualToString === expectedToString);
+		});
+
 	});
 
 });

@@ -55,6 +55,11 @@ describe("Given we are intercepting", function() {
 			assert(methodWasCalled);
 		});
 
+		it("Then should be able to get intercepted method as a string", function() {
+			var expectedToString = PrototypeFunction.toString();
+			var interceptedToString = InterPrototypeFunc.toString();
+			assert(expectedToString === interceptedToString);
+		});
 	});
 
 	describe("When we have a prototype function instance", function() {
@@ -74,6 +79,7 @@ describe("Given we are intercepting", function() {
 				assert.equal(result, instance.anyInstanceProperty);
 				assert.notEqual(result, undefined);
 			});
+
 		});
 
 	});

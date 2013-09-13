@@ -1,13 +1,25 @@
 function NamedFunction(){
 	
-	this.property = "";
+	var self = this;
+	self.property = "any";
+	self.methodCalled = false;
+	self.methodWithReturnCalled = false;
 
-	this.method = function(){
+	self.method = function(){
+		self.methodCalled = true;
 	};
 	
-	this.methodWithReturn = function(){
+	self.methodWithReturn = function(){
+		self.methodWithReturnCalled = true;
 		return "any";
 	};
+
+	self.reset = function(){
+		self.methodCalled = false;
+		self.methodWithReturnCalled = false;
+	};
+
+
 };
 
 module.exports = NamedFunction;

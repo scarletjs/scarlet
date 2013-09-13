@@ -1,12 +1,33 @@
-require("../../include");
+var g = require("../../include");
+var dummies = require("./dummies");
+var builders = require("./builders");
+var Scarlet = require("../../lib/scarlet");
 
-var scarlet = new(require("../../lib/scarlet"))();
+var scarlet = new Scarlet();
 
-var ObjectLiteral = require("./dummies/object-literal");
-var NamedFunction = require("./dummies/named-function");
-var UnnamedFunction = require("./dummies/unnamed-function");
-var PrototypeFunction = require("./dummies/prototype-function");
 
+describe("Given we are using async interceptors", function() {
+
+	describe("When calling done from an async interceptor", function() {
+
+		it("Then it should be called", function() {
+
+			var builder = 
+				builders
+					.for(scarlet)
+					.withNamedFunction()
+					.withInterceptor()
+					.invokeMethod();
+
+			builder
+				.assert()
+				.methodCalled()
+		});
+
+	});
+
+});
+/*
 describe("Given we are using async interceptors", function() {
 
 	var invocationObject = null;
@@ -94,3 +115,4 @@ describe("Given we are using async interceptors", function() {
 	});
 
 });
+*/

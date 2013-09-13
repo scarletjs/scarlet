@@ -1,11 +1,8 @@
-require("../../include");
+var g = require("../../include");
+var dummies = require("./dummies");
+var Scarlet = require("../../lib/scarlet");
 
-var scarlet = new(require("../../lib/scarlet"))();
-
-var ObjectLiteral = require("./dummies/object-literal");
-var NamedFunction = require("./dummies/named-function");
-var UnnamedFunction = require("./dummies/unnamed-function");
-var PrototypeFunction = require("./dummies/prototype-function");
+var scarlet = new Scarlert();
 
 describe("Given we are using more than one interceptor", function() {
 
@@ -35,11 +32,11 @@ describe("Given we are using more than one interceptor", function() {
 		var result = instance.method();
 
 		it("Then the first interceptor should be called", function() {
-			assert(firstMethodCalled);
+			assert(firstMethodCalled, "First method was not called");
 		});
 
 		it("Then the second interceptor should be called", function() {
-			assert(secondMethodCalled);
+			assert(secondMethodCalled, "Second method was not called");
 		});
 
 	});
@@ -55,7 +52,7 @@ describe("Given we are using more than one interceptor", function() {
 			} catch (ex) {
 				exceptionThrown = true;
 			}
-			assert(exceptionThrown);
+			assert(exceptionThrown, "Did not throw exception when trying to intercept more than once");
 		});
 	
 	});

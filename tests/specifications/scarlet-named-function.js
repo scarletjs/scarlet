@@ -1,11 +1,8 @@
-require("../../include");
+var g = require("../../include");
+var dummies = require("./dummies");
+var Scarlet = require("../../lib/scarlet");
 
-var scarlet = new(require("../../lib/scarlet"))();
-
-var ObjectLiteral = require("./dummies/object-literal");
-var NamedFunction = require("./dummies/named-function");
-var UnnamedFunction = require("./dummies/unnamed-function");
-var PrototypeFunction = require("./dummies/prototype-function");
+var scarlet = new Scarlert();
 
 describe("Given we are intercepting", function() {
 

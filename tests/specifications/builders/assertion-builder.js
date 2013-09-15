@@ -2,9 +2,10 @@ var g = require("../../../include");
 var dummies = require("./dummies");
 var ext = require("../../../lib/extensions");
 
-function AssertionBuilder(instances, interceptor) {
+function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
 	var self = this;
+	self.log = scarletBuilder.log;
 
 	self.methodCalled = function(){
 		ext.enumerable.forEach(instances, function(instance){

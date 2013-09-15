@@ -61,7 +61,7 @@ function ScarletBuilder(scarlet){
 	};
 
 	self.assert = function(){
-		return new AssertionBuilder(self.instances, self.interceptor);
+		return new AssertionBuilder(self, self.instances, self.interceptor);
 	};
 };
 

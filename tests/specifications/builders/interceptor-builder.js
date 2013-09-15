@@ -10,7 +10,6 @@ function Interceptor(scarletBuilder){
 	self.log = scarletBuilder.log;
 
 	self.intercept = function(proceed, invocation){
-		self.log.debug(self, this, "->");
 		self.timesCalled += 1;
 		self.invocation = invocation;
 		return proceed();
@@ -29,7 +28,6 @@ function InterceptorBuilder(scarletBuilder, instances) {
 	self.interceptor = new Interceptor(scarletBuilder);
 
 	self.methodCalled = function(times){
-		//self.log.debug(self, this, "->");
 		if (typeof(times) == "undefined")
 			g.assert(self.interceptor.timesCalled > 0);
 		else 

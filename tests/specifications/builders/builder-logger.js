@@ -12,14 +12,10 @@ function BuilderLogger(){
 	self.logLevel = 4;
 
 	self.print = function(obj, func, msg) {
-		console.log(ext.object.getParams(func));
-		return;
-
-
 		if (!ext.object.isNull(obj) && ext.object.isNull(func))
 			g.ll(ext.object.getName(obj));
 		if (!ext.object.isNull(obj) && !ext.object.isNull(func))
-			g.ll(ext.object.getName(obj) + "::" + ext.object.getName(func) + "(" + ext.object.getParams(func).join(",") + ")");
+			g.ll(ext.object.getName(obj) + "::" + ext.object.getName(func) + "(" + ext.object.getParameterNames(func).join(",") + ")");
 		g.ll(msg);
 		if(!ext.object.isNull(obj))
 			g.ll(obj);

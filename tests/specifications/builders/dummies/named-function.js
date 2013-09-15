@@ -10,8 +10,9 @@ function NamedFunction(){
 	};
 	
 	self.methodWithReturn = function(){
-		console.log("Method with return called");
+		console.log("->>> NAMED-FUNC ->>> METHOD WITH RET START");
 		self.methodWithReturnCalled = true;
+		console.log("->>> NAMED-FUNC ->>> METHOD WITH RET FINISHED");
 		return "any";
 	};
 

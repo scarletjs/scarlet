@@ -17,8 +17,12 @@ describe("Given we are using async interceptors", function() {
 		invocationObject = invocation;
 		process.nextTick(function(){
 			interceptorCalled = true;
+			g.ll("->>> INTERCEPTOR ->>> BEFORE PROCEED");
 			var result = proceed();
+			g.ll("->>> INTERCEPTOR ->>> AFTER PROCEED");
+			g.ll("->>> INTERCEPTOR ->>> BEFORE DONE");
 			done(result);
+			g.ll("->>> INTERCEPTOR ->>> AFTER DONE");
 		});
 	};
 

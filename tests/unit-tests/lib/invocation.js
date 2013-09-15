@@ -1,4 +1,4 @@
-require("../../../include");
+var g = require("../../../include");
 
 describe("Given /lib/Invocation", function(){
 
@@ -18,16 +18,16 @@ describe("Given /lib/Invocation", function(){
 	describe("When #ctor()", function(){
 
 		it("Then should throw if 'object' and/or 'method' parameter is null", function(){
-			assert(_throws(function(){
+			g.assert(_throws(function(){
 				new Invocation(null, null);
 			}), "new Invocation(null, null) should throw");
-			assert(_throws(function(){
+			g.assert(_throws(function(){
 				new Invocation({}, null);
 			}), "new Invocation(obj!=null, null) should throw");
-			assert(_throws(function(){
+			g.assert(_throws(function(){
 				new Invocation(null, function(){});
 			}), "new Invocation(null, method!=null) should throw");
-			assert(_doesNotThrow(function(){
+			g.assert(_doesNotThrow(function(){
 				new Invocation({}, function(){});
 			}), "new Invocation(obj!=null, method!=null) should not throw");
 		});
@@ -47,13 +47,13 @@ describe("Given /lib/Invocation", function(){
 		var invocation = new Invocation(obj, obj.anyMethod);
 
 		it("Then should not allow the method to execute more than once", function(){
-			assert(_doesNotThrow(function(){
+			g.assert(_doesNotThrow(function(){
 				invocation.proceed();
 			}));
-			assert(_throws(function(){
+			g.assert(_throws(function(){
 				invocation.proceed();
 			}));
-			assert(methodCalled);
+			g.assert(methodCalled);
 		});
 
 	});

@@ -10,6 +10,7 @@ function NamedFunction(){
 	};
 	
 	self.methodWithReturn = function(){
+		console.log("Method with return called");
 		self.methodWithReturnCalled = true;
 		return "any";
 	};

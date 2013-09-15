@@ -1,4 +1,4 @@
-require("../../../../include");
+var g = require("../../../../include");
 
 describe("Given lib/extensions/LinkedArray", function() {
 
@@ -22,9 +22,9 @@ describe("Given lib/extensions/LinkedArray", function() {
 
 		it("Then it should build the linked array correctly", function() {
 			var result = ext.linkedArray.build(elementArray);
-			assert(result.method() == "One");
-			assert(result.next().method() == "Two");
-			assert(result.next().next().method() == "Three");
+			g.assert(result.method() == "One");
+			g.assert(result.next().method() == "Two");
+			g.assert(result.next().next().method() == "Three");
 		});
 
 	});

@@ -1,4 +1,4 @@
-require("../../../../include");
+var g = require("../../../../include");
 
 describe("Given lib/extensions/Enumerable", function(){
 

@@ -1,4 +1,4 @@
-require("../../../include");
+var g = require("../../../include");
 
 describe("Given /lib/Dispatcher", function(){
 
@@ -9,19 +9,19 @@ describe("Given /lib/Dispatcher", function(){
 		it("Then should return 'true' if interceptor has any 3rd parameter", function(){
 			var dispatcher = new Dispatcher();
 			var interceptor = function(proceed, invocation, done){};
-			assert(dispatcher.isAsynchronous(interceptor));
+			g.assert(dispatcher.isAsynchronous(interceptor));
 		});
 
 		it("Then should return 'false' if the interceptor only has 2 parameters", function(){
 			var dispatcher = new Dispatcher();
 			var interceptor = function(proceed, invocation){};
-			assert(!dispatcher.isAsynchronous(interceptor));
+			g.assert(!dispatcher.isAsynchronous(interceptor));
 		});
 
 		it("Then should return 'false' if the interceptor only has 1 parameters", function(){
 			var dispatcher = new Dispatcher();
 			var interceptor = function(proceed){};
-			assert(!dispatcher.isAsynchronous(interceptor));
+			g.assert(!dispatcher.isAsynchronous(interceptor));
 		});		
 
 	});
@@ -40,10 +40,10 @@ describe("Given /lib/Dispatcher", function(){
 		var callChain = dispatcher.getCallChain();
 
 		it("Then build the call chain correctly", function(){
-			assert(callChain != null);
-			assert(callChain.method == firstCall);
-			assert(callChain.next().method == secondCall);
-			assert(callChain.next().next().method == thirdCall)
+			g.assert(callChain != null);
+			g.assert(callChain.method == firstCall);
+			g.assert(callChain.next().method == secondCall);
+			g.assert(callChain.next().next().method == thirdCall)
 		});
 
 	});
@@ -54,7 +54,7 @@ describe("Given /lib/Dispatcher", function(){
 			var dispatcher = new Dispatcher();
 			var callback = function(proceed, invocation) {};
 			dispatcher.subscribeCall(callback);
-			assert(dispatcher.methodCalls.length == 1);
+			g.assert(dispatcher.methodCalls.length == 1);
 		});
 
 		it("Then should be able to override the context of 'this'", function(){
@@ -75,7 +75,7 @@ describe("Given /lib/Dispatcher", function(){
 			dispatcher.subscribeCall(callback, thisContext);
 			dispatcher.dispatch(invocation);
 
-			assert(resultThisContext === thisContext);
+			g.assert(resultThisContext === thisContext);
 		});
 
 	});
@@ -89,7 +89,7 @@ describe("Given /lib/Dispatcher", function(){
 		it("Then should clear all callbacks", function(){
 			dispatcher.subscribeCall(callback);
 			dispatcher.dispose();
-			assert(dispatcher.methodCalls.length == 0);
+			g.assert(dispatcher.methodCalls.length == 0);
 		});
 
 	});
@@ -130,18 +130,18 @@ describe("Given /lib/Dispatcher", function(){
 		dispatcher.dispatch(invocation);
 
 		it("Then should call all callbacks", function(){
-			assert(firstMethodCalled);
-			assert(secondMethodCalled);
+			g.assert(firstMethodCalled);
+			g.assert(secondMethodCalled);
 		});
 
 		it("Then should use invocation.object as context for this", function(){
-			assert(firstThisContext === invocation.object);
-			assert(secondThisContext === invocation.object);
+			g.assert(firstThisContext === invocation.object);
+			g.assert(secondThisContext === invocation.object);
 		});
 
 		it("Then should use the same invocation object instance", function(){
-			assert(firstInvocation === invocation);
-			assert(secondInvocation === invocation);
+			g.assert(firstInvocation === invocation);
+			g.assert(secondInvocation === invocation);
 		});
 
 	});
@@ -173,8 +173,8 @@ describe("Given /lib/Dispatcher", function(){
 		it("Then should call both methods synchronously", function(done){
 
 			dispatcher.onComplete(function(){
-				assert(firstMethodCalled);
-				assert(secondMethodCalled);
+				g.assert(firstMethodCalled);
+				g.assert(secondMethodCalled);
 				done();
 			});
 

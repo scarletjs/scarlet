@@ -30,7 +30,7 @@ describe("Given we are using async interceptors", function() {
 			.intercept(instance)
 			.using(asyncInterceptor);
 
-		it("Then it should be called", function(done) {
+		/*it("Then it should be called", function(done) {
 			var result = instance.methodWithReturn();
 			setTimeout(function() {
 				g.assert(interceptorCalled);
@@ -41,7 +41,7 @@ describe("Given we are using async interceptors", function() {
 		it("Then it should not have an immediate result", function() {
 			var result = instance.methodWithReturn();
 			g.assert(result == null);
-		});
+		});*/
 
 		it("Then it should have an eventual result", function(done) {
 			var result = instance.methodWithReturn();
@@ -51,14 +51,14 @@ describe("Given we are using async interceptors", function() {
 			}, 10);
 		});
 
-		it("Then it should not execute immediately", function(){
+		/*it("Then it should not execute immediately", function(){
 			instance.methodWithReturn();
 			g.assert(!interceptorCalled);
-		});
+		});*/
 
 	});
 
-	describe("When not calling done from an interceptor", function(){
+	/*describe("When not calling done from an interceptor", function(){
 
 		var firstMethodCalled = false;
 		var secondMethodCalled = false;
@@ -88,6 +88,6 @@ describe("Given we are using async interceptors", function() {
 			}, 10)
 		})
 
-	});
+	});*/
 
 });

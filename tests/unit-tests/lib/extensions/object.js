@@ -1,4 +1,4 @@
-g = require("../../../../include");
+var g = require("../../../../include");
 
 describe("Given lib/extensions/Object", function(){
 
@@ -9,9 +9,9 @@ describe("Given lib/extensions/Object", function(){
 		it("Then it should be able to discover the paramters", function(){
 			var interceptor = function(proceed, invocation, done) {};
 			var results = ext.object.getParameterNames(interceptor);
-			g.assert(results[0] == "proceed");
-			g.assert(results[1] == "invocation");
-			g.assert(results[2] == "done");
+			g.g.assert(results[0] == "proceed");
+			g.g.assert(results[1] == "invocation");
+			g.g.assert(results[2] == "done");
 		});
 
 	});
@@ -21,9 +21,9 @@ describe("Given lib/extensions/Object", function(){
 		it("Then should find params for a vanilla function", function(){
 			function any(param1, param2, param3) {}
 			var params = ext.object.getParams(any);
-			g.assert(params[0] == "param1", "First parameter is not equal to 'param1'");
-			g.assert(params[1] == "param2", "Second parameter is not equal to 'param2'");
-			g.assert(params[2] == "param3", "Third parameter is not equal to 'param3'");
+			g.g.assert(params[0] == "param1", "First parameter is not equal to 'param1'");
+			g.g.assert(params[1] == "param2", "Second parameter is not equal to 'param2'");
+			g.g.assert(params[2] == "param3", "Third parameter is not equal to 'param3'");
 		});
 
 	});
@@ -34,15 +34,15 @@ describe("Given lib/extensions/Object", function(){
 		var undefObj = undefined;
 
 		it("Then should return true for null reference", function(){
-			g.assert(ext.object.isNull(nullObj));
+			g.g.assert(ext.object.isNull(nullObj));
 		});
 
 		it("Then should return true for undefined", function(){
-			g.assert(ext.object.isNull(undefObj));
+			g.g.assert(ext.object.isNull(undefObj));
 		});
 
 		it("Then should return false for non null reference", function(){
-			g.assert(!ext.object.isNull(new function(){}));
+			g.g.assert(!ext.object.isNull(new function(){}));
 		});
 
 	});
@@ -56,11 +56,11 @@ describe("Given lib/extensions/Object", function(){
 		};
 
 		it("Then it should be able to find a method", function(){
-			g.assert(ext.object.hasMember(anyClass, "anyMethod"));
+			g.g.assert(ext.object.hasMember(anyClass, "anyMethod"));
 		});
 
 		it("Then it should be able to find a property", function(){
-			g.assert(ext.object.hasMember(anyClass, "anyProperty"));
+			g.g.assert(ext.object.hasMember(anyClass, "anyProperty"));
 		});
 
 	});
@@ -76,11 +76,11 @@ describe("Given lib/extensions/Object", function(){
 		var anyInstance = new anyClass();
 
 		it("Then it should be able to find a method", function(){
-			g.assert(ext.object.hasMember(anyInstance, "anyMethod"));
+			g.g.assert(ext.object.hasMember(anyInstance, "anyMethod"));
 		});
 
 		it("Then it should be able to find a property", function(){
-			g.assert(ext.object.hasMember(anyInstance, "anyProperty"));
+			g.g.assert(ext.object.hasMember(anyInstance, "anyProperty"));
 		});
 
 	});
@@ -94,11 +94,11 @@ describe("Given lib/extensions/Object", function(){
 		};
 
 		it("Then it should recognise 'anyProperty' as a valid property", function(){
-			g.assert(ext.object.hasProperty(anyClass, "anyProperty"));
+			g.g.assert(ext.object.hasProperty(anyClass, "anyProperty"));
 		});
 
 		it("Then it should recognise 'anyMethod' as an invalid property", function(){
-			g.assert(ext.object.hasProperty(anyClass, "anyMethod") == false);
+			g.g.assert(ext.object.hasProperty(anyClass, "anyMethod") == false);
 		});
 
 	});

@@ -1,4 +1,4 @@
-require("../../../include");
+var g = require("../../../include");
 
 module.exports = function($scarlet){
 
@@ -14,7 +14,8 @@ module.exports = function($scarlet){
 describe("Given /lib/Plugins", function(){
 
 	var Scarlet = require("../../../lib/scarlet");
-	var pluginManager = require("../../../lib/plugins");
+	var Plugins = require("../../../lib/plugins");
+	var pluginManager = new Plugins();
 
 	describe("When #loadPlugin()", function(){
 
@@ -23,7 +24,7 @@ describe("Given /lib/Plugins", function(){
 
 		it("Then should load and call initialize", function(){
 			var plugin = pluginManager.loadPlugin($scarlet, "plugins");
-			assert(plugin.initializeWasCalled);
+			g.assert(plugin.initializeWasCalled);
 		});
 
 	});

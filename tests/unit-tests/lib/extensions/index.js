@@ -1,4 +1,4 @@
-require("../../../../include");
+var g = require("../../../../include");
 
 describe("Given lib/extensions/", function(){
 
@@ -7,19 +7,19 @@ describe("Given lib/extensions/", function(){
 		var ext = require("../../../../lib/extensions");
 
 		it("Then should have an unique identifier instance", function(){
-			assert(ext.uuid != null, "Could not find unique identifier instance");
+			g.assert(ext.uuid != null, "Could not find unique identifier instance");
 		});
 
 		it("Then should have an extended object instance", function(){
-			assert(ext.object != null, "Could not find extended object instance");
+			g.assert(ext.object != null, "Could not find extended object instance");
 		});
 
 		it("Then should have an enumerable instance", function(){
-			assert(ext.enumerable != null, "Could not find enumerable instance");
+			g.assert(ext.enumerable != null, "Could not find enumerable instance");
 		});
 
 		it("Then should have a linked array instance", function(){
-			assert(ext.linkedArray != null, "Could not find linked array instance");
+			g.assert(ext.linkedArray != null, "Could not find linked array instance");
 		});
 
 	});

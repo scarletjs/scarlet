@@ -1,6 +1,9 @@
-require("../../include");
+var g = require("../../include");
+var ext = require("../../lib/extensions");
+var dummies = require("builders/dummies");
 
-var scarlet = new(require("../../lib/scarlet"))();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = Scarlet();
 
 var ObjectLiteral = require("./dummies/object-literal");
 var NamedFunction = require("./dummies/named-function");

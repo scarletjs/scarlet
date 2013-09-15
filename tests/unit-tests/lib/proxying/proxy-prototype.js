@@ -102,19 +102,38 @@ describe("Given /lib/proxying/ProxyPrototype", function() {
 
 		var instance = new AnyClass();
 
-		it("Then should invoke whenCalled delegate for 'property' set", function() {
+		it("Then should not invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
 			g.assert(!proceedWasCalled);
 		});
 
-		it("Then should invoke whenCalled delegate for 'property' get", function() {
+		it("Then should not invoke whenCalled delegate for 'prototypeProperty' set", function() {
+			instance.prototypeProperty = 6;
+			g.assert(!proceedWasCalled);
+			g.assert(instance.prototypeProperty == 6);
+		});
+
+		it("Then should not invoke whenCalled delegate for 'property' get", function() {
 			var result = instance.anyProperty;
 			g.assert(!proceedWasCalled);
 		});
 
-		it("Then should invoke whenCalled delegate for 'method'", function() {
+		it("Then should not invoke whenCalled delegate for 'prototypeProperty' get", function() {
+			instance.prototypeProperty = "apple";
+			var result = instance.prototypeProperty;
+			g.assert(!proceedWasCalled);
+			g.assert(result == "apple");
+		});
+
+		it("Then should not invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
 			g.assert(!proceedWasCalled);
+		});
+
+		it("Then should not invoke whenCalled delegate for 'prototypeMethod'", function() {
+			var result = instance.prototypeMethod(6);
+			g.assert(!proceedWasCalled);
+			g.assert(result == 6);
 		});
 
 	});

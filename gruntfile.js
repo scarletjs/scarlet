@@ -97,7 +97,7 @@ module.exports = function(grunt) {
   grunt.loadTasks("./tasks");
 
   grunt.registerTask("doc", ["mox"]);
-  grunt.registerTask("test", ["spawn:test"]);
+  grunt.registerTask("test", ["spawn:unittest"]);
   grunt.registerTask("bddtest", ["spawn:bddtest"]);
   grunt.registerTask("unittest", ["spawn:unittest"]);
   grunt.registerTask("default", ["jshint", "mox"]);

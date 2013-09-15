@@ -45,7 +45,9 @@ describe("Given we are using async interceptors", function() {
 
 		it("Then it should have an eventual result", function(done) {
 			var result = instance.methodWithReturn();
+			g.ll(result);
 			setTimeout(function() {
+				g.ll(invocationObject);
 				g.assert(invocationObject.result == "any");
 				done();
 			}, 10);

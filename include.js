@@ -3,10 +3,10 @@ var util = require("util");
 var inspect = util.inspect;
 
 // Optional debug extension
-Object.prototype.__trace = function() {
+/*Object.prototype.__trace = function() {
 	var stack = new Error().stack
 	log(stack);
-}
+}*/
 
 module.exports = {
 	// Node modules

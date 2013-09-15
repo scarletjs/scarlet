@@ -7,6 +7,10 @@ function AnyClass(){
 	};
 }
 
+AnyClass.prototype.prototypeMethod = function(val) {
+	return val;
+};
+
 describe("Given /lib/proxying/ProxyInfo", function(){
 
 	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
@@ -33,7 +37,6 @@ describe("Given /lib/proxying/ProxyInfo", function(){
 	describe("When get isProperty: function()", function(){
 
 		var instance = new AnyClass();
-		instance.__scarlet = {};
 
 		it("Then should be 'true' for a property", function(){
 			var info = new ProxyInfo(instance, "anyProperty");
@@ -50,7 +53,6 @@ describe("Given /lib/proxying/ProxyInfo", function(){
 	describe("When get isMethod: function()", function(){
 
 		var instance = new AnyClass();
-		instance.__scarlet = {};
 
 		it("Then should be 'true' for a function", function(){
 			var info = new ProxyInfo(instance, "anyMethod");
@@ -63,5 +65,15 @@ describe("Given /lib/proxying/ProxyInfo", function(){
 		});
 
 	});
+
+	/* TODO: Need facility for checking whether the function has a prototype */
+	/*describe("When get isPrototype: function()", function(){
+
+		it("Then should be 'true' for a prototype class", function(){
+			var info = new ProxyInfo(AnyClass, "prototypeMethod");
+			g.assert(info.isPrototype);
+		});
+
+	});*/
 
 });

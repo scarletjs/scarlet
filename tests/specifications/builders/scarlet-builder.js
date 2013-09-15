@@ -1,13 +1,12 @@
 var g = require("../../../include");
 var dummies = require("./dummies");
-var ext = require("../../../lib/extensions");
-
-var BuilderLogger = require("./builder-logger");
-var AssertionBuilder = require("./assertion-builder");
-var InterceptorBuilder = require("./interceptor-builder");
 
 function ScarletBuilder(scarlet){
 	
+	var BuilderLogger = require("./builder-logger");
+	var AssertionBuilder = require("./assertion-builder");
+	var InterceptorBuilder = require("./interceptor-builder");
+
 	var self = this;
 	self.instances = [];
 	self.interceptor = null;
@@ -47,14 +46,14 @@ function ScarletBuilder(scarlet){
 	};
 
 	self.invokeMethod = function(){
-		ext.enumerable.forEach(self.instances, function(instance){
+		g.ext.enumerable.forEach(self.instances, function(instance){
 			instance.method();
 		});
 		return self;
 	};
 
 	self.invokeMethodWithReturn = function(){
-		ext.enumerable.forEach(self.instances, function(instance){
+		g.ext.enumerable.forEach(self.instances, function(instance){
 			instance.methodWithReturn();
 		});
 		return self;

@@ -8,6 +8,8 @@ module.exports = {
 	path: require("path"),
 	assert: require("assert"),
 	events: require("events"),
+	// Scarlet modules
+	ext: require("./lib/extensions"),
 	// Diagnostics methods
 	l: log,
 	i: inspect,

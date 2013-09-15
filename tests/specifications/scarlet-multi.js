@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are using more than one interceptor", function() {
 
@@ -20,7 +20,7 @@ describe("Given we are using more than one interceptor", function() {
 		return proceed();
 	};
 
-	var instance = new NamedFunction();
+	var instance = new builder.dummies.NamedFunc();
 
 	scarlet
 		.intercept(instance)
@@ -32,11 +32,11 @@ describe("Given we are using more than one interceptor", function() {
 		var result = instance.method();
 
 		it("Then the first interceptor should be called", function() {
-			assert(firstMethodCalled, "First method was not called");
+			g.assert(firstMethodCalled, "First method was not called");
 		});
 
 		it("Then the second interceptor should be called", function() {
-			assert(secondMethodCalled, "Second method was not called");
+			g.assert(secondMethodCalled, "Second method was not called");
 		});
 
 	});
@@ -52,7 +52,7 @@ describe("Given we are using more than one interceptor", function() {
 			} catch (ex) {
 				exceptionThrown = true;
 			}
-			assert(exceptionThrown, "Did not throw exception when trying to intercept more than once");
+			g.assert(exceptionThrown, "Did not throw exception when trying to intercept more than once");
 		});
 	
 	});

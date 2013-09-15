@@ -1,10 +1,11 @@
-require("../../include");
+var g = require("../../include");
+var builder = require("./builders");
 
-var scarlet = new(require("../../lib/scarlet"))();
-
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
-	
+
 	var numberOfCalls = 0;
 	var methodWasCalled = false;
 
@@ -21,72 +22,73 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a named function with a return", function() {
 
-		function namedFunctionWithReturn(){
+		function namedFunctionWithReturn() {
 			numberOfCalls++;
 			return "any";
 		};
 		var expectedToString = namedFunctionWithReturn.toString();
-		namedFunctionWithReturn = scarlet
-								.intercept(namedFunctionWithReturn)
-								.using(interceptor)
-								.resolve();
+		namedFunctionWithReturn =
+			scarlet
+				.intercept(namedFunctionWithReturn)
+				.using(interceptor)
+				.resolve();
 
 		it("Then should be able to intercept", function() {
 			namedFunctionWithReturn();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			var result = namedFunctionWithReturn();
-			assert(methodWasCalled);
-			assert(result);
+			g.assert(methodWasCalled);
+			g.assert(result);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			namedFunctionWithReturn();
-			assert(methodWasCalled);
-			assert(numberOfCalls === 1);
+			g.assert(methodWasCalled);
+			g.assert(numberOfCalls === 1);
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			var actualToString = namedFunctionWithReturn.toString();
-			assert(actualToString === expectedToString);
+			g.assert(actualToString === expectedToString);
 		});
 
 	});
 
 	describe("When we have an unnamed function with a return", function() {
-		
-		var unNamedFunctionWithReturn =function (){
+
+		var unNamedFunctionWithReturn = function() {
 			numberOfCalls++;
 			return "any";
 		};
 		var expectedToString = unNamedFunctionWithReturn.toString();
 		unNamedFunctionWithReturn = scarlet
-								.intercept(unNamedFunctionWithReturn)
-								.using(interceptor)
-								.resolve();
+			.intercept(unNamedFunctionWithReturn)
+			.using(interceptor)
+			.resolve();
 
 		it("Then should be able to intercept", function() {
 			unNamedFunctionWithReturn();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			var result = unNamedFunctionWithReturn();
-			assert(methodWasCalled);
-			assert(result);
+			g.assert(methodWasCalled);
+			g.assert(result);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			unNamedFunctionWithReturn();
-			assert(methodWasCalled);
-			assert(numberOfCalls === 1);
+			g.assert(methodWasCalled);
+			g.assert(numberOfCalls === 1);
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			var actualToString = unNamedFunctionWithReturn.toString();
-			assert(actualToString === expectedToString);
+			g.assert(actualToString === expectedToString);
 		});
 	});
 

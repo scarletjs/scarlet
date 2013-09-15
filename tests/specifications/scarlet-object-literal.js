@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -19,8 +19,8 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have an object literal instance", function() {
 
-		var instance = Object.create(ObjectLiteral);
-		instance.property = ObjectLiteral.property;
+		var instance = builder.dummies.ObjectLiteral();
+		instance.property = builder.dummies.ObjectLiteral().property;
 
 		scarlet
 			.intercept(instance)
@@ -28,24 +28,24 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to intercept the property getter", function() {
 			var result = instance.property;
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method", function() {
 			instance.method();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
+			g.assert(methodWasCalled);
+			g.assert(result);
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			var actualToString = instance.method.toString();
-			var expectedToString = ObjectLiteral.method.toString();
-			assert(actualToString === expectedToString);
+			var expectedToString = builder.dummies.ObjectLiteral().method.toString();
+			g.assert(actualToString === expectedToString);
 		});
 
 	});

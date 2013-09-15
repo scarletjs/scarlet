@@ -1,6 +1,5 @@
 var g = require("../../../include");
 var dummies = require("./dummies");
-var ext = require("../../../lib/extensions");
 
 function BuilderLogger(){
 
@@ -12,12 +11,12 @@ function BuilderLogger(){
 	self.logLevel = 4;
 
 	self.print = function(obj, func, msg) {
-		if (!ext.object.isNull(obj) && ext.object.isNull(func))
-			g.ll(ext.object.getName(obj));
-		if (!ext.object.isNull(obj) && !ext.object.isNull(func))
-			g.ll(ext.object.getName(obj) + "::" + ext.object.getName(func) + "(" + ext.object.getParameterNames(func).join(",") + ")");
+		if (!g.ext.object.isNull(obj) && g.ext.object.isNull(func))
+			g.ll(g.ext.object.getName(obj));
+		if (!g.ext.object.isNull(obj) && !g.ext.object.isNull(func))
+			g.ll(g.ext.object.getName(obj) + "::" + g.ext.object.getName(func) + "(" + g.ext.object.getParameterNames(func).join(",") + ")");
 		g.ll(msg);
-		if(!ext.object.isNull(obj))
+		if(!g.ext.object.isNull(obj))
 			g.ll(obj);
 	};
 

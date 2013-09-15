@@ -1,6 +1,5 @@
 var g = require("../../../include");
 var dummies = require("./dummies");
-var ext = require("../../../lib/extensions");
 
 function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
@@ -8,7 +7,7 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 	self.log = scarletBuilder.log;
 
 	self.methodCalled = function(){
-		ext.enumerable.forEach(instances, function(instance){
+		g.ext.enumerable.forEach(instances, function(instance){
 			g.assert(instance.methodCalled);
 		});
 		interceptor.methodCalled();
@@ -16,7 +15,7 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 	};
 
 	self.methodWithReturnCalled = function(){
-		ext.enumerable.forEach(instances, function(instance){
+		g.ext.enumerable.forEach(instances, function(instance){
 			g.assert(instance.methodWithReturnCalled);
 		});
 		interceptor.methodCalled();

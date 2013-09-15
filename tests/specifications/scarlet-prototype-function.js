@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -19,7 +19,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a prototype function instance", function() {
 
-		var instance = new PrototypeFunction();
+		var instance = new builder.dummies.PrototypeFunc();
 
 		scarlet
 			.intercept(instance)
@@ -27,7 +27,7 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to intercept method", function() {
 			instance.method();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 	});
@@ -36,7 +36,7 @@ describe("Given we are intercepting", function() {
 
 		var InterPrototypeFunc = 
 			scarlet
-				.intercept(PrototypeFunction)
+				.intercept(builder.dummies.PrototypeFunc)
 				.using(interceptor)
 				.resolve();
 
@@ -44,18 +44,18 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to intercept the constructor", function() {
 			var constructorInstance = new InterPrototypeFunc();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method", function() {
 			instance.method();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to get intercepted method as a string", function() {
-			var expectedToString = PrototypeFunction.toString();
+			var expectedToString = builder.dummies.PrototypeFunc.toString();
 			var interceptedToString = InterPrototypeFunc.toString();
-			assert(expectedToString === interceptedToString);
+			g.assert(expectedToString === interceptedToString);
 		});
 	});
 
@@ -65,7 +65,7 @@ describe("Given we are intercepting", function() {
 
 			var InterPrototypeFunc = 
 				scarlet
-					.intercept(PrototypeFunction)
+					.intercept(builder.dummies.PrototypeFunc)
 					.using(interceptor)
 					.resolve();
 
@@ -73,8 +73,8 @@ describe("Given we are intercepting", function() {
 
 			it("Then should be able to use it", function() {
 				var result = instance.methodUsingInstanceProperty();
-				assert.equal(result, instance.anyInstanceProperty);
-				assert.notEqual(result, undefined);
+				g.assert.equal(result, instance.anyInstanceProperty);
+				g.assert.notEqual(result, undefined);
 			});
 
 		});
@@ -85,15 +85,15 @@ describe("Given we are intercepting", function() {
 		
 		describe("When intercepted method uses an instance property", function() {
 
-			var instance = new PrototypeFunction();
+			var instance = new builder.dummies.PrototypeFunc();
 
 			scarlet.intercept(instance)
 				.using(interceptor);
 
 			it("Then should be able to use it", function() {
 				var result = instance.methodUsingInstanceProperty();
-				assert.equal(result, instance.anyInstanceProperty);
-				assert.notEqual(result, undefined);
+				g.assert.equal(result, instance.anyInstanceProperty);
+				g.assert.notEqual(result, undefined);
 			});
 			
 		});

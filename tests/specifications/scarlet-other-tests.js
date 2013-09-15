@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -23,7 +23,7 @@ describe("Given we are intercepting", function() {
 			
 			var resultInvocation = null;
 
-			var instance = new NamedFunction();
+			var instance = new builder.dummies.NamedFunc();
 
 			var interceptor = function(proceed, invocation) {
 				resultInvocation = invocation;
@@ -35,17 +35,18 @@ describe("Given we are intercepting", function() {
 			instance.methodWithReturn();
 
 			it("Should return name of intercepted function", function() {
-				assert(resultInvocation.methodName === 'methodWithReturn');
+				g.assert(resultInvocation.methodName === 'methodWithReturn');
 			});
 
 			it("Should return name of intercepted object", function() {
-				assert(resultInvocation.objectName === 'NamedFunction');
+				g.assert(resultInvocation.objectName === 'NamedFunction');
 			});
 
 		});
 		describe("When getting method name for a prototype named function", function() {
+			
 			var resultInvocation = null;
-			var instance = new PrototypeFunction();
+			var instance = new builder.dummies.PrototypeFunc();
 			var interceptor = function(proceed, invocation) {
 				resultInvocation = invocation;
 			};
@@ -56,17 +57,18 @@ describe("Given we are intercepting", function() {
 			instance.method();
 
 			it("Should return name of intercepted function", function() {
-				assert(resultInvocation.methodName === 'method');
+				g.assert(resultInvocation.methodName === 'method');
 			});
 
 			it("Should return name of intercepted object", function() {
-				assert(resultInvocation.objectName === 'PrototypeFunction');
+				g.assert(resultInvocation.objectName === 'PrototypeFunction');
 			});
 		});
 
 		describe("When getting method name for a prototype named function", function() {
+			
 			var resultInvocation = null;
-			var instance = new UnnamedFunction();
+			var instance = new builder.dummies.UnnamedFunc();
 			var interceptor = function(proceed, invocation) {
 				resultInvocation = invocation;
 			};
@@ -76,11 +78,11 @@ describe("Given we are intercepting", function() {
 
 			instance.method();
 			it("Should return name of intercepted function", function() {
-				assert(resultInvocation.methodName === 'method');
+				g.assert(resultInvocation.methodName === 'method');
 			});
 
 			it("Should return Function as the intercepted object name", function() {
-				assert(resultInvocation.objectName === 'Object');
+				g.assert(resultInvocation.objectName === 'Object');
 			});
 		});
 
@@ -92,7 +94,7 @@ describe("Given we are intercepting", function() {
 			it("Should return name of intercepted function", function(done) {
 
 				var interceptor = function(proceed, invocation) {
-					assert(invocation.methodName === 'method');
+					g.assert(invocation.methodName === 'method');
 					done();
 				};
 
@@ -109,12 +111,15 @@ describe("Given we are intercepting", function() {
 	describe("When intercepting a function with no instance methods", function() {
 
 		var f1 = function() {};
-		f1 = scarlet.intercept(f1)
-			.using(interceptor).resolve();
+		var interf1 = 
+			scarlet
+				.intercept(f1)
+				.using(interceptor)
+				.resolve();
 
 		it("Should intercept function", function() {
-			f1();
-			assert(methodWasCalled);
+			interf1();
+			g.assert(methodWasCalled);
 		});
 
 	});
@@ -127,12 +132,12 @@ describe("Given we are intercepting", function() {
 			f1 = scarlet.intercept(f1)
 				.using(interceptor).resolve();
 			f1();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Should intercept function", function() {
 			var interceptor = function(proceed, invocation) {
-				assert(invocation.args.length === 1);
+				g.assert(invocation.args.length === 1);
 			};
 			f1 = scarlet.intercept(f1)
 				.using(interceptor).resolve();

@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -19,7 +19,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting specific members", function() {
 
-		var InterObjectLiteral = Object.create(ObjectLiteral);
+		var InterObjectLiteral = builder.dummies.ObjectLiteral();
 
 		var memberInterceptor =
 			scarlet
@@ -28,20 +28,20 @@ describe("Given we are intercepting", function() {
 
 		it("Then it should intercept calls", function() {
 			var result = InterObjectLiteral.methodWithReturn();
-			assert.equal(result, "any");
-			assert(methodWasCalled);
+			g.assert.equal(result, "any");
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to get intercepted method as a string", function() {
-			var expectedToString = ObjectLiteral.methodWithReturn.toString();
+			var expectedToString = builder.dummies.ObjectLiteral().methodWithReturn.toString();
 			var interceptedToString = InterObjectLiteral.methodWithReturn.toString();
-			assert(expectedToString === interceptedToString);
+			g.assert(expectedToString === interceptedToString);
 		});
 	});
 
 	describe("When intercepting non-existent members", function() {
 
-		var InterObjectLiteral = Object.create(ObjectLiteral);
+		var InterObjectLiteral = builder.dummies.ObjectLiteral();
 
 		it("Then it should throw an exception", function() {
 			var didThrowException = false;
@@ -52,7 +52,7 @@ describe("Given we are intercepting", function() {
 			} catch (exception) {
 				didThrowException = true;
 			}
-			assert(didThrowException);
+			g.assert(didThrowException);
 		});
 
 	});

@@ -1,14 +1,8 @@
 var g = require("../../include");
-var ext = require("../../lib/extensions");
-var dummies = require("builders/dummies");
+var builder = require("./builders");
 
 var Scarlet = require("../../lib/scarlet")
-var scarlet = Scarlet();
-
-var ObjectLiteral = require("./dummies/object-literal");
-var NamedFunction = require("./dummies/named-function");
-var UnnamedFunction = require("./dummies/unnamed-function");
-var PrototypeFunction = require("./dummies/prototype-function");
+var scarlet = new Scarlet();
 
 describe("Given we are using async interceptors", function() {
 
@@ -30,7 +24,7 @@ describe("Given we are using async interceptors", function() {
 
 	describe("When calling done from an async interceptor", function() {
 
-		var instance = new NamedFunction();
+		var instance = new builder.dummies.NamedFunc();
 
 		scarlet
 			.intercept(instance)
@@ -39,27 +33,27 @@ describe("Given we are using async interceptors", function() {
 		it("Then it should be called", function(done) {
 			var result = instance.methodWithReturn();
 			setTimeout(function() {
-				assert(interceptorCalled);
+				g.assert(interceptorCalled);
 				done();
 			}, 10);
 		});
 
 		it("Then it should not have an immediate result", function() {
 			var result = instance.methodWithReturn();
-			assert(result == null);
+			g.assert(result == null);
 		});
 
 		it("Then it should have an eventual result", function(done) {
 			var result = instance.methodWithReturn();
 			setTimeout(function() {
-				assert(invocationObject.result == "any");
+				g.assert(invocationObject.result == "any");
 				done();
 			}, 10);
 		});
 
 		it("Then it should not execute immediately", function(){
 			instance.methodWithReturn();
-			assert(!interceptorCalled);
+			g.assert(!interceptorCalled);
 		});
 
 	});
@@ -68,7 +62,7 @@ describe("Given we are using async interceptors", function() {
 
 		var firstMethodCalled = false;
 		var secondMethodCalled = false;
-		var instance = new NamedFunction();
+		var instance = new builder.dummies.NamedFunc();
 
 		var firstInterceptor = function(proceed, invocation, done) {
 			firstMethodCalled = true;
@@ -87,10 +81,10 @@ describe("Given we are using async interceptors", function() {
 		var result = instance.methodWithReturn();
 
 		it("Then should only call the first method", function(){
-			assert(result == "any");
+			g.assert(result == "any");
 			setTimeout(function(){
-				assert(firstMethodCalled);
-				assert(!secondMethodCalled);
+				g.assert(firstMethodCalled);
+				g.assert(!secondMethodCalled);
 			}, 10)
 		})
 

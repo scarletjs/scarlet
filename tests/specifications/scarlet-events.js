@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are using scarlet events", function() {
 
@@ -10,7 +10,7 @@ describe("Given we are using scarlet events", function() {
 	var afterEventCalled = false;
 	var beforeEventCalled = false;
 	var interceptorCalled = false;
-	var instance = new NamedFunction();
+	var instance = new builder.dummies.NamedFunc();
 
 	function interceptor(proceed, invocation) {
 		interceptorCalled = true;
@@ -33,19 +33,19 @@ describe("Given we are using scarlet events", function() {
 		var result = instance.method();
 
 		it("Then the 'before' event should be called", function() {
-			assert(beforeEventCalled);
+			g.assert(beforeEventCalled);
 		});
 
 		it("Then the 'after' event should be called", function() {
-			assert(afterEventCalled);
+			g.assert(afterEventCalled);
 		});
 
 		it("Then the 'done' event should be called", function() {
-			assert(doneEventCalled);
+			g.assert(doneEventCalled);
 		});
 
 		it("Then the interceptor should be called", function() {
-			assert(interceptorCalled);
+			g.assert(interceptorCalled);
 		});
 
 	});

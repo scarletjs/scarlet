@@ -1,6 +1,5 @@
 var g = require("../../../include");
 var dummies = require("./dummies");
-var ext = require("../../../lib/extensions");
 
 function Interceptor(scarletBuilder){
 
@@ -39,7 +38,7 @@ function InterceptorBuilder(scarletBuilder, instances) {
 		self.interceptor.reset();
 	};
 
-	ext.enumerable.forEach(instances, function(instance){
+	g.ext.enumerable.forEach(instances, function(instance){
 		scarletBuilder
 			.scarlet
 			.intercept(instance)

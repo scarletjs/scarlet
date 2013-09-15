@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -24,8 +24,8 @@ describe("Given we are intercepting", function() {
 	});
 
 	describe("When intercepting a named function instance", function() {
-		
-		var instance = new NamedFunction();
+
+		var instance = new builder.dummies.NamedFunc();
 
 		scarlet
 			.intercept(instance)
@@ -38,12 +38,12 @@ describe("Given we are intercepting", function() {
 
 		it("Then should return name of intercepted object", function() {
 			instance.method();
-			assert(invocationObj.objectName == 'NamedFunction');
+			assert(invocationObj.objectName == 'builder.dummies.NamedFunc');
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			instance.method();
-			var unInterceptedInstance = new NamedFunction();
+			var unInterceptedInstance = new builder.dummies.NamedFunc();
 			var actualToString = invocationObj.method.toString();
 			var expectedToString = unInterceptedInstance.method.toString();
 			assert(actualToString === expectedToString);
@@ -53,7 +53,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting a prototype function instance", function() {
 
-		var instance = new PrototypeFunction();
+		var instance = new builder.dummies.PrototypeFunc();
 
 		scarlet
 			.intercept(instance)
@@ -81,7 +81,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting an unamed function instance", function() {
 
-		var instance = new UnnamedFunction();
+		var instance = new builder.dummies.UnnamedFunc();
 
 		scarlet
 			.intercept(instance)
@@ -99,7 +99,7 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			instance.method();
-			var unInterceptedInstance = new UnnamedFunction();
+			var unInterceptedInstance = new Unbuilder.dummies.NamedFunc();
 			var actualToString = invocationObj.method.toString();
 			var expectedToString = unInterceptedInstance.method.toString();
 			assert(actualToString === expectedToString);
@@ -109,7 +109,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When intercepting a specific member of a named function instance", function() {
 
-		var instance = new NamedFunction();
+		var instance = new builder.dummies.NamedFunc();
 
 		scarlet
 			.intercept(instance, 'method')
@@ -122,12 +122,12 @@ describe("Given we are intercepting", function() {
 
 		it("Then should return name of intercepted object", function() {
 			instance.method();
-			assert(invocationObj.objectName === 'NamedFunction');
+			assert(invocationObj.objectName === 'builder.dummies.NamedFunc');
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
 			instance.method();
-			var unInterceptedInstance = new NamedFunction();
+			var unInterceptedInstance = new builder.dummies.NamedFunc();
 			var actualToString = invocationObj.method.toString();
 			var expectedToString = unInterceptedInstance.method.toString();
 			assert(actualToString === expectedToString);
@@ -139,10 +139,11 @@ describe("Given we are intercepting", function() {
 		function functionWithName() {}
 		var expectedToString = functionWithName.toString();
 
-		functionWithName = scarlet
-							.intercept(functionWithName)
-							.using(interceptor)
-							.resolve();
+		functionWithName =
+			scarlet
+				.intercept(functionWithName)
+				.using(interceptor)
+				.resolve();
 
 		it("Then should return name of intercepted function", function() {
 			functionWithName();
@@ -168,9 +169,9 @@ describe("Given we are intercepting", function() {
 		var expectedToString = unNamed.toString();
 
 		unNamed = scarlet
-					.intercept(unNamed)
-					.using(interceptor)
-					.resolve();
+			.intercept(unNamed)
+			.using(interceptor)
+			.resolve();
 
 		it("Then should return default name for a function", function() {
 			unNamed();

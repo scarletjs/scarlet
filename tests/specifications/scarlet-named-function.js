@@ -1,8 +1,8 @@
 var g = require("../../include");
-var dummies = require("./dummies");
-var Scarlet = require("../../lib/scarlet");
+var builder = require("./builders");
 
-var scarlet = new Scarlert();
+var Scarlet = require("../../lib/scarlet")
+var scarlet = new Scarlet();
 
 describe("Given we are intercepting", function() {
 
@@ -19,7 +19,7 @@ describe("Given we are intercepting", function() {
 
 	describe("When we have a named function instance", function() {
 
-		var instance = new NamedFunction();
+		var instance = new builder.dummies.NamedFunc();
 
 		scarlet
 			.intercept(instance)
@@ -27,25 +27,25 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to intercept the property getter", function() {
 			var result = instance.property;
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method", function() {
 			instance.method();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
+			g.assert(methodWasCalled);
+			g.assert(result);
 		});
 
 		it("Then should be able to get the intercepted method as a string", function() {
-			var unInterceptedInstance = new NamedFunction();
+			var unInterceptedInstance = new builder.dummies.NamedFunc();
 			var actualToString = instance.method.toString();
 			var expectedToString = unInterceptedInstance.method.toString();
-			assert(actualToString === expectedToString);
+			g.assert(actualToString === expectedToString);
 		});
 
 	});
@@ -54,7 +54,7 @@ describe("Given we are intercepting", function() {
 
 		var InterNamedFunction = 
 			scarlet
-				.intercept(NamedFunction)
+				.intercept(builder.dummies.NamedFunc)
 				.using(interceptor)
 				.resolve();
 
@@ -62,29 +62,29 @@ describe("Given we are intercepting", function() {
 
 		it("Then should be able to intercept the constructor", function() {
 			var constructorInstance = new InterNamedFunction();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept the property getter", function() {
 			var result = instance.property;
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method", function() {
 			instance.method();
-			assert(methodWasCalled);
+			g.assert(methodWasCalled);
 		});
 
 		it("Then should be able to intercept method with return value", function() {
 			var result = instance.methodWithReturn();
-			assert(methodWasCalled);
-			assert(result);
+			g.assert(methodWasCalled);
+			g.assert(result);
 		});
 
 		it("Then should be able to get intercepted method as a string", function() {
-			var expectedToString = NamedFunction.toString();
+			var expectedToString = builder.dummies.NamedFunc.toString();
 			var interceptedToString = InterNamedFunction.toString();
-			assert(expectedToString === interceptedToString);
+			g.assert(expectedToString === interceptedToString);
 		});
 	});
 

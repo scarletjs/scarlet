@@ -35,6 +35,7 @@ describe("Given /lib/proxying/ProxyProperty", function() {
 		it("Then should invoke whenCalled delegate for 'get'", function() {
 			var result = instance.anyProperty;
 			g.assert(proceedWasCalled);
+			g.assert(result == "anyValue");
 		});
 
 		it("Then should invoke whenCalled delegate for 'get'", function() {

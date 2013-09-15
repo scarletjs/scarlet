@@ -1,5 +1,5 @@
 var g = require("../../../include");
-var dummies = require("../dummies");
+var dummies = require("./dummies");
 var ext = require("../../../lib/extensions");
 
 function AssertionBuilder(instances, interceptor) {

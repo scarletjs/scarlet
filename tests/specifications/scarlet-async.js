@@ -1,5 +1,4 @@
 var g = require("../../include");
-var dummies = require("./dummies");
 var builders = require("./builders");
 var Scarlet = require("../../lib/scarlet");
 
@@ -17,11 +16,10 @@ describe("Given we are using async interceptors", function() {
 					.for(scarlet)
 					.withNamedFunction()
 					.withInterceptor()
-					.invokeMethod();
+					.invokeMethod()
+					.assert()
+					.methodCalled();
 
-			builder
-				.assert()
-				.methodCalled()
 		});
 
 	});

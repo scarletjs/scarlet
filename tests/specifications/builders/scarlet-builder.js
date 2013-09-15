@@ -1,7 +1,8 @@
 var g = require("../../../include");
-var dummies = require("../dummies");
+var dummies = require("./dummies");
 var ext = require("../../../lib/extensions");
 
+var BuilderLogger = require("./builder-logger");
 var AssertionBuilder = require("./assertion-builder");
 var InterceptorBuilder = require("./interceptor-builder");
 
@@ -11,24 +12,25 @@ function ScarletBuilder(scarlet){
 	self.instances = [];
 	self.interceptor = null;
 	self.scarlet = scarlet;
+	self.log = new BuilderLogger();
 
 	self.withNamedFunction = function(){
-		self.instances.push(new dummies.NamedFunc());
+		self.instances.push(new dummies.NamedFunc(self));
 		return self;
 	}
 
 	self.withObjectLiteral = function(){
-		self.instances.push(dummies.ObjectLiteral);
+		self.instances.push(dummies.ObjectLiteral(self));
 		return self;
 	};
 
 	self.withPrototypeFunction = function(){
-		self.instances.push(new dummies.PrototypeFunc());
+		self.instances.push(new dummies.PrototypeFunc(self));
 		return self;
 	};
 
 	self.withUnamedFunction = function(){
-		self.instances.push(new dummies.UnnamedFunc());
+		self.instances.push(new dummies.UnnamedFunc(self));
 		return self;
 	};
 

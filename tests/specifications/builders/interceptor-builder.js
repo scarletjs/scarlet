@@ -1,15 +1,16 @@
 var g = require("../../../include");
-var dummies = require("../dummies");
-var ext = require("./../../../lib/extensions");
+var dummies = require("./dummies");
 var ext = require("../../../lib/extensions");
 
-function Interceptor(){
+function Interceptor(scarletBuilder){
 
 	var self = this;
 	self.timesCalled = 0;
 	self.invocation = null;
+	self.log = scarletBuilder.log;
 
 	self.intercept = function(proceed, invocation){
+		self.log.debug(self, this, "->");
 		self.timesCalled += 1;
 		self.invocation = invocation;
 		return proceed();
@@ -24,9 +25,11 @@ function Interceptor(){
 function InterceptorBuilder(scarletBuilder, instances) {
 	
 	var self = this;
-	self.interceptor = new Interceptor();
+	self.log = scarletBuilder.log;
+	self.interceptor = new Interceptor(scarletBuilder);
 
 	self.methodCalled = function(times){
+		//self.log.debug(self, this, "->");
 		if (typeof(times) == "undefined")
 			g.assert(self.interceptor.timesCalled > 0);
 		else 

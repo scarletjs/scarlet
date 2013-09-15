@@ -6,10 +6,16 @@ function AnyClass() {
 	self.anyMethod = function(val) { return val; };
 }
 
-describe("Given /lib/proxying/ProxyInstance", function() {
+AnyClass.prototype.prototypeProperty = "anyPrototypeValue";
+
+AnyClass.prototype.prototypeMethod = function(val) {
+	return val;
+}
+
+describe("Given /lib/proxying/ProxyPrototype", function() {
 
 	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
-	var ProxyInstance = require("../../../../lib/proxying/proxy-instance");
+	var ProxyPrototype = require("../../../../lib/proxying/proxy-prototype");
 
 	var proceedWasCalled = false;
 	var proceedThisContext = null;
@@ -22,20 +28,30 @@ describe("Given /lib/proxying/ProxyInstance", function() {
 	describe("When #wrap()", function() {
 
 		var info = null;
-		var instance = new AnyClass();
+		var AugmentedClass = null;
 
-		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyPrototype(AnyClass, function(proxyInfo, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
 
-		proxy.wrap();
+		proxy.wrap(function(newClass){
+			AugmentedClass = newClass;
+		});
+
+		var instance = new AugmentedClass();
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
 			g.assert(proceedWasCalled);
 			g.assert(instance.anyProperty == 6);
+		});
+
+		it("Then should invoke whenCalled delegate for 'prototypeProperty' set", function() {
+			instance.prototypeProperty = 6;
+			g.assert(proceedWasCalled);
+			g.assert(instance.prototypeProperty == 6);
 		});
 
 		it("Then should invoke whenCalled delegate for 'property' get", function() {
@@ -45,8 +61,21 @@ describe("Given /lib/proxying/ProxyInstance", function() {
 			g.assert(result == "apple");
 		});
 
+		it("Then should invoke whenCalled delegate for 'prototypeProperty' get", function() {
+			instance.prototypeProperty = "apple";
+			var result = instance.prototypeProperty;
+			g.assert(proceedWasCalled);
+			g.assert(result == "apple");
+		});
+
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
+			g.assert(proceedWasCalled);
+			g.assert(result == 6);
+		});
+
+		it("Then should invoke whenCalled delegate for 'prototypeMethod'", function() {
+			var result = instance.prototypeMethod(6);
 			g.assert(proceedWasCalled);
 			g.assert(result == 6);
 		});
@@ -62,15 +91,16 @@ describe("Given /lib/proxying/ProxyInstance", function() {
 	describe("When #unwrap()", function() {
 
 		var info = null;
-		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyPrototype(AnyClass, function(proxyInfo, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
 
 		proxy.wrap().unwrap();
+
+		var instance = new AnyClass();
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;

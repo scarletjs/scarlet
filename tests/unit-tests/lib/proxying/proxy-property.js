@@ -48,6 +48,10 @@ describe("Given /lib/proxying/ProxyProperty", function() {
 			g.assert(instance == proceedThisContext);
 		});
 
+		it("Then should have a '__scarlet' shadow object", function(){
+			g.assert(instance.__scarlet);
+		});
+
 	});
 
 	describe("When #unwrap()", function() {

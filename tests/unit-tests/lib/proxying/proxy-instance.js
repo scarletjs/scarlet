@@ -9,7 +9,7 @@ function AnyClass() {
 describe("Given /lib/proxying/ProxyProperty", function() {
 
 	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
-	var ProxyMethod = require("../../../../lib/proxying/proxy-method");
+	var ProxyInstance = require("../../../../lib/proxying/proxy-instance");
 
 	var proceedWasCalled = false;
 	var proceedThisContext = null;
@@ -21,16 +21,29 @@ describe("Given /lib/proxying/ProxyProperty", function() {
 
 	describe("When #wrap()", function() {
 
+		var info = null;
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
 
 		proxy.wrap();
+
+		it("Then should invoke whenCalled delegate for 'property' set", function() {
+			instance.anyProperty = 6;
+			g.assert(proceedWasCalled);
+			g.assert(instance.anyProperty == 6);
+		});
+
+		it("Then should invoke whenCalled delegate for 'property' get", function() {
+			instance.anyProperty = "apple";
+			var result = instance.anyProperty;
+			g.assert(proceedWasCalled);
+			g.assert(result == "apple");
+		});
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
@@ -44,29 +57,34 @@ describe("Given /lib/proxying/ProxyProperty", function() {
 			g.assert(result == 7);
 		});
 
-		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet);
-		});
-
 	});
 
 	describe("When #unwrap()", function() {
 
+		var info = null;
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
-			return proceed.call(proxyInfo.instance, args);
+			return proceed(args);
 		});
 
 		proxy.wrap().unwrap();
 
-		it("Then should not invoke whenCalled delegate for 'method'", function() {
+		it("Then should invoke whenCalled delegate for 'property' set", function() {
+			instance.anyProperty = 6;
+			g.assert(!proceedWasCalled);
+		});
+
+		it("Then should invoke whenCalled delegate for 'property' get", function() {
+			var result = instance.anyProperty;
+			g.assert(!proceedWasCalled);
+		});
+
+		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
 			g.assert(!proceedWasCalled);
-			g.assert(result == 6);
 		});
 
 	});

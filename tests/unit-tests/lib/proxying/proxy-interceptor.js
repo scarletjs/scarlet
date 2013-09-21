@@ -29,17 +29,20 @@ describe("Given /lib/proxying/ProxyInterceptor", function() {
 		};
 
 		var replaceType = function(observableType) {
+			g.ll(observableType);
 			AnyClass = observableType;
 		};
 
 		interceptor
 			.intercept(
-				self.whenCalled,
-				self.replaceType);
+				whenCalled,
+				replaceType);
 
 		it("Then should be able to observe methods", function() {
+			
 			var instance = new AnyClass();
-			instance.anyMethod("anyParameterValue");
+			var result = instance.anyMethod("anyParameterValue");
+
 			g.assert(whenCalledExecuted);
 			g.assert(observedArguments);
 			g.assert(observedProxyInfo);

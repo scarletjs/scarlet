@@ -28,6 +28,38 @@ describe("Given lib/extensions/Object", function(){
 
 	});
 
+	describe("When #has(obj, prop)", function(){
+
+		function NamedFunction(){
+			this.anyProperty = "any";
+			this.anyMethod = function(){}
+		}
+
+		var UnamedFunction = function(){
+			this.anyProperty = "any";
+			this.anyMethod = function(){}
+		};
+
+		var ObjectLiteral = {
+			anyProperty: "any",
+			anyMethod: function(){}
+		};
+
+		function PrototypeFunction(){}
+		PrototypeFunction.prototype.anyProperty = "any";
+		PrototypeFunction.prototype.anyMethod = function(){}
+
+		var oldObjectConstructor = Object.constructor;
+		g.ll("Checking out old constructor");
+		g.ll(oldObjectConstructor);
+
+		it("Then should find 'anyProperty' on a named function", function(){
+			var hasPropertyOnType = ext.object.has(NamedFunction, "anyProperty");
+			g.assert(hasPropertyOnType);
+		});
+
+	});
+
 	describe("When #isNull()", function(){
 
 		var nullObj = null;

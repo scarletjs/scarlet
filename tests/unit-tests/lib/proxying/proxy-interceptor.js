@@ -46,6 +46,8 @@ describe("Given /lib/proxying/ProxyInterceptor", function() {
 			g.assert(whenCalledExecuted);
 			g.assert(observedArguments);
 			g.assert(observedProxyInfo);
+
+			g.assert(observedArguments.length == 1);
 		});
 
 	});

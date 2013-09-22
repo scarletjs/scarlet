@@ -49,15 +49,8 @@ describe("Given lib/extensions/Object", function(){
 		PrototypeFunction.prototype.anyProperty = "any";
 		PrototypeFunction.prototype.anyMethod = function(){}
 
-		var oldObjectConstructor = Object.constructor;
-		g.ll("Checking out old constructor");
-		g.ll(oldObjectConstructor);
-		Object.constructor = function(){
-			oldObjectConstructor.call[]
-		};
-
 		it("Then should find 'anyProperty' on a named function", function(){
-			var hasPropertyOnType = ext.object.has(NamedFunction, "anyProperty");
+			var hasPropertyOnType = ext.object.has(new NamedFunction(), "anyProperty");
 			g.assert(hasPropertyOnType);
 		});
 

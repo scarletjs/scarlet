@@ -45,7 +45,7 @@ describe("Given /lib/proxying/ProxyMethod", function() {
 		});
 
 		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet);
+			g.assert(instance.__scarlet__);
 		});
 
 	});

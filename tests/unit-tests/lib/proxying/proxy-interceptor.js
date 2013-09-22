@@ -11,56 +11,77 @@ describe("Given /lib/proxying/ProxyInterceptor", function() {
 			self.methodCalled = false;
 			self.anyProperty = "anyValue";
 			self.anyMethod = function(anyParameter){
-				g.ll(" *** AnyClass::anyMethod(anyParameter='" + anyParameter + "') <--- *** ");
 				self.methodCalled = true;
 				return anyParameter;
 			};
-			g.ll(" *** AnyClass::ctor() <--- *** ");
 		}
 
-		var observedArguments = null;
-		var observedProxyInfo = null;
-		var observedMethodCall = null;
-		var whenCalledExecuted = false;
+		var methodCalls = [];
 		var interceptor = new ProxyInterceptor(AnyClass);
 
 		var whenCalled = function(info, proceed, args) {
-			g.ll(" *** WhenCalled:: ---> *** ");
-			g.ll(info);
-			g.ll(proceed);
-			g.ll(args);
-			observedArguments = args;
-			observedProxyInfo = info;
-			observedMethodCall = proceed;
-			whenCalledExecuted = true;
-			return proceed();
+			var methodResult = proceed.apply(this, args);
+			var result = {
+				info: info,
+				method: proceed,
+				args: args,
+				result: methodResult,
+				instance: this
+			};
+			methodCalls.push(result);
+			return methodResult;
 		};
 
 		var replaceType = function(observableType) {
 			AnyClass = observableType;
 		};
 
-		g.ll(" *** Before interceptor.intercept(whenCalled, replaceTypeCallback)");
 		interceptor
 			.intercept(
 				whenCalled,
 				replaceType);
-		g.ll(" *** After interceptor.intercept(whenCalled, replaceTypeCallback)");
+
+		beforeEach(function(){
+			methodCalls = [];
+		});
 
 		it("Then should be able to observe methods", function() {
 			
-			g.ll(" *** Before new AynClass()");
 			var instance = new AnyClass();
-			g.ll(" *** After new AynClass()");
 			var result = instance.anyMethod("anyParameterValue");
 
-			g.ll(observedArguments);
+			g.assert(methodCalls.length > 0);
+			g.assert(result == "anyParameterValue");
 
-			g.assert(whenCalledExecuted);
-			g.assert(observedArguments);
-			g.assert(observedProxyInfo);
+			var anyMethodCall = g.ext.enumerable.first(methodCalls, function(element){
+				return element.info.memberName == "anyMethod";
+			});
 
-			g.assert(observedArguments.length == 1);
+			g.assert(anyMethodCall.args.length > 0);
+			g.assert(anyMethodCall.instance == instance);
+			g.assert(anyMethodCall.result == "anyParameterValue");
+			g.assert(anyMethodCall.args[0] == "anyParameterValue");
+		});
+
+		it("Then should be able ot observe properties", function(){
+
+			var instance = new AnyClass();
+			instance.anyProperty = "foo";
+			var result = instance.anyProperty;
+
+			g.assert(result == "foo");
+			g.assert(methodCalls.length == 2);
+
+			var anyPropertySetCall = methodCalls[0];
+
+			g.assert(anyPropertySetCall.instance == instance);
+			g.assert(anyPropertySetCall.info.memberName == "anyProperty");
+
+			var anyPropertyGetCall = methodCalls[1];
+
+			g.assert(anyPropertyGetCall.instance == instance);
+			g.assert(anyPropertyGetCall.info.memberName == "anyProperty");
+
 		});
 
 	});

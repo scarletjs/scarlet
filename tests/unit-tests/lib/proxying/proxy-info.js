@@ -40,7 +40,7 @@ describe("Given /lib/proxying/ProxyInfo", function(){
 
 		var instance = new AnyClass();
 
-		it("Then should be 'true' for #instanceMethod()", function(){
+		it("Then should be 'true' for newAnyClass().instanceMethod()", function(){
 			var info = new ProxyInfo(instance, "instanceMethod");
 			var isMethod = info.isMethod();
 			g.assert(isMethod);

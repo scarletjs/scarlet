@@ -12,10 +12,10 @@ AnyClass.prototype.prototypeMethod = function(val) {
 	return val;
 }
 
-describe("Given /lib/proxying/ProxyPrototype", function() {
+describe("Given /lib/proxies/ProxyPrototype", function() {
 
-	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
-	var ProxyPrototype = require("../../../../lib/proxying/proxy-prototype");
+	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
+	var ProxyPrototype = require("../../../../lib/proxies/proxy-prototype");
 
 	var proceedWasCalled = false;
 	var proceedThisContext = null;

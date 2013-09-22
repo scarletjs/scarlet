@@ -1,8 +1,8 @@
 var g = require("../../../../include");
 
-describe("Given /lib/proxying/ProxyInterceptor", function() {
+describe("Given /lib/proxies/ProxyInterceptor", function() {
 
-	var ProxyInterceptor = require("../../../../lib/proxying/proxy-interceptor");
+	var ProxyInterceptor = require("../../../../lib/proxies/proxy-interceptor");
 
 	describe("When #ctor() with a normal function", function() {
 

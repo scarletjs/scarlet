@@ -13,9 +13,9 @@ AnyClass.prototype.prototypeMethod = function(val) {
 	return val;
 };
 
-describe("Given /lib/proxying/ProxyInfo", function(){
+describe("Given /lib/proxies/ProxyInfo", function(){
 
-	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
+	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 
 	describe("When #ctor()", function(){
 

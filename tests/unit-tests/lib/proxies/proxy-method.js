@@ -6,10 +6,10 @@ function AnyClass() {
 	self.anyMethod = function(val) { return val; };
 }
 
-describe("Given /lib/proxying/ProxyMethod", function() {
+describe("Given /lib/proxies/ProxyMethod", function() {
 
-	var ProxyInfo = require("../../../../lib/proxying/proxy-info");
-	var ProxyMethod = require("../../../../lib/proxying/proxy-method");
+	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
+	var ProxyMethod = require("../../../../lib/proxies/proxy-method");
 
 	var proceedWasCalled = false;
 	var proceedThisContext = null;

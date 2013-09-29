@@ -10,8 +10,8 @@ function AnyClass(){
 
 AnyClass.prototype.prototypeProperty = "anyValue";
 
-AnyClass.prototype.prototypeMethod = function(val) {
-	return val;
+AnyClass.prototype.prototypeMethod = function(arg1, arg2, arg3) {
+	return arg1 + " " + arg2 + " " + arg3;
 };
 
 describe("Given /lib/Scarlet", function(){
@@ -21,26 +21,62 @@ describe("Given /lib/Scarlet", function(){
 	describe("When #intercept/#using(...)", function(){
 
 		var scarlet = new Scarlet();
-		var interceptorCalled = false;
+		
+		var instanceMethodCalled = false;
+		var instancePropertyCalled = false;
+		var prototypeMethodCalled = false;
+		var prototypePropertyCalled = false;
 
 		var proxyAnyClass = 
 			scarlet
 				.intercept(AnyClass)
 				.using(function(info, method, args){
-					interceptorCalled = true;
+					if (info.memberName == "instanceMethod")
+						instanceMethodCalled = true;
+					if (info.memberName == "instanceProperty")
+						instancePropertyCalled = true;
+					if(info.memberName == "prototypeMethod")
+						prototypeMethodCalled = true;
+					if(info.memberName == "prototypeProperty")
+						prototypePropertyCalled = true;
 					return method.call(this, info, method, args);
-				}).asProxy();
+				})
+				.proxy();
 
 		beforeEach(function(){
-			interceptorCalled = false;
+			instanceMethodCalled = false;
+			instancePropertyCalled = false;
+			prototypeMethodCalled = false;
+			prototypePropertyCalled = false;
 		});
 
-		it("Then it should call the interceptor", function(){
+		it("Then it should call the interceptor for an #instanceMethod()", function(){
 			var instance = new proxyAnyClass();
 			var result = instance.instanceMethod("apple", "pear", "bananna");
-			g.assert(interceptorCalled);
+			g.assert(instanceMethodCalled);
 			g.assert(result == "apple pear bananna");
-		})
+		});
+
+		it("Then it should call the interceptor for an #instanceProperty()", function(){
+			var instance = new proxyAnyClass();
+			var result = instance.instanceProperty;
+			g.assert(instancePropertyCalled);
+			g.assert(result == "anyValue");
+		});
+
+		it("Then it should call the interceptor for #prototypeMethod()", function(){
+			var instance = new proxyAnyClass();
+			var result = instance.prototypeMethod("apple", "pear", "bananna");
+			g.assert(prototypeMethodCalled);
+			g.assert(result == "apple pear bananna");
+		});
+
+		it("Then it should call the interceptor for #prototypeProperty()", function(){
+			var instance = new proxyAnyClass();
+			var result = instance.prototypeProperty;
+			g.assert(prototypePropertyCalled);
+			g.assert(result == "anyValue");
+		});
 
 	});
 

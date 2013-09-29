@@ -1,4 +1,4 @@
-var g = require("../../../include");
+var g = require("../../../../include");
 
 module.exports = function($scarlet){
 
@@ -13,17 +13,17 @@ module.exports = function($scarlet){
 
 describe("Given /lib/Plugins", function(){
 
-	var Scarlet = require("../../../lib/scarlet");
-	var Plugins = require("../../../lib/plugins");
-	var pluginManager = new Plugins();
+	var Scarlet = require("../../../../lib/scarlet");
+	var PluginManager = require("../../../../lib/plugins/plugin-manager");
+	var pluginManager = new PluginManager();
 
 	describe("When #loadPlugin()", function(){
 
 		var $scarlet = new Scarlet();
-		pluginManager.setPluginPath(__dirname + "/");
+		pluginManager.setDirectory(__dirname + "/");
 
 		it("Then should load and call initialize", function(){
-			var plugin = pluginManager.loadPlugin($scarlet, "plugins");
+			var plugin = pluginManager.load($scarlet, "plugin-manager");
 			g.assert(plugin.initializeWasCalled);
 		});
 

@@ -23,13 +23,13 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/unit-tests/**/*.js"
+        pattern: "tests/unit/**/*.js"
       },
       bddtest: {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/bdd-tests/**/*.js", 
+        pattern: "tests/spec/**/*.js", 
         ignore: [
           "dummies/named-function.js",
           "dummies/object-literal.js",

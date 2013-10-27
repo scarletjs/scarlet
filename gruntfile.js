@@ -17,13 +17,7 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/**/*.js", 
-        ignore: [
-          "dummies/named-function.js",
-          "dummies/object-literal.js",
-          "dummies/prototype-function.js",
-          "dummies/unnamed-function.js"
-        ]
+        pattern: "tests/**/*.js"
       }, 
       unittest: {
         command: "mocha",
@@ -35,7 +29,7 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/specifications/**/*.js", 
+        pattern: "tests/bdd-tests/**/*.js", 
         ignore: [
           "dummies/named-function.js",
           "dummies/object-literal.js",

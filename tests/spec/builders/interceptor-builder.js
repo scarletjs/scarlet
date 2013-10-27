@@ -5,13 +5,13 @@ function Interceptor(scarletBuilder){
 
 	var self = this;
 	self.timesCalled = 0;
-	self.invocation = null;
+	self.proxyInfo = null;
 	self.log = scarletBuilder.log;
 
-	self.intercept = function(proceed, invocation){
+	self.intercept = function(info, method, args){
 		self.timesCalled += 1;
-		self.invocation = invocation;
-		return proceed();
+		self.proxyInfo = info;
+		return method.apply(this, args);
 	};
 
 	self.reset = function(){
@@ -39,10 +39,11 @@ function InterceptorBuilder(scarletBuilder, instances) {
 	};
 
 	g.ext.enumerable.forEach(instances, function(instance){
-		scarletBuilder
-			.scarlet
-			.intercept(instance)
-			.using(self.interceptor.intercept);
+		var proxiedType = 
+			scarletBuilder
+				.scarlet
+				.intercept(instance)
+				.using(self.interceptor.intercept);
 	});
 
 };

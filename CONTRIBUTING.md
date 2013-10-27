@@ -10,7 +10,7 @@ If you introduce a new class, please make sure you add a similar named unit test
 
 #Specifications
 
-When adding new features, try to make sure it is backed up with a BDD style specification. This can be regarded as a wordy description that tests the entire system for a particular case. This are not required when fixing bugs, instead use a unit test.
+When adding new features, try to make sure it is backed up with a BDD style specification. This can be regarded as a wordy description that tests the entire system for a particular case. This are not required when fixing bugs, instead use a unit test. These are intended to describe the behaviours of the system.
 
 #Depedencies
 

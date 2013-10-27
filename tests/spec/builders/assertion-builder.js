@@ -6,15 +6,16 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 	var self = this;
 	self.log = scarletBuilder.log;
 
-	self.methodCalled = function(){
+	self.methodWasCalled = function(){
 		g.ext.enumerable.forEach(instances, function(instance){
+			g.ll(instance);
 			g.assert(instance.methodCalled);
 		});
 		interceptor.methodCalled();
 		return self;
 	};
 
-	self.methodWithReturnCalled = function(){
+	self.methodWithReturnWasCalled = function(){
 		g.ext.enumerable.forEach(instances, function(instance){
 			g.assert(instance.methodWithReturnCalled);
 		});
@@ -22,7 +23,7 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 		return self;
 	};
 
-	self.anyMethodCalled = function(){
+	self.anyMethodWasCalled = function(){
 		g.assert(self.methodCalled() || self.methodWithReturnCalled());
 		interceptor.methodCalled();
 		return self;

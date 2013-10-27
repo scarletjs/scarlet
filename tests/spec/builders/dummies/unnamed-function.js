@@ -1,18 +1,17 @@
-function NamedFunction(){
-	
+module.exports = function(){
+
 	var self = this;
 	self.property = "any";
 	self.methodCalled = false;
 	self.methodWithReturnCalled = false;
+	self.__type__ = "spec.builders.dummies.NamedFunction";
 
 	self.method = function(){
 		self.methodCalled = true;
 	};
 	
 	self.methodWithReturn = function(){
-		console.log("->>> NAMED-FUNC ->>> METHOD WITH RET START");
 		self.methodWithReturnCalled = true;
-		console.log("->>> NAMED-FUNC ->>> METHOD WITH RET FINISHED");
 		return "any";
 	};
 
@@ -20,8 +19,4 @@ function NamedFunction(){
 		self.methodCalled = false;
 		self.methodWithReturnCalled = false;
 	};
-
-
 };
-
-module.exports = NamedFunction;

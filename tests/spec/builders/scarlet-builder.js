@@ -42,6 +42,14 @@ function ScarletBuilder(scarlet){
 		return self;
 	};
 
+	self.withInstances = function(){
+		self.withNamedFunction();
+		self.withObjectLiteral();
+		self.withPrototypeFunction();
+		self.withUnamedFunction();
+		return self;
+	};
+
 	self.withInterceptor = function() {
 		g.assert(self.instances.length != 0, "Please make sure you allocate an instance first using 'withNamedFunction()', 'withObjectLiteral()', 'withPrototypeFunction()' or 'withUnamedFunction()'");
 		self.interceptor = new InterceptorBuilder(self, self.instances, function(proxiedInstances){ self.instances = proxiedInstances; });
@@ -76,6 +84,11 @@ function ScarletBuilder(scarlet){
 		});
 		self.log.debug(self, "methodWithReturn", "Return Values from Methods", [self.results]);
 		return self;
+	};
+
+	self.invokeAll = function(){
+		self.invokeMethod();
+		self.invokeMethodWithReturn();
 	};
 
 	self.assert = function(){

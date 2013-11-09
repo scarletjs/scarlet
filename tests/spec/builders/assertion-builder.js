@@ -31,6 +31,12 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 		return self;
 	};
 
+	self.allInvoked = function(){
+		g.assert(self.methodWasCalled() && self.methodWithReturnWasCalled());
+		interceptor.methodCalled();
+		return self;
+	};
+
 	self.reset = function(){
 		instance.reset();
 		interceptor.reset();

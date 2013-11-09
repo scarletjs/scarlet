@@ -18,8 +18,6 @@ describe("Given /lib/Scarlet", function(){
 
 	var Scarlet = require("../../../lib/scarlet");
 
-	describe("When #")
-
 	describe("When #intercept/#using(...)", function(){
 
 		var scarlet = new Scarlet();

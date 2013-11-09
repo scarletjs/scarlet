@@ -2,22 +2,27 @@ var g = require("../../include");
 var builder = require("./builders");
 var Scarlet = require("../../lib/Scarlet");
 
-describe("Given we are using scarlet", function(){
+
+
+describe("Given we are using scarlet", function() {
 
 	var scarlet = new Scarlet();
 
-	describe("When invoking the named function with an interceptor", function(){
+	describe("When invoking the named function with an interceptor", function() {
 
-		var assertThat = builder.for(scarlet)
+		var assertThat = 
+		
+		builder
+			.for (scarlet)
 			.withNamedFunction()
 			.withObjectLiteral()
-			//.withPrototypeFunction()
+			.withPrototypeFunction()
 			//.withUnamedFunction()
 			.withInterceptor()
 			.invokeMethod()
 			.assert();
 
-		it("Then we should be able to verify the interceptor was called", function(){
+		it("Then we should be able to verify the interceptor was called", function() {
 			assertThat.methodWasCalled();
 		});
 

@@ -13,10 +13,15 @@ describe("Given we are using builders", function() {
 			builders
 				.for(scarlet)
 				.withNamedFunction()
+				.withObjectLiteral()
+				.withUnamedFunction()
+				.withPrototypeFunction()
 				.withInterceptor()
 				.invokeMethod()
+				.invokeMethodWithReturn()
 				.assert()
-				.anyMethodCalled();
+					.methodWasCalled()
+					.methodWithReturnWasCalled();
 
 		});
 

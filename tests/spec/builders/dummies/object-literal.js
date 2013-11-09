@@ -1,34 +1,30 @@
-var state = new function() {
-		this.methodCalled = false;
-		this.methodWithReturnCalled = false;
+function createNew() {
+	var BuilderLogger = require("./../builder-logger");
+	var log = new BuilderLogger();
+
+	var instance = {
+		methodCalled: false,
+		methodWithReturnCalled: false,
+		__type__: "scarlet.tests.spec.builders.dummies.ObjectLiteral"
 	};
 
-var objectLiteral = {
+	instance.method = function() {
+		instance.methodCalled = true;
+		log.debug(instance, "method", "Set instance.methodCalled", [instance]);
+	};
 
-	property: "any",
-	__type__: "spec.builders.dummies.ObjectLiteral",
-
-	get methodCalled() {
-		return state.methodCalled;
-	},
-
-	get methodWithReturnCalled() {
-		return state.methodWithReturnCalled;
-	},
-
-	method: function() {
-		state.methodCalled = true;
-	},
-
-	methodWithReturn: function() {
-		state.methodWithReturnCalled = true;
+	instance.methodWithReturn = function() {
+		instance.methodWithReturnCalled = true;
+		log.debug(instance, "method", "Set instance.methodWithReturnCalled", [instance]);
 		return "any";
-	},
+	};
 
-	reset: function() {
-		state.methodCalled = false;
-		state.methodWithReturnCalled = false;
-	}
-};
+	instance.reset = function() {
+		instance.methodCalled = false;
+		instance.methodWithReturnCalled = false;
+	};
 
-module.exports = objectLiteral;
+	return instance;
+}
+
+module.exports = createNew;

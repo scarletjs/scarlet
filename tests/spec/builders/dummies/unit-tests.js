@@ -28,7 +28,7 @@ describe("NamedFunction", function() {
 
 describe("ObjectLiteral", function() {
 
-	var instance = require("./object-literal");
+	var instance = require("./object-literal")();
 
 	describe("#method", function() {
 		instance.method();

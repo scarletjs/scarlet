@@ -5,7 +5,7 @@ function PrototypeFunction(){
 	self.property = "any";
 	self.methodCalled = false;
 	self.methodWithReturnCalled = false;
-	self.__type__ = "spec.builders.dummies.PrototypeFunction";
+	self.__type__ = "scarlet.tests.spec.builders.dummies.PrototypeFunction";
 }
 
 PrototypeFunction.prototype.property = "any";

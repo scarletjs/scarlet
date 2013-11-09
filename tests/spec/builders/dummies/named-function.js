@@ -4,7 +4,7 @@ function NamedFunction(){
 	self.property = "any";
 	self.methodCalled = false;
 	self.methodWithReturnCalled = false;
-	self.__type__ = "spec.builders.dummies.NamedFunction";
+	self.__type__ = "scarlet.tests.spec.builders.dummies.NamedFunction";
 
 	self.method = function(){
 		self.methodCalled = true;

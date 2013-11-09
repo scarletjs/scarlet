@@ -1,8 +1,6 @@
 var g = require("../../include");
 var builder = require("./builders");
-var Scarlet = require("../../lib/Scarlet");
-
-
+var Scarlet = require("../../lib/scarlet");
 
 describe("Given we are using scarlet", function() {
 

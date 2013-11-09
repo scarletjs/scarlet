@@ -75,17 +75,17 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks("grunt-mox");
+  //grunt.loadNpmTasks("grunt-mox");
   grunt.loadNpmTasks("grunt-spawn");
   grunt.loadNpmTasks("grunt-release");
-  grunt.loadNpmTasks('grunt-browserify');
+  //grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
 
   grunt.loadTasks("./tasks");
 
   grunt.registerTask("doc", ["mox"]);
-  grunt.registerTask("test", ["spawn:unittest"]);
+  grunt.registerTask("test", ["spawn:test"]);
   grunt.registerTask("bddtest", ["spawn:bddtest"]);
   grunt.registerTask("unittest", ["spawn:unittest"]);
   grunt.registerTask("default", ["jshint", "mox"]);

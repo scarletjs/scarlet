@@ -17,7 +17,19 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/**/*.js"
+        pattern: "tests/**/*.js",
+        ignore: [
+          "dummies/index.js",
+          "dummies/named-function.js",
+          "dummies/object-literal.js",
+          "dummies/prototype-function.js",
+          "dummies/unnamed-function.js",
+          "builders/index.js",
+          "builders/assertion-builder.js",
+          "builders/builder-logger.js",
+          "builders/interceptor-builder.js",
+          "builders/scarlet-builder.js"
+        ]
       }, 
       unittest: {
         command: "mocha",
@@ -52,7 +64,7 @@ module.exports = function(grunt) {
     },
     watch: {
       files: ["<%= jshint.files %>"],
-      tasks: ["jshint"]
+      tasks: ["jshint", "spawn:test"]
     },
     browserify: {
       basic: {

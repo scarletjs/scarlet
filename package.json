@@ -8,7 +8,9 @@
     "url": "https://github.com/scarletjs/scarlet.git"
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
-  "dependencies": {},
+  "dependencies": {
+    "grunt-spawn": "~1.0.47"
+  },
   "devDependencies": {
     "mocha": "*",
     "should": "*",

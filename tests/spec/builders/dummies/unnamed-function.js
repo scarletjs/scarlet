@@ -4,7 +4,7 @@ module.exports = function(){
 	self.property = "any";
 	self.methodCalled = false;
 	self.methodWithReturnCalled = false;
-	self.__type__ = "scarlet.tests.spec.builders.dummies.NamedFunction";
+	self.__type__ = "scarlet.tests.spec.builders.dummies.UnnamedFunction";
 
 	self.method = function(){
 		self.methodCalled = true;

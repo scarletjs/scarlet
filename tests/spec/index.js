@@ -17,13 +17,15 @@ describe("Given we are using scarlet", function() {
 			.withNamedFunction()
 			.withObjectLiteral()
 			.withPrototypeFunction()
-			//.withUnamedFunction()
+			.withUnamedFunction()
 			.withInterceptor()
 			.invokeMethod()
+			.invokeMethodWithReturn()
 			.assert();
 
 		it("Then we should be able to verify the interceptor was called", function() {
 			assertThat.methodWasCalled();
+			assertThat.methodWithReturnWasCalled();
 		});
 
 	});

@@ -89,6 +89,7 @@ function ScarletBuilder(scarlet){
 	self.invokeAll = function(){
 		self.invokeMethod();
 		self.invokeMethodWithReturn();
+		return self;
 	};
 
 	self.assert = function(){

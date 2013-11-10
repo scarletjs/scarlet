@@ -30,7 +30,7 @@ module.exports = function(grunt) {
           "builders/interceptor-builder.js",
           "builders/scarlet-builder.js"
         ]
-      }, 
+      },
       unittest: {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
@@ -41,12 +41,18 @@ module.exports = function(grunt) {
         command: "mocha",
         commandArgs: ["--reporter", "spec", "{0}"],
         directory: "./tests",
-        pattern: "tests/spec/**/*.js", 
+        pattern: "tests/spec/**/*.js",
         ignore: [
+          "dummies/index.js",
           "dummies/named-function.js",
           "dummies/object-literal.js",
           "dummies/prototype-function.js",
-          "dummies/unnamed-function.js"
+          "dummies/unnamed-function.js",
+          "builders/index.js",
+          "builders/assertion-builder.js",
+          "builders/builder-logger.js",
+          "builders/interceptor-builder.js",
+          "builders/scarlet-builder.js"
         ]
       }
     },
@@ -101,6 +107,6 @@ module.exports = function(grunt) {
   grunt.registerTask("bddtest", ["spawn:bddtest"]);
   grunt.registerTask("unittest", ["spawn:unittest"]);
   grunt.registerTask("default", ["jshint", "mox"]);
-  grunt.registerTask("deploy", ["jshint","mox", "browserify", "release", "scarlet-bump"]);
+  grunt.registerTask("deploy", ["jshint", "mox", "browserify", "release", "scarlet-bump"]);
 
 };

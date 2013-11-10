@@ -15,6 +15,7 @@ The simple fast javascript interceptor for methods and properties.
 
 ## Start Intercepting
 
+Here is an example where we intercept Math.min using an anonymous function as an interceptor.
 
 ```javascript
 var scarlet = require('scarlet');
@@ -28,7 +29,26 @@ Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
 var result = Math.min(1, 2, 3); //result = 1;
 ```
 
+We could just as esily change the behaviour or Math.min to always return the result of Math.max as follows: 
+
+```javascript
+var scarlet = require('scarlet');
+
+Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+    .using(function(info, method, args){ 
+        return Math.max(args);
+    }).proxy();
+
+var result = Math.min(1, 2, 3); //result = 3;
+```
+
+As you can see we use Scarlet in a capacity not only where we 'observe' behaviour but we can effectively 'change'
+it. Scarlet also has the ability to intercept constructors, properties and functions. Pretty neat huh? :)
+
 ### What does Scarlet call when?
+
+Here is a visual breakdown of a pseudo callstack for the Math.min example above.  
+
 ```
 -->Math.min(1,2,3) // proxied method is called
         |
@@ -47,8 +67,12 @@ var result = Math.min(1, 2, 3); //result = 1;
 
 ## Project Purpose
 
-To be a simple easy to use javascript method and property interception framework. *Interception* allows you to gain access to **methods** and **properties** when they get called.  This gives you access to the **arguments**, **results**, and context of **this** for the called method. In addition, it allows you to dynamically change the behavior of a method/property.  For more about interception and aop read [here](http://en.wikipedia.org/wiki/Aspect-oriented_programming).
+To be a simple easy to use javascript method and property interception framework. *Interception* allows you to gain access 
+to **methods** and **properties** when they get called.  This gives you access to the **arguments**, **results**, and 
+context of **this** for the called method. In addition, it allows you to dynamically change the behavior of a 
+method/property.  
 
+For more about interception and aop read [here](http://en.wikipedia.org/wiki/Aspect-oriented_programming).
 
 This project focuses on the following foundations:
 
@@ -60,12 +84,14 @@ This project focuses on the following foundations:
 
 ## Why you should choose Scarlet?
 
-Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly integrate aop interception into your application, framework, or method.  Here are a couple of reasons **Scarlet** was written:
+Scarlet was written to elimante the complexities with creating interceptors.  The project allows you to seamlessly 
+integrate aop interception into your application, framework, or method.  Here are a couple of reasons **Scarlet** was 
+written:
 
 * Intercept all object members
 * Creation of interception events
 * Creation of asynchronous interceptors
-* Access to intercpted method details (method name,arguments, result, execution start and end date)
+* Access to intercepted method details
 
 ## Plugins
 
@@ -77,23 +103,44 @@ Here are a few you might find useful:
 
 ### Creating a plugin
 
-The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) project to get the project setup.
+The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) 
+project to get the project setup.
 
 ### Intercept all object members
 
 One of the main benefits is that you can intercept all **enumerable** members for an object as follows:
 
 ```javascript
-function someFunction(){
-	var self = this;
-	self.memberFunction1 = function(){};
-	self.memberFunction2 = function(){};
+var assert = require('assert');
+
+var interceptorTimesCalled = 0;
+
+function someInterceptor(info, method, args) {
+    // 'Prelude Code' or 'Before Advice'
+    var result = method.call(this, info, method, args); // 'Target Method' or 'Join Point'
+    interceptorTimesCalled += 1;
+    // 'Postlude Code' or 'After Advice'
+    return result;
 }
 
-scarlet.intercept(someFunction, scarlet.type.asPrototype()) //-> memberFunction1 and 2 will now be intercepted
-		.using(someInterceptor);
+function someFunction() {
+    var self = this;
+    self.memberProperty1 = "any";
+    self.memberFunction1 = function() {};
+    self.memberFunction2 = function() {};
+}
+
+someFunction = scarlet.intercept(someFunction, scarlet.type.asPrototype()) //-> memberFunction1 and 2 will now be intercepted
+    .using(someInterceptor)
+    .proxy();
+
+var instance = new someFunction();
+instance.memberProperty1 = "other";
+instance.memberFunction1();
+instance.memberFunction2();
+
+assert(interceptorTimesCalled === 4); // Once for constructor and 3 times for members
 ```
-This stops you from writing each member when setting up an interceptor. It allows you to change *someFunction* and not have to change the interceptor definition; this is especially nice for logging all method calls in an object.
 
 ### Creation of interception events
 
@@ -151,7 +198,7 @@ asyncMethod();
 //-> 3. ~10 ms later --> outputs "Async method Completed"
 ```
 
-### Access to intercpted method details (arguments, result, etc)
+### Access to intercepted method details (arguments, result, etc)
 
 Scarlet provides interceptors with a view into the main method being called.  When an interceptor gets called the *2nd* argument contains an invocation object containing:
 

@@ -35,8 +35,26 @@ describe("Given we are using scarlet", function() {
 			        return result;
 			    }).proxy();
 			        
-			Math.min(1,2,3);
+			var result = Math.min(1,2,3);
 
+			g.assert(result === 1, "Function is broken, should return '1'");
+			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
+
+		});
+
+		it("Should be able to override results", function(){
+
+			var interceptorCalled = false;
+			
+			Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+			    .using(function(info, method, args){ 
+			        interceptorCalled = true;
+			        return 3;
+			    }).proxy();
+			        
+			var result = Math.min(1,2,3);
+
+			g.assert(result === 3, "Function is broken, should return '1'");
 			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
 
 		});

@@ -19,17 +19,15 @@ The simple fast javascript interceptor for methods and properties.
 ```javascript
 var scarlet = require('scarlet');
 
-Math.min = scarlet.intercept(Math.min)
+Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
     .using(function(info, method, args){ 
-        console.log("Interceptor Called -> ");
-        console.log(info);
-        console.log(args);
         var result = method.call(this, info, method, args);
-        console.log(result);
+        interceptorCalled = true;
         return result;
     }).proxy();
-        
-Math.min(1,2,3);
+
+var result = Math.min(1, 2, 3); //result = 1;
+
 ```
 
 ### What does Scarlet call when?

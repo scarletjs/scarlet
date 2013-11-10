@@ -29,7 +29,7 @@ describe("Given /lib/Scarlet", function(){
 
 		var proxyAnyClass = 
 			scarlet
-				.intercept(AnyClass)
+				.intercept(AnyClass, scarlet.type.asPrototype())
 				.using(function(info, method, args){
 					if (info.memberName == "instanceMethod")
 						instanceMethodCalled = true;

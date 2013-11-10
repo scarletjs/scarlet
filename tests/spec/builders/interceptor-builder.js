@@ -64,10 +64,10 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 	g.ext.enumerable.forEach(instances, function(instance) {
 		var proxiedTypeOrInstance =
 			scarletBuilder
-			.scarlet
-			.intercept(instance)
-			.using(self.interceptor.intercept)
-			.proxy();
+				.scarlet
+				.intercept(instance, scarletBuilder.scarlet.type.asInstance())
+				.using(self.interceptor.intercept)
+				.proxy();
 		proxiedInstances.push(proxiedTypeOrInstance);
 	});
 

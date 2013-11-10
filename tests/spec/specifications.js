@@ -22,37 +22,25 @@ describe("Given we are using scarlet", function() {
 
 	});
 
-	/*describe("When intercepting Math.min", function(){
+	describe("When intercepting Math.min", function(){
 
-		it("Should call out to the interceptor", function(done){
+		it("Should call out to the interceptor", function(){
 
 			var interceptorCalled = false;
 			
-			g.ll(Math.min);
-
-			Math.min = scarlet.intercept(Math.min)
+			Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
 			    .using(function(info, method, args){ 
-			        console.log("Interceptor Called -> ");
-			        console.log("Info:");
-			        console.log(info);
-			        console.log("Args:");
-			        console.log(args);
 			        var result = method.call(this, info, method, args);
-			        console.log("Result:");
-			        console.log(result);
 			        interceptorCalled = true;
-			        done();
 			        return result;
 			    }).proxy();
 			        
-			g.ll(Math.min);
-
 			Math.min(1,2,3);
 
 			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
 
 		});
 
-	});*/
+	});
 
 });

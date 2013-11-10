@@ -22,26 +22,27 @@ var scarlet = require('scarlet');
 Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
     .using(function(info, method, args){ 
         var result = method.call(this, info, method, args);
-        interceptorCalled = true;
         return result;
     }).proxy();
 
 var result = Math.min(1, 2, 3); //result = 1;
-
 ```
 
 ### What does Scarlet call when?
 ```
--->someFunction  //call to method
+-->Math.min(1,2,3) // proxied method is called
         |
         |
-        -->interceptor //before method starts
+        -->interceptor<function<anonymous>>(info, method, args) // interceptor is called
                 |
                 |
-                -->someFunction //after the interceptor executes **method.call(this, info, method, args)**
+                --> var result = method.call(this, info, method, args) // interceptor calls 'actual' method and saves 'result'
                         |
                         |
-                        -->interceptor // interceptor gets method results
+                        -->interceptor<function<anonymous>>(info, method, args) // interceptor is called
+                            |
+                            |
+                            --> return result; // result is returned. 
 ``` 
 
 ## Project Purpose
@@ -71,13 +72,12 @@ Scarlet was written to elimante the complexities with creating interceptors.  Th
 Scarlet allows for easy integration of plugins.  
 
 Here are a few you might find useful:
-* scarlet-winston - Scarlet plugin for using Winston with method and property event interception
 * scarlet-ioc - A Javascript IoC container
+* scarlet-winston - Scarlet plugin for using Winston with method and property event interception
 
 ### Creating a plugin
 
 The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) project to get the project setup.
-
 
 ### Intercept all object members
 
@@ -86,12 +86,11 @@ One of the main benefits is that you can intercept all **enumerable** members fo
 ```javascript
 function someFunction(){
 	var self = this;
-    
 	self.memberFunction1 = function(){};
 	self.memberFunction2 = function(){};
 }
 
-scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercepted
+scarlet.intercept(someFunction, scarlet.type.asPrototype()) //-> memberFunction1 and 2 will now be intercepted
 		.using(someInterceptor);
 ```
 This stops you from writing each member when setting up an interceptor. It allows you to change *someFunction* and not have to change the interceptor definition; this is especially nice for logging all method calls in an object.

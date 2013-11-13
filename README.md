@@ -20,7 +20,7 @@ Here is an example where we intercept Math.min using an anonymous function as an
 ```javascript
 var scarlet = require('scarlet');
 
-Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
     .using(function(info, method, args){ 
         var result = method.call(this, info, method, args);
         return result;
@@ -34,7 +34,7 @@ We could just as esily change the behaviour or Math.min to always return the res
 ```javascript
 var scarlet = require('scarlet');
 
-Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
     .using(function(info, method, args){ 
         return Math.max(args);
     }).proxy();
@@ -130,7 +130,7 @@ function someFunction() {
     self.memberFunction2 = function() {};
 }
 
-someFunction = scarlet.intercept(someFunction, scarlet.type.asPrototype()) //-> memberFunction1 and 2 will now be intercepted
+someFunction = scarlet.intercept(someFunction, scarlet.PROTOTYPE) //-> memberFunction1 and 2 will now be intercepted
     .using(someInterceptor)
     .proxy();
 

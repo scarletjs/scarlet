@@ -9,13 +9,11 @@ describe("Given we are using scarlet", function() {
 	describe("When invoking all kinds of instances", function() {
 
 		var assertThat =
-			builder
-			.
-		for (scarlet)
-			.withInstances()
-			.withInterceptor()
-			.invokeAll()
-			.assert();
+			builder.for (scarlet)
+				.withInstances()
+				.withInterceptor()
+				.invokeAll()
+				.assert();
 
 		it("Then we should be able to verify all methods were invoked", function() {
 			assertThat.allInvoked();
@@ -29,7 +27,7 @@ describe("Given we are using scarlet", function() {
 
 			var interceptorCalled = false;
 
-			Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
 				.using(function(info, method, args) {
 					var result = method.call(this, info, method, args);
 					interceptorCalled = true;
@@ -47,7 +45,7 @@ describe("Given we are using scarlet", function() {
 
 			var interceptorCalled = false;
 
-			Math.min = scarlet.intercept(Math.min, scarlet.type.asFunction())
+			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
 				.using(function(info, method, args) {
 					interceptorCalled = true;
 					return 3;
@@ -83,7 +81,7 @@ describe("Given we are using scarlet", function() {
 				self.memberFunction2 = function() {};
 			}
 
-			someFunction = scarlet.intercept(someFunction, scarlet.type.asPrototype()) //-> memberFunction1 and 2 will now be intercepted
+			someFunction = scarlet.intercept(someFunction, scarlet.PROTOTYPE) //-> memberFunction1 and 2 will now be intercepted
 				.using(someInterceptor)
 				.proxy();
 

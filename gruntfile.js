@@ -50,7 +50,7 @@ module.exports = function(grunt) {
     browserify: {
       basic: {
         src: ['./index.js'],
-        dest: './dist/scarlet.js'
+        dest: './pub/scarlet.js'
       },
       options: {
         standalone: 'scarlet'

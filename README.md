@@ -184,6 +184,79 @@ var min = Math.min(1,2,3);
 //-> 4. afterFunction called
 ```
 
+## Interceptor Parameters
+
+The typical declaration of any interceptor is as follows:
+
+```javascript
+function myInterceptor1(info, method, args) {
+    return method.call(this, info, method, args);
+}
+```
+It is important to note a few things about this. 
+
+ - **this**: Is always the context of the instance of the object.
+ - **info**: Is an object which contains meta data about the function being intercepted.
+ - **method**: A reference to the original method or next interceptor in the call chain.
+ - **args**: The arguments passed to the method being intercepted.
+
+The **info** parameter object has the following properties and functions: 
+
+**isConstructor**
+
+A function which can be used to determine if the current function begin called is used as a constructor function. 
+
+```javascript
+function myInterceptor1(info, method, args) {
+    if(info.isConstructor()) // Only invokes if constructor
+        return method.call(this, info, method, args);
+}
+```
+
+**isFunction**
+
+A function which determines whether the info object represents an object that is a function.
+
+```javascript
+function myInterceptor1(info, method, args) {
+    if(info.isConstructor()) // Only invokes if function
+        return method.call(this, info, method, args);
+}
+```
+
+**isProperty**
+
+A function which determines whether the info object represents a property.
+
+```javascript
+function myInterceptor1(info, method, args) {
+    if(info.isProperty()) // Only invokes if property
+        return method.call(this, info, method, args);
+}
+```
+
+**isInstance**
+
+A function which determines whether the info object represents an instance object.
+
+```javascript
+function myInterceptor1(info, method, args) {
+    if(info.isInstance()) // Only invokes if instance
+        return method.call(this, info, method, args);
+}
+```
+
+**isPrototype**
+
+A function which determines whether the info object represents a prototype.
+
+```javascript
+function myInterceptor1(info, method, args) {
+    if(info.isPrototype()) // Only invokes if prototype
+        return method.call(this, info, method, args);
+}
+```
+
 ## Browser Example
 
 Grab scarlet.js from the pub/scarlet.js.  Place it in your web pages javascript directory(js/) and start using it.

@@ -165,10 +165,10 @@ It is important to note that interceptors are chained together recursively via t
 
 Scarlet interceptors emit the following events:
 
-**before**: emitted before *interceptors* are called
-**after**: emitted after *intercepted* method, not called if error
-**done**: emitted after all *interceptors* and *intercepted* method called
-**error**: emitted if an error occurs
+ - **before**: emitted before *interceptors* are called
+ - **after**: emitted after *intercepted* method, not called if error
+ - **done**: emitted after all *interceptors* and *intercepted* method called
+ - **error**: emitted if an error occurs
 
 ```javascript
 Scarlet.intercept(Math, 'min')

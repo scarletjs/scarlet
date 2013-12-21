@@ -62,7 +62,7 @@ module.exports = function(grunt) {
         options: {
           name: "Scarlet",
           template: "category",
-          outputFile: "doc/README.md"
+          outputFile: "docs/README.md"
         }
       }
     }

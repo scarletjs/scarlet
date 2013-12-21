@@ -8,37 +8,42 @@
     "url": "https://github.com/scarletjs/scarlet.git"
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
-  "dependencies": {
-    "grunt-spawn": "~1.0.47"
-  },
+  "dependencies": {},
   "devDependencies": {
     "mocha": "*",
-    "should": "*",
-    "benchmark": "1.0.0",
+    "hooks": "~0.3.0",
     "prompt": "~0.2.9",
+    "benchmark": "1.0.0",
+    "string-format": "0.2.1",
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.9",
-    "string-format": "0.2.1",
+    "grunt-spawn": "*",
+    "grunt-release": "~0.3.3",
+    "grunt-browserify": "~1.3.0",
     "grunt-contrib-jshint": "~0.4.3",
     "grunt-contrib-watch": "~0.4.0",
-    "grunt-release": "~0.3.3",
-    "hooks": "~0.3.0",
-    "grunt-spawn": "*"
+    "browserify": "~3.12.0",
+    "grunt-mox": "0.0.9"
   },
   "browserDependencies": {},
   "keywords": [
-    "interceptor",
     "aop",
     "aspect",
+    "oriented",
+    "programming",
+    "code",
+    "weave",
+    "cross",
+    "cutting",
+    "concern",
+    "interceptor",
     "interception",
     "hook",
     "hooks",
     "hooker",
-    "monkey-patch",
-    "monkey patch",
+    "monkey",
     "patch",
-    "debug",
-    "async"
+    "debug"
   ],
   "engines": {
     "node": ">= 0.8.0"

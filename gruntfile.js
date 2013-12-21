@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
 
-  // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
     jshint: {
@@ -30,36 +29,12 @@ module.exports = function(grunt) {
           "builders/interceptor-builder.js",
           "builders/scarlet-builder.js"
         ]
-      },
-      unittest: {
-        command: "mocha",
-        commandArgs: ["--reporter", "spec", "{0}"],
-        directory: "./tests",
-        pattern: "tests/unit/**/*.js"
-      },
-      bddtest: {
-        command: "mocha",
-        commandArgs: ["--reporter", "spec", "{0}"],
-        directory: "./tests",
-        pattern: "tests/spec/**/*.js",
-        ignore: [
-          "dummies/index.js",
-          "dummies/named-function.js",
-          "dummies/object-literal.js",
-          "dummies/prototype-function.js",
-          "dummies/unnamed-function.js",
-          "builders/index.js",
-          "builders/assertion-builder.js",
-          "builders/builder-logger.js",
-          "builders/interceptor-builder.js",
-          "builders/scarlet-builder.js"
-        ]
       }
     },
     release: {
       options: {
-        bump: true, //default: true
-        file: "package.json", //default: package.json
+        bump: true, 
+        file: "package.json", 
         add: true,
         commit: true,
         tag: true,
@@ -93,20 +68,18 @@ module.exports = function(grunt) {
     }
   });
 
-  //grunt.loadNpmTasks("grunt-mox");
+  grunt.loadNpmTasks("grunt-mox");
   grunt.loadNpmTasks("grunt-spawn");
   grunt.loadNpmTasks("grunt-release");
-  //grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks("grunt-contrib-watch");
   grunt.loadNpmTasks("grunt-contrib-jshint");
-
-  grunt.loadTasks("./tasks");
 
   grunt.registerTask("doc", ["mox"]);
   grunt.registerTask("test", ["spawn:test"]);
   grunt.registerTask("bddtest", ["spawn:bddtest"]);
   grunt.registerTask("unittest", ["spawn:unittest"]);
   grunt.registerTask("default", ["jshint", "mox"]);
-  grunt.registerTask("deploy", ["jshint", "mox", "browserify", "release", "scarlet-bump"]);
+  grunt.registerTask("deploy", ["jshint", "mox", "browserify", "release"]);
 
 };

@@ -7,7 +7,7 @@ The simple fast javascript interceptor.
 
 [![NPM](https://nodei.co/npm/scarlet.png?downloads=true)](https://nodei.co/npm/scarlet/)
 
-![Scarlet!](https://raw.github.com/scarletjs/scarlet/p-vs-d/logo.png)
+![Scarlet!](https://raw.github.com/scarletjs/scarlet/master/logo.png)
 
 ## Installation
 

@@ -7,111 +7,83 @@ var scarletBenchMark = require('./scarletBenchMark');
 var suites = [];
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Intercepting an Instance of a Named Function");
-    	s.push(scarletBenchMark.namedFunctionInstance);
+		s.push(scarletBenchMark.namedFunctionInstance);
 		s.push(hooksBenchMark.namedFunctionInstance);
-
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Intercepting a Prototype Function");
-    	s.push(scarletBenchMark.prototypeFunction);
+		s.push(scarletBenchMark.prototypeFunction);
 		s.push(hooksBenchMark.prototypeFunction);
-
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Intercepting a Un-Named Function");
-    	s.push(scarletBenchMark.unnamedFunctionInstance);
+		s.push(scarletBenchMark.unnamedFunctionInstance);
 		s.push(hooksBenchMark.unnamedFunctionInstance);
-
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Intercepting a Object Literal");
-    	s.push(scarletBenchMark.objectLiteral);
+		s.push(scarletBenchMark.objectLiteral);
 		s.push(hooksBenchMark.objectLiteral);
-
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Multiple Interception using a Named Function");
-    	s.push(scarletBenchMark.multipleInterceptorNamedFunctionInstance);
+		s.push(scarletBenchMark.multipleInterceptorNamedFunctionInstance);
 		s.push(hooksBenchMark.multipleInterceptorNamedFunctionInstance);
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Multiple Interception using a Object Literal");
-    	s.push(scarletBenchMark.multipleInterceptorObjectLiteral);
+		s.push(scarletBenchMark.multipleInterceptorObjectLiteral);
 		s.push(hooksBenchMark.multipleInterceptorObjectLiteral);
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Multiple Interception using a Prototype Function");
-    	s.push(scarletBenchMark.multipleInterceptorPrototypeFunction);
+		s.push(scarletBenchMark.multipleInterceptorPrototypeFunction);
 		s.push(hooksBenchMark.multipleInterceptorPrototypeFunction);
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 
 suites.push(
-	function(){
+	function() {
 		var self = this;
-
 		var s = Benchmark.Suite("Multiple Interception using a Un-Named Function");
-    	s.push(scarletBenchMark.multipleInterceptorUnnamedFunctionInstance);
+		s.push(scarletBenchMark.multipleInterceptorUnnamedFunctionInstance);
 		s.push(hooksBenchMark.multipleInterceptorUnnamedFunctionInstance);
-
-		 return s.run();
-
+		return s.run();
 	}
 );
 

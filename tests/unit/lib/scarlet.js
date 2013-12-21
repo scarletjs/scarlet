@@ -50,28 +50,28 @@ describe("Given /lib/Scarlet", function() {
 			prototypePropertyCalled = false;
 		});
 
-		it.skip("Then it should call the interceptor for an #instanceMethod()", function() {
+		it("Then it should call the interceptor for an #instanceMethod()", function() {
 			var instance = new proxyAnyClass();
 			var result = instance.instanceMethod("apple", "pear", "bananna");
 			g.assert(instanceMethodCalled);
 			g.assert(result == "apple pear bananna");
 		});
 
-		it.skip("Then it should call the interceptor for an #instanceProperty()", function() {
+		it("Then it should call the interceptor for an #instanceProperty()", function() {
 			var instance = new proxyAnyClass();
 			var result = instance.instanceProperty;
 			g.assert(instancePropertyCalled);
 			g.assert(result == "anyValue");
 		});
 
-		it.skip("Then it should call the interceptor for #prototypeMethod()", function() {
+		it("Then it should call the interceptor for #prototypeMethod()", function() {
 			var instance = new proxyAnyClass();
 			var result = instance.prototypeMethod("apple", "pear", "bananna");
 			g.assert(prototypeMethodCalled);
 			g.assert(result == "apple pear bananna");
 		});
 
-		it.skip("Then it should call the interceptor for #prototypeProperty()", function() {
+		it("Then it should call the interceptor for #prototypeProperty()", function() {
 			var instance = new proxyAnyClass();
 			var result = instance.prototypeProperty;
 			g.assert(prototypePropertyCalled);

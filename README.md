@@ -31,7 +31,7 @@ This project focuses on the following:
 
 ## Design Goals
 
-Scarlet was written to eliminate the complexities that arise when intercepting code. The project allows you to seamlessly integrate interception into your application or framework with the following design goals:
+Scarlet was written to eliminate the complexities that arise when intercepting code. The project allows you to seamlessly integrate interception into your application or framework with the following design goals in mind:
 
 * Change anything
 * Observe anything
@@ -113,7 +113,7 @@ assert(timesCalled === 4); // Once for constructor and 3 times for members
 
 ## Intercepting Asynchronously
 
-We have left the ability to intercept asyncronously up to you. It is important that you understand the implications of doing this. To intercept asyncronously would be done as follows:
+We have left the ability to intercept asyncronously up to you. It is important that you understand the implications of doing this. To intercept asyncronously you can do the following:
 
 ```javascript
 var Scarlet = require('scarlet');
@@ -136,11 +136,11 @@ myFunction = scarlet
 
 ```
 
-The benefits of this approach is that you can delegate your interceptors execution to the event loop and return values wont break. The down side is you cannot change return values from within your interceptor. In this case you might want to consider using a javascript futures framework that implements the promise pattern.
+The benefits of this approach is that you can delegate your interceptors execution to the event loop and return values wont break. The down side is you cannot change return values from within your interceptor. In this case you might want to consider using a javascript futures framework that implements a promise pattern.
 
 ## Using Multiple Interceptors
 
-You can also use multiple interceptos on the same function: 
+You can also use multiple interceptors on the same function: 
 
 ```javascript
 var Scarlet = require("scarlet");
@@ -269,15 +269,17 @@ Here is a sample page.
     <head>
         <script type="text/javascript" src="js/scarlet.js"></script> 
         <script type="text/javascript">
-            function interceptor(proceed){
+            function interceptor(info, method, args){
                 console.log("In interceptor");
-                proceed();
+                method.call(this, info, method, args);
             };
             function doStuff () {
                 console.log("In doStuff");
             }
-            doStuff = scarlet.intercept(doStuff, scarlet.FUNCTION)
-                    .using(interceptor);
+            doStuff = scarlet
+                .intercept(doStuff, scarlet.FUNCTION)
+                .using(interceptor)
+                .proxy();
 
             doStuff();
         </script>
@@ -291,7 +293,7 @@ Here is a sample page.
 
 ## Method Call Lifecycle
 
-Here is a visual breakdown of a pseudo callstack for the Math.min example above.  
+Here is a visual breakdown of a pseudo callstack for the Math.min we saw earlier.  
 
 ```
 -->Math.min(1,2,3) // proxied method is called
@@ -325,4 +327,4 @@ Here are a few you might find useful:
 
 The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) project for a template. This will later be incorporated into the scarlet cli.
 
-We accept pull requests and will definitely consider new ideas. 
+We accept pull requests if you are keen on hacking on scarlet and will definitely consider new ideas. 

@@ -328,3 +328,7 @@ Here are a few you might find useful:
 The best way to get started writing your own plugin, is to use the [scarlet-init](https://github.com/scarletjs/scarlet-init) project for a template. This will later be incorporated into the scarlet cli.
 
 We accept pull requests if you are keen on hacking on scarlet and will definitely consider new ideas. 
+
+## Node Versions
+
+When running scarlet we recommend that you use node version manager. Currently works under node version 0.10.24. To install node version manager please see [nvm](https://github.com/creationix/nvm)

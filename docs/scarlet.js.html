@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: /usr/local/src/nodejs/scarlet/lib/scarlet.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: /usr/local/src/nodejs/scarlet/lib/scarlet.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var g = require("../include");
+
+/**
+For creating a new instance of Scarlet
+@namespace scarlet.lib
+@method ctor
+@param {array|string} pluginArr
+@return scarlet.lib.Scarlet
+@example
+	
+	var Scarlet = require("scarlet");
+	var scarlet = new Scarlet();
+
+	// A function that does addition
+	function add(arg1, arg2){
+		return arg1 + arg2;
+	}
+
+	// Log arguments and result of add
+	add = scarlet
+		.intercept(add, scarlet.FUNCTION)
+		.using(function(info, method, args){
+			console.log("Adding '" + args[0] + "'' and '" + args[1] + "'");
+			var result = method.call(this, info, method, args);
+			console.log("Result is '" + result + "'");
+			return result;
+		}).proxy();
+
+	add(1,2); // Output -> Adding '1' and '2'\n Result is '3'
+	add(3,5); // Output -> Adding '3' and '5'\n Result is '8'
+*/
+function Scarlet(pluginArr) {
+
+	"use strict";
+
+	var ProxyType = require("./proxies/proxy-type");
+	var Interceptor = require("./interceptors/interceptor");
+	var PluginManager = require("./plugins/plugin-manager");
+
+	var interceptor = null;
+	var pluginManager = new PluginManager();
+
+	var self = this;
+	self.plugins = {};
+	self.type = new ProxyType().asUndefined();
+	self.__typename__ = "scarlet.lib.Scarlet";
+
+	self.UNDEFINED = self.type.asUndefined();
+
+	/**
+		Constant used to coerce proxy for type only
+		@property INSTANCE
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
+	self.INSTANCE = self.type.asInstance();
+
+	/**
+		Constant used to coerce proxy for a normal function
+		@property FUNCTION
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Function that we would like to intercept
+			function any(arg1, arg2) {
+				return arg1 + arg2;
+			}
+
+			// Create a proxy of the function using scarlet
+			var anyProxy = scarlet
+				.intercept(any, scarlet.FUNCTION)
+				.using(function(info, method, args){
+					// ...
+				}).proxy();
+
+			anyProxy(1,2) // -> will invoke interceptor
+			any(1,2) // -> wont invoke interceptor
+	*/
+	self.FUNCTION = self.type.asFunction();
+
+	/**
+		Constant used to coerce proxy for prototype functions, includes constructor interception
+		@property PROTOTYPE
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Function or prototypical object that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.anyProperty = 5;
+				self.anyMethod = function(){
+				};
+			}
+
+			MyClass.prototype.anyOtherMethod = function(){
+			};
+
+			// Intercept type
+			MyClass = scarlet
+				.intercept(MyClass)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			var instance = new MyClass(); // -> Calls interceptor for constructor
+			instance.anyMethod(); // -> Calls interceptor again for method
+			instance.anyOtherMethod(); -> Calls interceptor again for prototype function
+			instance.anyProperty = 6; // -> Calls interceptor for the property setter
+			var result = instance.anyProperty; // -> Calls the interceptor again for property getter
+	*/	
+	self.PROTOTYPE = self.type.asPrototype();
+
+	/**
+		Method for proxying types, functions and instances
+		@method intercept
+		@param {object} typeOrInstance
+		@param {scarlet.lib.proxies.ProxyType} proxyType
+		@return {scarlet.lib.Scarlet}
+		@chainable
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
+	self.intercept = function(typeOrInstance, proxyType) {
+		g.assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
+		g.assert(proxyType, "Please make sure you supply a type. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());")
+		g.ext.logger.info(Scarlet, "intercept", "For Type Or Instance", [typeOrInstance]);
+		interceptor = new Interceptor()
+		interceptor.observable = typeOrInstance;
+		interceptor.intercept(typeOrInstance, function(observable) {
+			interceptor.observable = observable;
+		}, proxyType);
+		return self;
+	};
+
+	/**
+		Method for chaining interceptors onto a proxied type or function
+		@method using
+		@param {Function} callback
+		@return {scarlet.lib.Scarlet}
+		@chainable
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){ // Interceptor 1
+					return method.call(this, info, method, args);
+				})
+				.using(function(info, method, args){ // Interceptor 2
+					return method.call(this, info, method, args);
+				})
+				.using(function(info, method, args){ // Interceptor 3
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
+	self.using = function(callback) {
+		g.assert(callback);
+		g.assert(interceptor);
+		g.ext.logger.info(Scarlet, "using", "Using Interceptor", [callback]);
+		interceptor.using(function(info, method, args){
+			var thisContext = this;
+			self.emit("before", {
+				info: info,
+				args: args,
+				result: null,
+				method: method,
+				self: thisContext
+			});
+			var result = null;
+			try {
+				result = callback.call(this, info, method, args);
+				self.emit("after", {
+					info: info,
+					args: args,
+					result: result,
+					method: method,
+					self: thisContext
+				});
+			} catch(err){
+				self.emit("error", {
+					info: info,
+					args: args,
+					result: result,
+					method: method,
+					self: thisContext,
+					error: err
+				});
+			}
+			self.emit("done", {
+				info: info,
+				args: args,
+				result: result,
+				method: method,
+				self: thisContext
+			});
+			return result;
+
+		});
+		return self;
+	};
+
+	/**
+		Method for retrieving a reference to a proxy type, this is for types that need to be instantiated using 'new'
+		@method proxy
+		@return {Object}
+	*/
+	self.proxy = function() {
+		g.assert(interceptor);
+		g.assert(interceptor.observable);
+		g.ext.logger.info(Scarlet, "proxy", "As Proxied Type Or Instance", [interceptor.observable]);
+		return interceptor.observable;
+	};
+
+	/**
+		Method for loading a plugin into scarlet
+		@param {String} pluginPath
+		@method load
+		@return {scarlet.lib.Scarlet}
+	*/
+	self.load = function(pluginPath) {
+		g.assert(pluginPath);
+		pluginManager.load(self, pluginPath);
+		return self;
+	};
+
+	var initializePlugins = function() {
+		if (typeof(pluginArr) === 'string')
+			pluginArr = [pluginArr];
+		if (pluginArr) {
+			if (pluginArr.length) {
+				pluginArr.forEach(function(plugin) {
+					self.loadPlugin(plugin);
+				});
+			}
+		}
+	};
+
+	initializePlugins();
+
+	g.events.EventEmitter.call(self);
+}
+
+g.util.inherits(Scarlet, g.events.EventEmitter);
+
+module.exports = Scarlet;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Global</h3><ul><li><a href="global.html#ctor">ctor</a></li><li><a href="global.html#intercept">intercept</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#proxy">proxy</a></li><li><a href="global.html#using">using</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha3</a> on Sun Dec 29 2013 23:57:02 GMT+0000 (GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

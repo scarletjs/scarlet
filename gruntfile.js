@@ -29,12 +29,22 @@ module.exports = function(grunt) {
           "builders/interceptor-builder.js",
           "builders/scarlet-builder.js"
         ]
+      },
+      docs: {
+        command: "jsdoc",
+        commandArgs: ["./lib", "-r", "-d", "./docs"],
+        directory: "./",
+        pattern: "**/*.js",
+        useQuotes: true,
+        quoteDelimiter: "\"",
+        groupFiles: true,
+        fileDelimiter: " "
       }
     },
     release: {
       options: {
-        bump: true, 
-        file: "package.json", 
+        bump: true,
+        file: "package.json",
         add: true,
         commit: true,
         tag: true,
@@ -54,16 +64,6 @@ module.exports = function(grunt) {
       },
       options: {
         standalone: 'scarlet'
-      }
-    },
-    mox: {
-      documentationByCategoryTag: {
-        sourceFiles: ['./lib/'],
-        options: {
-          name: "Scarlet",
-          template: "category",
-          outputFile: "docs/README.md"
-        }
       }
     }
   });

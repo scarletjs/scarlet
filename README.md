@@ -313,7 +313,7 @@ Benchmarking has been performed against a [hooks](https://github.com/bnoguchi/ho
 
 ## Api Reference
 
-For all api information see the [docs](http://raw.github.com/scarletjs/scarlet/tree/master/docs/index.html).
+For all api information see the [docs](http://htmlpreview.github.com/?https://github.com/scarletjs/scarlet/blob/master/docs/index.html).
 
 ## Plugins
 

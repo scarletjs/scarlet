@@ -32,7 +32,9 @@ module.exports = function(grunt) {
       },
       docs: {
         command: "jsdoc",
-        commandArgs: ["./lib", "-r", "-d", "./docs"],
+        commandArgs: [
+          "./lib", "\-r", "\-d", "./"
+        ],
         directory: "./",
         pattern: "**/*.js",
         useQuotes: true,

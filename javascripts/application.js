@@ -47,18 +47,18 @@ require([
 		var footer = new Footer("#footer", style);
 		footer.animate();
 
-		var tile1 = new Tile("#tileContainer", style);
-		tile1.initialise(2,2);
-		tile1.animate(2,2, "#tileTemplate");
+		// var tile1 = new Tile("#tileContainer", style);
+		// tile1.initialise(2,2);
+		// tile1.animate(2,2, "#tileTemplate");
 
-		var tile2 = new Tile("#tileContainer", style);
-		tile2.animate(2,2, "#tileTemplate");
+		// var tile2 = new Tile("#tileContainer", style);
+		// tile2.animate(2,2, "#tileTemplate");
 		
-		var tile3 = new Tile("#tileContainer", style);
-		tile3.animate(2,2, "#tileTemplate");
+		// var tile3 = new Tile("#tileContainer", style);
+		// tile3.animate(2,2, "#tileTemplate");
 		
-		var tile4 = new Tile("#tileContainer", style);
-		tile4.animate(2,2, "#tileTemplate");
+		// var tile4 = new Tile("#tileContainer", style);
+		// tile4.animate(2,2, "#tileTemplate");
 
 
 //		console.log("Before jquery grid thingy");

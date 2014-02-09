@@ -1,0 +1,11 @@
+hr.underline {
+	margin: 3px;
+	padding: 0;
+    border: 0;
+    height: 3px;
+    /*background: #576d80;*/
+	-webkit-box-shadow: inset 1px 1px 1px #576d80;
+	-moz-box-shadow: inset 1px 1px 1px #576d80;
+	-o-box-shadow: inset 1px 1px 1px #576d80;
+	box-shadow: inset 1px 1px 1px #576d80;
+}

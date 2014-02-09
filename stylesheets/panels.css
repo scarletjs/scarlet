@@ -1,0 +1,64 @@
+.panel {
+	margin: 15px;
+	padding: 15px;
+	border-radius: 5px;
+	background-color: white;
+	font-size: 16px;
+}
+
+.panel a {
+	color: #2e373f;
+	text-decoration: none;
+}
+
+.panel a:hover {
+	color: #576d80;
+	text-decoration: none;
+}
+
+.panel-logo{
+	float: left;
+	font-size: 16px;
+}
+
+.panel-title {
+	margin: 0;
+	padding: 0px;
+  	font-size: 22px;
+  	font-family: arial;
+  	font-weight: bold;
+	padding-bottom: 10px;
+}
+
+.panel-date {
+	font-size: 18px;
+	font-weight: normal;
+	font-style: italic;
+	color: #6c7c8b;
+}
+
+.panel-footer {
+	text-align: right;
+	padding: 10px;
+	height: 30px;
+}
+
+.panel-content {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+  	/*border-top: solid 1px #eee;*/
+  	/*border-bottom: solid 1px #eee;*/
+}
+
+.panel-content a {
+	color: #576d80;
+	text-decoration: underline;
+}
+
+.panel-content a:hover {
+	color: #2e373f;
+	text-decoration: none;
+}
+

@@ -1,0 +1,15 @@
+ul.hlist {
+	margin: 0;
+	padding: 0;
+	padding-left: 30px;
+	list-style-type: none;	
+}
+
+ul.hlist > li {
+	display:inline;
+}
+
+ul.big > li {
+	margin:15px;
+	padding:15px;
+}

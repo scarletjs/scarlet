@@ -28,11 +28,22 @@
   <link rel="stylesheet" href="stylesheets/tiles.css" />
 
   <script src="javascripts/vendor/prettify/prettify.js?autoload=true&amp;lang=basic"></script>
+  
   <script data-main="javascripts/application.js" src="javascripts/vendor/require.js"></script>
+
+  <style>
+    #editor { 
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+  </style>
 
 </head>
 
-<body onload="prettyPrint()" onclick="window.location.href = window.location.href">
+<body onload="prettyPrint()">
 
   <div class="wrapper">
 
@@ -90,28 +101,22 @@
       
       <div id="content">
 
-        <!--script id="tileTemplate" type="text/template">
-          <div class="tile-4x4">
-            TILE TEMPLATE
+        <div id="leftContainer" style="border: solid 1px green; width: 50%;float: left;">
+          <div id="navigationOptionsPanel">
+            NAV OPTIONS
           </div>
-        </script-->
+        </div>
 
-        <!--div id="tileContainer" style="height: 100%; border: solid 3px green"></div-->
+        <div id="rightContainer" style="border: solid 1px green; width: 50%; float: right;">
+          <div id="tryScarletNowPanel">
+            <div id="editor">function foo(items) {
+                var x = "All this is syntax highlighted";
+                return x;
+            }</div>
+          </div>
+        </div>
 
-<!--         <div id="topLeftPanel" class="tile-4x4">
-          TOP LEFT
-        </div>
-        <div id="topRightPanel" class="tile-4x4">
-          TOP RIGHT
-        </div>
-        <div id="bottomLeftPanel" class="tile-4x4">
-          BOTTOM LEFT
-        </div>
-        <div id="bottomRightPanel" class="tile-4x4">
-          BOTTOM RIGHT
-        </div>
- -->      </div>
-
+      </div>
 
     </section>
     
@@ -140,5 +145,6 @@
 
   </div>
   <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
 </body>
 </html>

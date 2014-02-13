@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+  <title>Scarlet by scarletjs</title>
+
+  <script src="javascripts/scale.fix.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  <!--[if lt IE 9]>
+  <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" href="stylesheets/vendor/animate/animate.css" />
+  <link rel="stylesheet" href="stylesheets/vendor/prettify/prettify.css" />
+  <link rel="stylesheet" href="stylesheets/vendor/bootstrap/bootstrap.css" />
+  <link rel="stylesheet" href="stylesheets/vendor/font-awesome/css/font-awesome.css" />
+  <link rel="stylesheet" href="javascripts/vendor/jqgrid/css/ui.jqgrid.css" />
+
+  <link rel="stylesheet" href="stylesheets/fonts.css" />
+  <link rel="stylesheet" href="stylesheets/layout.css" />
+  <link rel="stylesheet" href="stylesheets/panels.css" />
+  <link rel="stylesheet" href="stylesheets/lists.css" />
+  <link rel="stylesheet" href="stylesheets/lines.css" />
+  <link rel="stylesheet" href="stylesheets/articles.css" />
+  <link rel="stylesheet" href="stylesheets/tiles.css" />
+
+  <script src="javascripts/vendor/prettify/prettify.js?autoload=true&amp;lang=basic"></script>
+  
+  <script data-main="javascripts/application.js" src="javascripts/vendor/require.js"></script>
+
+  <style>
+    #editor { 
+        position: absolute;
+        top: 114px;
+        width: 50%;
+        bottom: 0;
+        left: 0;
+    }
+  </style>
+
+</head>
+
+<body onload="prettyPrint()">
+
+  <div class="wrapper">
+
+    <header>
+
+      <div id="header">
+        <div id="logo">
+          <div class="contact">
+            <ul class="hlist">
+              <li>
+                <a href="https://github.com/scarletjs/scarlet">
+                  <i class="fa fa-github fa-2x"></i>
+                </a>
+              </li>
+              <li>
+                <a href="https://twitter.com/scarlet_js">
+                  <i class="fa fa-twitter fa-2x"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div class="title">
+            <b>scarlet</b>&nbsp;<i>js</i> - <small>aop that just works</small>
+          </div>
+        </div>
+      </div>
+
+      <navigation>
+        <div id="navigation">
+          <ul class="hlist">
+            <li>
+              <a href="https://github.com/scarletjs/scarlet/zipball/master">
+                <i class="fa fa-archive fa-2x"></i>ZIP
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/scarletjs/scarlet/tarball/master">
+                <i class="fa fa-archive fa-2x"></i>TAR
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/scarletjs/scarlet">
+                <i class="fa fa-github fa-2x"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </navigation>
+
+    </header>
+
+    <section>
+      
+      <div class="spacer" style="height: 110px"></div>
+      
+      <div id="content">
+
+        <div id="leftContainer" style="border: solid 1px green; width: 50%;float: left;">
+          <div id="navigationOptionsPanel">
+            NAV OPTIONS
+          </div>
+        </div>
+
+        <div id="rightContainer" style="border: solid 1px green; width: 50%; float: right;">
+          <div id="tryScarletNowPanel">
+            <div id="editor">
+function foo(items) {
+    var x = "All this is syntax highlighted";
+    return x;
+}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+    
+    <footer>
+      <div id="footer">
+        ScarletJS @ 2014
+      </div>
+    </footer>
+
+  </div>
+  <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+</body>
+</html>

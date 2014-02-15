@@ -36,7 +36,7 @@
         position: absolute;
         top: 114px;
         width: 50%;
-        bottom: 0;
+        bottom: 40px;
         left: 0;
     }
   </style>
@@ -109,31 +109,46 @@
 
         <div id="rightContainer" style="border: solid 1px green; width: 50%; float: right;">
           <div id="tryScarletNowPanel">
-            <div id="editor">
-              <div class="target">
+            <div id="editor">// Try Scarlet Now :)
+
+// A simple javascript object with property
 function MyClass() {
   var self = this;
-
+  // A sample property
   self.property = "anyPropertyValue";
-
+  // A sample method
   self.method = function(param1, param2){
-    console.log("MyClass::Method Executed(param1='"+param1+"', param2='"+param2+"')");
+    console.log("MyClass::method(param1='"+param1+"', param2='"+param2+"')");
+    return 0;
   };
+  console.log("MyClass::ctor");
 }
-export = MyClass;
-              </div>
-              <div class="interceptor">
-function(info, method, args){ 
-  var result = method.call(this, info, method, args);
-  console.log("Interceptor::result='"+result+"'");
-  return result;
-}              
-              </div>
-            </div>
-            <div id="editor">
-            </div>
-          </div>
-        </div>
+
+// Instantiate Scarlet
+var scarlet = new Scarlet();
+
+// Create prototype proxy
+var MyClassProxy = scarlet
+  .intercept(MyClass, scarlet.PROTOTYPE)
+  .using(function(info, method, args){ 
+    var result = method.call(this, info, method, args);
+    console.log("Interceptor::result='"+result+"'");
+    return result;
+  }).proxy();
+
+// Instantiate MyClass
+var instance = new MyClassProxy();
+
+// Set property
+instance.property = "anyOtherValue";
+
+// Get property
+console.log(instance.property);
+
+// Execute method
+var result = instance.method("param1", "param2");
+console.log(result);
+</div>
 
       </div>
 

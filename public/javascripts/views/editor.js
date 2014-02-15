@@ -11,8 +11,28 @@ define("views/editor", ["ace/ace"], function(ace) {
 				.addClassDelay("animated fadeIn", 700);
 
 			self.editor = ace.edit("editor");
-			self.editor.setTheme("ace/theme/monokai");
+			
+			// chrome
+			// clouds_midnight
+			// kr_theme
+			// tomorrow_night
+			// 
+			self.editor.setTheme("ace/theme/clouds_midnight");
 			self.editor.getSession().setMode("ace/mode/javascript");
+
+			self.editor.setReadOnly(false);
+			self.editor.setShowPrintMargin(false);
+			self.editor.setHighlightActiveLine(true);
+			self.editor.getSession().setUseWrapMode(false);
+			
+			self.editor.commands.addCommand({
+			    name: "execute",
+			    bindKey: {win: "Ctrl-X",  mac: "Command-X"},
+			    exec: function(editor) {
+			    	console.log("Run fired");
+			    },
+			    readOnly: false 
+			});
 		};
 	}
 	return Editor;

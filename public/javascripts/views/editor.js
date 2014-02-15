@@ -18,7 +18,8 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 			    exec: function(editor) {
 			    	var args = {
 			    		self: self,
-			    		key: "Ctrl-X"
+			    		key: "Ctrl-X",
+			    		text: self.editor.getValue()
 			    	};
 			    	_.each(self.executeEventTargets, function(executeTarget){
 			    		executeTarget(args);

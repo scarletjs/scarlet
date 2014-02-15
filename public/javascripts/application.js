@@ -2,10 +2,12 @@ require.config({
 	baseUrl: "javascripts",
 	paths: {
 		"ace": "vendor/ace/lib/ace",
+		"lodash": "vendor/lodash",
 		"jquery": "vendor/jquery",
 		"jquery.gridify": "vendor/gridify",
 		"jquery.jqgrid": "vendor/jqgrid/js/jquery.jqGrid.min",
-		"stringformat": "vendor/string-format"
+		"stringformat": "vendor/string-format",
+		"scarlet": "https://raw2.github.com/scarletjs/scarlet/master/pub/scarlet"
 	},
 	shim: {
 		"jquery.gridify": {
@@ -24,12 +26,10 @@ require([
 		"jquery.gridify",
 		"jquery.jqgrid",
 		"stringformat",
-		"views/index"
+		"views/index",
+		"scarlet"
 	],
-	function($, gf, jqg, sf, Views) {
-
-		console.log("Inside application");
-		console.log(Views);
+	function($, gf, jqg, sf, Views, Scarlet) {
 
 		var style = new Views.Style();
 

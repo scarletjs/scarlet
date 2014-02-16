@@ -1,9 +1,10 @@
-define("interpretor/shell", ["lodash"], function(_, ace) {
+define("interpreter/shell", ["lodash"], function(_) {
 	function Shell() {
 
 		var self = this;
 
 		self.execute = function(command) {
+			console.log(command);
 		};
 	}
 	return Shell;

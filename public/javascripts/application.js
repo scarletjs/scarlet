@@ -27,9 +27,10 @@ require([
 		"jquery.jqgrid",
 		"stringformat",
 		"views/index",
+		"interpreter/index",
 		"scarlet"
 	],
-	function($, gf, jqg, sf, Views, Scarlet) {
+	function($, gf, jqg, sf, Views, Interpreter, Scarlet) {
 
 		var style = new Views.Style();
 
@@ -47,8 +48,8 @@ require([
 
 		var editor = new Views.Editor("#editor", style);
 		editor.addEventListener("execute", function(args){
-			console.log("Execute Fired -> ");
-			console.log(args);
+			var shell = new Interpreter.Shell();
+			shell.execute(args.text);
 		});
 		editor.render();
 

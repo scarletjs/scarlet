@@ -141,7 +141,7 @@ var scarlet = new Scarlet();
 // Create Interceptor
 var interceptor = function(info, method, args){
   var result = method.call(this, info, method, args);
-  print(info.memberName + " Intercepted!!!!");
+  print(" ->> Intercepted -> " + info.memberName + " >> " + args + " >> " + result);
   return result;
 };
 
@@ -152,24 +152,24 @@ var MyClassProxy = scarlet
   .proxy();
 
 // Instantiate MyClass
-print("Instance::Instantiating New Class");
+print("Instance:: *** Instantiating Proxy *** ");
 var instance = new MyClassProxy();
-print("Instance::Complete");
+print("Instance:: *** Complete *** ");
 
 // Set property
-print("Instance::Setting Property Value");
+print("Instance:: *** Setting Property Value *** ");
 instance.property = "anyOtherValue";
-print("Instance::Complete");
+print("Instance:: *** Complete *** ");
 
 // Get property
-print("Instance::Getting Property Value");
+print("Instance:: *** Getting Property Value *** ");
 print(instance.property);
-print("Instance::Complete");
+print("Instance:: *** Complete *** ");
 
 // Execute method
-print("Instance::Executing Method");
+print("Instance:: *** Executing Method *** ");
 var result = instance.method("param1", "param2");
-print("Instance::Complete");
+print("Instance:: *** Complete *** ");
 print(result);
 </div>
 

@@ -8,7 +8,7 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 
 		self.addEventListener = function(eventName, target){
 			if (eventName == "execute")
-				executeEventTargets.push(target);
+				self.executeEventTargets.push(target);
 		};
 
 		self.subscribeEvents = function(){
@@ -44,10 +44,8 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 			self.style
 				.for(selector)
 				.addClassDelay("animated fadeIn", 700);
-
 			self.renderEditor();
 			self.subscribeEvents();
-
 		};
 	}
 	return Editor;

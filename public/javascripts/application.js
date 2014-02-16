@@ -46,6 +46,9 @@ require([
 		footer.render();
 
 		var editor = new Views.Editor("#editor", style);
+		editor.addEventListener("execute", function(args){
+			console.log("Execute Fired -> " + JSON.stringify(args));
+		});
 		editor.render();
 
 	});

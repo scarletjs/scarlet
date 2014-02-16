@@ -4,6 +4,7 @@ require.config({
 		"ace": "vendor/ace/lib/ace",
 		"lodash": "vendor/lodash",
 		"jquery": "vendor/jquery",
+		"dateformat": "vendor/date-format",
 		"jquery.gridify": "vendor/gridify",
 		"jquery.jqgrid": "vendor/jqgrid/js/jquery.jqGrid.min",
 		"stringformat": "vendor/string-format",
@@ -28,9 +29,10 @@ require([
 		"stringformat",
 		"views/index",
 		"interpreter/index",
-		"scarlet"
+		"scarlet", 
+		"dateformat"
 	],
-	function($, gf, jqg, sf, Views, Interpreter, Scarlet) {
+	function($, gf, jqg, sf, Views, Interpreter, Scarlet, DateFormat) {
 
 		var style = new Views.Style();
 
@@ -49,7 +51,8 @@ require([
 		var editor = new Views.Editor("#editor", style);
 		editor.addEventListener("execute", function(args){
 			var shell = new Interpreter.Shell();
-			shell.execute(args.text);
+			var result = shell.execute(args.text);
+			$("#output").html(result);
 		});
 		editor.render();
 

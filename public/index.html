@@ -47,6 +47,8 @@
         left: 50%;
         color: #CCCCCC;
         background-color: #191919;
+        overflow: auto;
+        overflow-y:scroll;
     }
   </style>
 
@@ -118,7 +120,7 @@
 
         <div id="rightContainer" style="border: solid 1px green; width: 50%; float: right;">
           <div id="tryScarletNowPanel">
-            <div id="editor">// Try Scarlet Now :)
+            <div id="editor">// Try Scarlet Now :) (WIN=Ctrl-X, MAC=Cmd+X to execute)
 
 // A simple javascript object with property
 function MyClass() {
@@ -127,40 +129,51 @@ function MyClass() {
   self.property = "anyPropertyValue";
   // A sample method
   self.method = function(param1, param2){
-    console.log("MyClass::method(param1='"+param1+"', param2='"+param2+"')");
+    print("MyClass::method(param1='"+param1+"', param2='"+param2+"')");
     return 0;
   };
-  console.log("MyClass::ctor");
+  print("MyClass::ctor");
 }
 
 // Instantiate Scarlet
 var scarlet = new Scarlet();
 
+// Create Interceptor
+var interceptor = function(info, method, args){
+  var result = method.call(this, info, method, args);
+  print(info.memberName + " Intercepted!!!!");
+  return result;
+};
+
 // Create prototype proxy
 var MyClassProxy = scarlet
   .intercept(MyClass, scarlet.PROTOTYPE)
-  .using(function(info, method, args){ 
-    var result = method.call(this, info, method, args);
-    console.log("Interceptor::result='"+result+"'");
-    return result;
-  }).proxy();
+  .using(interceptor)
+  .proxy();
 
 // Instantiate MyClass
+print("Instance::Instantiating New Class");
 var instance = new MyClassProxy();
+print("Instance::Complete");
 
 // Set property
+print("Instance::Setting Property Value");
 instance.property = "anyOtherValue";
+print("Instance::Complete");
 
 // Get property
-console.log(instance.property);
+print("Instance::Getting Property Value");
+print(instance.property);
+print("Instance::Complete");
 
 // Execute method
+print("Instance::Executing Method");
 var result = instance.method("param1", "param2");
-console.log(result);
+print("Instance::Complete");
+print(result);
 </div>
 
         <div id="output">
-          OUTPUT
         </div>
 
       </div>

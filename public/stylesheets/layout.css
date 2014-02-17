@@ -17,7 +17,7 @@ header #header{
 }
 
 footer #footer {
-	opacity: 0;
+	opacity: 1;
     bottom: 0px;
     width: 100%;
 	height: 40px;
@@ -34,10 +34,13 @@ footer #footer {
 }
 
 #logo {
+	top: 0;
+	position: absolute;
 	margin: 0px;
 	height: 60px;
 	color: white;
 	background-color: #930000;
+	width: 100%;
 }
 
 #logo .title {
@@ -45,12 +48,14 @@ footer #footer {
 	padding-top: 10px;
 	padding-left: 15px;
 	font-size: 32px;
+	width: 50%;
 }
 
 #logo .contact {
 	padding: 15px;
 	float: right;
-	width: 10%;
+	width: 50%;
+	text-align: right;
 }
 
 #logo .contact i {
@@ -60,7 +65,7 @@ footer #footer {
 
 #navigation {
 	top: 70px;
-	opacity: 0;
+	opacity: 1;
 	padding: 10px;
 	color: white;
     z-index: 100;

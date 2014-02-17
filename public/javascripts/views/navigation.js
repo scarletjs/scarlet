@@ -5,9 +5,9 @@ define("views/navigation", function() {
 		self.style = style.getInstance();
 
 		self.render = function() {
-			self.style
+			/*self.style
 				.for(selector)
-				.addClass("animated fadeInRightBig");
+				.addClass("animated fadeInRightBig");*/
 		};
 	}
 	return Navigation;

@@ -12,10 +12,12 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		};
 
 		self.subscribeEvents = function(){
+			console.log("> Subscribing Events");
 			self.editor.commands.addCommand({
 			    name: "execute",
 			    bindKey: {win: "Ctrl-X",  mac: "Command-X"},
 			    exec: function(editor) {
+						console.log("EXECUTING");
 			    	var args = {
 			    		self: self,
 			    		key: "Ctrl-X",
@@ -25,7 +27,7 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 			    		executeTarget(args);
 			    	});
 			    },
-			    readOnly: false 
+			    readOnly: false
 			});
 		};
 
@@ -37,7 +39,7 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 			self.editor.setShowPrintMargin(false);
 			self.editor.setHighlightActiveLine(true);
 			self.editor.getSession().setUseWrapMode(false);
-			
+
 		};
 
 		self.render = function() {

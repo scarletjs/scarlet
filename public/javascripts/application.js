@@ -29,10 +29,12 @@ require([
 		"stringformat",
 		"views/index",
 		"interpreter/index",
-		"scarlet", 
+		"scarlet",
 		"dateformat"
 	],
 	function($, gf, jqg, sf, Views, Interpreter, Scarlet, DateFormat) {
+
+		console.log("Inside Constructor of Application");
 
 		var style = new Views.Style();
 
@@ -56,4 +58,6 @@ require([
 		});
 		editor.render();
 
-	});
+		console.log("Exiting Constructor of Application");
+
+});

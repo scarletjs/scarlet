@@ -138,9 +138,8 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
-  console.log(args);
   var result = method.call(this, info, method, args);
-  var formattedResult = typeof(result) != "undefined" ? "null" : result;
+  var formattedResult = typeof(result) == "undefined" ? "null" : result;
   var formattedName = info.type.isConstructor ? "ctor" : info.memberName;
   var formattedArgs = typeof(args) == "undefined" ? "null" : JSON.stringify(args);
   print("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
@@ -172,7 +171,6 @@ print("Complete");
 print("Executing Method");
 var result = instance.method("param1", "param2");
 print("Complete");
-print(result);
 </div>
 
         <div id="output">

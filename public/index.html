@@ -157,6 +157,8 @@ var interceptor = function(info, method, args){
   console.log(args);
   console.log("THIS");
   console.log(this);
+  console.log("RESULT");
+  console.log(result);
   print("{0}({1}):{2}".format(name, args, res));
   return result;
 };

@@ -147,10 +147,14 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
+
   var result = method.call(this, info, method, args);
   var args = isNull(args) || (_.isArray(args) && args.length === 0) ? "null" : JSON.stringify(args);
   var res = isNull(result) ? "null" : result;
+
+
   var name = info.type.isConstructor ? "ctor" : info.memberName;
+
   console.log("INFO");
   console.log(info);
   console.log("ARGS");
@@ -159,7 +163,9 @@ var interceptor = function(info, method, args){
   console.log(this);
   console.log("RESULT");
   console.log(result);
+
   print("{0}({1}):{2}".format(name, args, res));
+
   return result;
 };
 

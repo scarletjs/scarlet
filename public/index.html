@@ -122,13 +122,6 @@
           <div id="tryScarletNowPanel">
             <div id="editor">// Try Scarlet Now :) (WIN=Ctrl-X, MAC=Cmd+X to execute)
 
-// Handy
-function isNull(any){
-  if (typeof(any) === "undefined")
-    return true;
-  return false;
-}
-
 // A simple javascript object
 function MyClass() {
   var self = this;
@@ -136,10 +129,8 @@ function MyClass() {
   self.property = "anyPropertyValue";
   // A sample method
   self.method = function(param1, param2){
-    print("MyClass::method(param1='"+param1+"', param2='"+param2+"')");
     return 0;
   };
-  print("MyClass::ctor");
 }
 
 // Instantiate Scarlet
@@ -147,25 +138,11 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
-
   var result = method.call(this, info, method, args);
-  var args = isNull(args) || (_.isArray(args) && args.length === 0) ? "null" : JSON.stringify(args);
-  var res = isNull(result) ? "null" : result;
-
-
-  var name = info.type.isConstructor ? "ctor" : info.memberName;
-
-  console.log("INFO");
-  console.log(info);
-  console.log("ARGS");
-  console.log(args);
-  console.log("THIS");
-  console.log(this);
-  console.log("RESULT");
-  console.log(result);
-
-  print("{0}({1}):{2}".format(name, args, res));
-
+  var formattedResult = typeof(result) != "undefined" ? "null" : result;
+  var formattedName = info.type.isConstructor ? "ctor" : info.memberName;
+  var formattedArgs = typeof(args) == "undefined" ? "null" : JSON.stringify(args);
+  print("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
   return result;
 };
 

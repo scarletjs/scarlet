@@ -37,9 +37,9 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 			self.editor.getSession().setMode("ace/mode/javascript");
 			self.editor.setReadOnly(false);
 			self.editor.setShowPrintMargin(false);
+			self.editor.getSession().setTabSize(4);
 			self.editor.setHighlightActiveLine(true);
 			self.editor.getSession().setUseWrapMode(false);
-
 		};
 
 		self.render = function() {

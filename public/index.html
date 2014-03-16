@@ -150,7 +150,7 @@ var interceptor = function(info, method, args){
   var result = method.call(this, info, method, args);
   var args = isNull(args) || (_.isArray(args) && args.length === 0) ? "null" : JSON.stringify(args);
   var res = isNull(result) ? "null" : result;
-  var name = info.__isConstructor__ ? "ctor" : info.memberName;
+  var name = info.type.isConstructor ? "ctor" : info.memberName;
   console.log("INFO");
   console.log(info);
   console.log("ARGS");

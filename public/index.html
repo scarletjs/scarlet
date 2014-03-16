@@ -138,6 +138,7 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
+  console.log(args);
   var result = method.call(this, info, method, args);
   var formattedResult = typeof(result) != "undefined" ? "null" : result;
   var formattedName = info.type.isConstructor ? "ctor" : info.memberName;

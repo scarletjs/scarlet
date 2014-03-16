@@ -80,7 +80,7 @@ describe("Given /lib/Scarlet", function() {
 
 		it("Then it should emit a 'before' event", function(done) {
 			scarlet.on("before", function(eventArgs) {
-				if (!eventArgs.info.isConstructor())
+				if (!eventArgs.info.type.isConstructor)
 					done();
 			});
 			var instance = new proxyAnyClass();
@@ -90,7 +90,7 @@ describe("Given /lib/Scarlet", function() {
 
 		it("Then it should emit a 'after' event", function(done) {
 			scarlet.on("after", function(eventArgs) {
-				if (!eventArgs.info.isConstructor()) {
+				if (!eventArgs.info.type.isConstructor) {
 					g.assert(eventArgs.result == "apple pear bananna");
 					done();
 				}
@@ -102,7 +102,7 @@ describe("Given /lib/Scarlet", function() {
 
 		it("Then it should emit a 'done' event", function(done) {
 			scarlet.on("done", function(eventArgs) {
-				if (!eventArgs.info.isConstructor()) {
+				if (!eventArgs.info.type.isConstructor) {
 					done();
 				}
 			});

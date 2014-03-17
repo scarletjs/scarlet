@@ -83,6 +83,14 @@ describe("Given /lib/Scarlet", function() {
 			g.assert(callQueries[1].isMethod);
 		});
 
+		it("Then should be able to trace call queries", function(){
+			var instance = new proxyAnyClass();
+			instance.instanceMethod("1", "2", "3");
+			g.assert(callQueries.length == 2);
+			var query = callQueries[1];
+			query.traceTo(console.log);
+		});
+
 		it("Then it should call the interceptor for an #instanceMethod()", function() {
 			var instance = new proxyAnyClass();
 			var result = instance.instanceMethod("apple", "pear", "bananna");

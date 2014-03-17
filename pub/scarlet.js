@@ -918,7 +918,7 @@ var ScarletTrace = function(info, method, args, result){
 						: (self.argsEmpty)
 							? "null"
 							: JSON.stringify(args);
-		io("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
+		io(formattedName+"("+formattedArgs+"):"+formattedResult);
 	};
 }
 

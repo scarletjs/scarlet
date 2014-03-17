@@ -115,19 +115,18 @@
 
         <div id="leftContainer" style="border: solid 0px green; width: 50%;float: left;">
           <div id="navigationOptionsPanel">
+            THING
           </div>
         </div>
 
         <div id="rightContainer" style="border: solid 0px green; width: 50%; float: right;">
           <div id="tryScarletNowPanel">
-            <div id="editor">// Try Scarlet Now :) (WIN=Ctrl-X, MAC=Cmd+X to execute)
+            <div id="editor">// Try Scarlet Now :) (Click Here &amp;&amp; WIN=Ctrl-X, MAC=Cmd+X to execute)
 
 // A simple javascript object
 function MyClass() {
   var self = this;
-  // A sample property
   self.property = "anyPropertyValue";
-  // A sample method
   self.method = function(param1, param2){
     return 0;
   };
@@ -138,15 +137,13 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
-
   var result = method.call(this, info, method, args);
   var query = scarlet.interceptQuery(info, method, args, result);
-  //query.trace(print);
-
+  query.traceTo(print);
   return result;
 };
 
-// Create prototype proxy
+// Create proxy
 var MyClassProxy = scarlet
   .intercept(MyClass, scarlet.PROTOTYPE)
   .using(interceptor)
@@ -159,13 +156,15 @@ var instance = new MyClassProxy();
 instance.property = "anyOtherValue";
 
 // Get property
-print(instance.property);
+var anyResult = instance.property;
 
 // Execute method
 var result = instance.method("param1", "param2");
 </div>
-
-        <div id="output">
+        <div id="outputContainer">
+          <div style='color: #3C403B'>Trace Console</div>
+          <div id="output">
+          </div>
         </div>
 
       </div>

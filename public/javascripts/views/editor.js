@@ -9,6 +9,8 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		self.addEventListener = function(eventName, target){
 			if (eventName == "execute")
 				self.executeEventTargets.push(target);
+			else
+				throw "No such error defined " + eventName;
 		};
 
 		self.subscribeEvents = function(){

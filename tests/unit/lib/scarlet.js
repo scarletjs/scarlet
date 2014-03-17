@@ -65,14 +65,14 @@ describe("Given /lib/Scarlet", function() {
 		it("Then it should register a property getter call query", function(){
 			var instance = new proxyAnyClass();
 			var ignoreValue = instance.instanceProperty;
-			g.assert(callQueries.length > 0);
+			g.assert(callQueries.length == 2);
 			g.assert(callQueries[1].isPropertyGetter);
 		});
 
 		it("Then it should register a property setter call query", function(){
 			var instance = new proxyAnyClass();
 			instance.instanceProperty = "anything";
-			g.assert(callQueries.length > 0);
+			g.assert(callQueries.length == 2);
 			g.assert(callQueries[1].isPropertySetter);
 		});
 

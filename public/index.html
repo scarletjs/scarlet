@@ -140,39 +140,8 @@ var scarlet = new Scarlet();
 var interceptor = function(info, method, args){
 
   var result = method.call(this, info, method, args);
-
-  var m = scarlet.interceptors.query(info, method, args, result);
-
-  var formattedResult =
-    (m.isConstructor)
-      ? typeof(this)
-      : (m.isPropertySetter)
-        ? args[1]
-        : (!m.hasResult)
-          ? "void"
-          : result;
-
-  var formattedName =
-    (m.isConstructor)
-      ? "ctor"
-      : (m.isPropertySetter)
-        ? "set " + info.memberName
-        : (m.isPropertyGetter)
-          ? "get " + info.memberName
-          : info.memberName;
-
-  var formattedArgs =
-    (m.isPropertySetter)
-      ? args[0]
-      : (m.isPropertyGetter)
-        ? ""
-        : (!m.hasArgs)
-          ? "null"
-          : (m.argsEmpty)
-            ? "null"
-            : JSON.stringify(args);
-
-  print("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
+  var m = scarlet.query(info, method, args, result);
+  m.trace(print);
 
   return result;
 };

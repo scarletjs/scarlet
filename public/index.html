@@ -138,11 +138,57 @@ var scarlet = new Scarlet();
 
 // Create Interceptor
 var interceptor = function(info, method, args){
+
   var result = method.call(this, info, method, args);
-  var formattedResult = typeof(result) == "undefined" ? "null" : result;
-  var formattedName = info.type.isConstructor ? "ctor" : info.memberName;
-  var formattedArgs = typeof(args) == "undefined" ? "null" : JSON.stringify(args);
+
+  var meta = function(_info, _method, _args, _result){
+    var self = this;
+    self.args = args;
+    self.result = result;
+    self.memberName = _info.memberName;
+    self.isConstructor = _info.type.isConstructor;
+    self.isPropertyGetter = _info.type.isProperty && args.length === 1;
+    self.isPropertySetter = _info.type.isProperty && args.length === 2;
+    self.isMethod = _info.type.isMethod;
+    self.isFunction = _info.type.isFunction;
+    self.hasResult = typeof(_result) != "undefined";
+    self.hasArgs = typeof(_args) != "undefined";
+    self.argsEmpty = _args.length && _args.length === 0;
+  };
+
+  var m = new meta(info, method, args, result);
+
+  var formattedResult =
+    (m.isConstructor)
+      ? typeof(this)
+      : (m.isPropertySetter)
+        ? args[1]
+        : (!m.hasResult)
+          ? "void"
+          : result;
+
+  var formattedName =
+    (m.isConstructor)
+      ? "ctor"
+      : (m.isPropertySetter)
+        ? "set " + info.memberName
+        : (m.isPropertyGetter)
+          ? "get " + info.memberName
+          : info.memberName;
+
+  var formattedArgs =
+    (m.isPropertySetter)
+      ? args[0]
+      : (m.isPropertyGetter)
+        ? ""
+        : (!m.hasArgs)
+          ? "null"
+          : (m.argsEmpty)
+            ? "null"
+            : JSON.stringify(args);
+
   print("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
+
   return result;
 };
 
@@ -153,24 +199,16 @@ var MyClassProxy = scarlet
   .proxy();
 
 // Instantiate MyClass
-print("Instantiating Proxy");
 var instance = new MyClassProxy();
-print("Complete");
 
 // Set property
-print("Setting Property Value");
 instance.property = "anyOtherValue";
-print("Complete");
 
 // Get property
-print("Getting Property Value");
 print(instance.property);
-print("Complete");
 
 // Execute method
-print("Executing Method");
 var result = instance.method("param1", "param2");
-print("Complete");
 </div>
 
         <div id="output">

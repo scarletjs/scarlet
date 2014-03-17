@@ -872,7 +872,10 @@ module.exports = ProxyType;
 },{"../../include":1}],17:[function(require,module,exports){
 var g = require("../include");
 
-function Trace(info, method, args, result){
+var ScarletTrace = function(info, method, args, result){
+
+	g.assert(info, "info=null");
+	g.assert(method, "method=null");
 
 	var self = this;
 
@@ -886,34 +889,33 @@ function Trace(info, method, args, result){
 	self.isFunction = info.type.isFunction;
 	self.hasResult = typeof(result) != "undefined";
 	self.hasArgs = typeof(args) != "undefined";
-	self.argsEmpty = self.hasArgs && args.length && args.length === 0;
+	self.argsEmpty = args != null && typeof(args) != "undefined" && args.length === 0;
 
-	self.trace = function(io) {
-		var m = self;
+	self.traceTo = function(io) {
 		var formattedResult =
-			(m.isConstructor)
+			(self.isConstructor)
 				? typeof(this)
-				: (m.isPropertySetter)
+				: (self.isPropertySetter)
 					? args[1]
-					: (!m.hasResult)
+					: (!self.hasResult)
 						? "void"
 						: result;
 		var formattedName =
-			(m.isConstructor)
+			(self.isConstructor)
 				? "ctor"
-				: (m.isPropertySetter)
+				: (self.isPropertySetter)
 					? "set " + info.memberName
-					: (m.isPropertyGetter)
+					: (self.isPropertyGetter)
 						? "get " + info.memberName
 						: info.memberName;
 		var formattedArgs =
-			(m.isPropertySetter)
+			(self.isPropertySetter)
 				? args[0]
-				: (m.isPropertyGetter)
+				: (self.isPropertyGetter)
 					? ""
-					: (!m.hasArgs)
+					: (!self.hasArgs)
 						? "null"
-						: (m.argsEmpty)
+						: (self.argsEmpty)
 							? "null"
 							: JSON.stringify(args);
 		io("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
@@ -1167,6 +1169,7 @@ function Scarlet(pluginArr) {
 					self: thisContext
 				});
 			} catch(err){
+				console.log(err);
 				self.emit("error", {
 					info: info,
 					args: args,
@@ -1213,8 +1216,8 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
-	self.query = function(info, method, args, result){
-		return new Trace(info, method, args, result);
+	self.interceptQuery = function(info, method, args, result){
+		return new ScarletTrace(info, method, args, result);
 	};
 
 	var initializePlugins = function() {

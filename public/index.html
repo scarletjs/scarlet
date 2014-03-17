@@ -140,8 +140,8 @@ var scarlet = new Scarlet();
 var interceptor = function(info, method, args){
 
   var result = method.call(this, info, method, args);
-  var m = scarlet.query(info, method, args, result);
-  m.trace(print);
+  var query = scarlet.interceptQuery(info, method, args, result);
+  query.trace(print);
 
   return result;
 };

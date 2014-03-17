@@ -141,22 +141,7 @@ var interceptor = function(info, method, args){
 
   var result = method.call(this, info, method, args);
 
-  var meta = function(_info, _method, _args, _result){
-    var self = this;
-    self.args = args;
-    self.result = result;
-    self.memberName = _info.memberName;
-    self.isConstructor = _info.type.isConstructor;
-    self.isPropertyGetter = _info.type.isProperty && args.length === 1;
-    self.isPropertySetter = _info.type.isProperty && args.length === 2;
-    self.isMethod = _info.type.isMethod;
-    self.isFunction = _info.type.isFunction;
-    self.hasResult = typeof(_result) != "undefined";
-    self.hasArgs = typeof(_args) != "undefined";
-    self.argsEmpty = _args.length && _args.length === 0;
-  };
-
-  var m = new meta(info, method, args, result);
+  var m = scarlet.interceptors.query(info, method, args, result);
 
   var formattedResult =
     (m.isConstructor)

@@ -872,7 +872,7 @@ module.exports = ProxyType;
 },{"../../include":1}],17:[function(require,module,exports){
 var g = require("../include");
 
-function ScarletTrace(info, method, args, result){
+function Trace(info, method, args, result){
 	var self = this;
 	self.args = args;
 	self.result = result;
@@ -1180,9 +1180,9 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
-	self.inspect = function(info, method, args, result){
-		return new ScarletTrace(info, method, args, result);
-	}
+	self.query = function(info, method, args, result){
+		return new Trace(info, method, args, result);
+	};
 
 	var initializePlugins = function() {
 		if (typeof(pluginArr) === 'string')

@@ -873,7 +873,9 @@ module.exports = ProxyType;
 var g = require("../include");
 
 function Trace(info, method, args, result){
+
 	var self = this;
+
 	self.args = args;
 	self.result = result;
 	self.memberName = info.memberName;
@@ -885,6 +887,37 @@ function Trace(info, method, args, result){
 	self.hasResult = typeof(result) != "undefined";
 	self.hasArgs = typeof(args) != "undefined";
 	self.argsEmpty = self.hasArgs && args.length && args.length === 0;
+
+	self.trace = function(io) {
+		var m = self;
+		var formattedResult =
+			(m.isConstructor)
+				? typeof(this)
+				: (m.isPropertySetter)
+					? args[1]
+					: (!m.hasResult)
+						? "void"
+						: result;
+		var formattedName =
+			(m.isConstructor)
+				? "ctor"
+				: (m.isPropertySetter)
+					? "set " + info.memberName
+					: (m.isPropertyGetter)
+						? "get " + info.memberName
+						: info.memberName;
+		var formattedArgs =
+			(m.isPropertySetter)
+				? args[0]
+				: (m.isPropertyGetter)
+					? ""
+					: (!m.hasArgs)
+						? "null"
+						: (m.argsEmpty)
+							? "null"
+							: JSON.stringify(args);
+		io("{0}({1}):{2}".format(formattedName, formattedArgs, formattedResult));
+	};
 }
 
 /**

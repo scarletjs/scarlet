@@ -914,9 +914,9 @@ var ScarletTrace = function(info, method, args, result){
 				: (self.isPropertyGetter)
 					? ""
 					: (!self.hasArgs)
-						? "null"
+						? ""
 						: (self.argsEmpty)
-							? "null"
+							? ""
 							: JSON.stringify(args);
 		io(formattedName+"("+formattedArgs+"):"+formattedResult);
 	};

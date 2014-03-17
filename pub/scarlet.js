@@ -739,7 +739,9 @@ function ProxyPrototype(type, whenCalled) {
 
 	var getArguments = function(args) {
 		var result = Array.prototype.slice.call(args);
-		if (result.length && result.length == 0)
+		if (typeof(result) == "undefined")
+			return null;
+		if (typeof(result) != "undefined" && typeof(result.length) != "undefined" && result.length == 0)
 			return null;
 		return result;
 	};
@@ -870,6 +872,21 @@ module.exports = ProxyType;
 },{"../../include":1}],17:[function(require,module,exports){
 var g = require("../include");
 
+function ScarletTrace(info, method, args, result){
+	var self = this;
+	self.args = args;
+	self.result = result;
+	self.memberName = info.memberName;
+	self.isConstructor = info.type.isConstructor;
+	self.isPropertyGetter = info.type.isProperty && args.length === 1;
+	self.isPropertySetter = info.type.isProperty && args.length === 2;
+	self.isMethod = info.type.isMethod;
+	self.isFunction = info.type.isFunction;
+	self.hasResult = typeof(result) != "undefined";
+	self.hasArgs = typeof(args) != "undefined";
+	self.argsEmpty = self.hasArgs && args.length && args.length === 0;
+}
+
 /**
 For creating a new instance of Scarlet
 @namespace scarlet.lib
@@ -877,7 +894,7 @@ For creating a new instance of Scarlet
 @param {array|string} pluginArr
 @return scarlet.lib.Scarlet
 @example
-	
+
 	var Scarlet = require("scarlet");
 	var scarlet = new Scarlet();
 
@@ -1007,7 +1024,7 @@ function Scarlet(pluginArr) {
 			instance.anyOtherMethod(); -> Calls interceptor again for prototype function
 			instance.anyProperty = 6; // -> Calls interceptor for the property setter
 			var result = instance.anyProperty; // -> Calls the interceptor again for property getter
-	*/	
+	*/
 	self.PROTOTYPE = self.type.asPrototype();
 
 	/**
@@ -1163,6 +1180,10 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
+	self.inspect = function(info, method, args, result){
+		return new ScarletTrace(info, method, args, result);
+	}
+
 	var initializePlugins = function() {
 		if (typeof(pluginArr) === 'string')
 			pluginArr = [pluginArr];
@@ -1183,6 +1204,7 @@ function Scarlet(pluginArr) {
 g.util.inherits(Scarlet, g.events.EventEmitter);
 
 module.exports = Scarlet;
+
 },{"../include":1,"./interceptors/interceptor":7,"./plugins/plugin-manager":8,"./proxies/proxy-type":16}],18:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //

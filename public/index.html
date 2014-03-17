@@ -125,9 +125,8 @@
 
 // A simple javascript object
 function MyClass() {
-  var self = this;
-  self.property = "anyPropertyValue";
-  self.method = function(param1, param2){
+  this.anyProperty = "oldValue";
+  this.anyMethod = function(param1, param2){
     return 0;
   };
 }
@@ -153,13 +152,13 @@ var MyClassProxy = scarlet
 var instance = new MyClassProxy();
 
 // Set property
-instance.property = "anyOtherValue";
+instance.anyProperty = "newValue";
 
 // Get property
-var anyResult = instance.property;
+var anyResult = instance.anyProperty;
 
 // Execute method
-var result = instance.method("param1", "param2");
+var result = instance.anyMethod("param1", "param2");
 </div>
         <div id="outputContainer">
           <div style='color: #3C403B'>Trace Console</div>

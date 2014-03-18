@@ -9,7 +9,7 @@ define("views/style", function() {
 			if (self.childSelector == null)
 				return self.parentSelector;
 			return "{0} {1}".format(
-				self.parentSelector, 
+				self.parentSelector,
 				self.childSelector);
 		};
 

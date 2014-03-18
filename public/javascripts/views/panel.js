@@ -4,27 +4,29 @@ define("views/panel", function() {
 		var self = this;
 		self.style = style.getInstance();
 
-		self.animateTitle = function(){
+		var isDefined = function(any) {
+			return typeof(any) != "undefined";
 		};
 
-		self.animateLinks = function(){
-		};
+		self.render = function(){
+			var results = $(selector);
+			if (results.length === 0)
+				throw "Cannot process panel with id " + selector;
+			var element = $(results[0]);
+			var top = $(element).attr("x-top");
+			if (isDefined(top)) $(element).css("top", top);
+			var right = $(element).attr("x-right");
+			if (isDefined(right)) $(element).css("right", right);
+			var left = $(element).attr("x-left");
+			if (isDefined(left)) $(element).css("left", left);
+			var bottom = $(element).attr("x-bottom");
+			if (isDefined(bottom)) $(element).css("bottom", bottom);
+			var width = $(element).attr("x-width");
+			if (isDefined(width)) $(element).css("width", width);
+			var height = $(element).attr("x-height");
+			if (isDefined(height)) $(element).css("height", height);
+		}
 
-		self.render = function() {
-			self.initialiseSize(2, 2);
-		};
-
-		self.initialiseSize = function(numberOfColumns, numberOfRows){
-			
-			var documentWidth = $(document).width() - (numberOfColumns * 2 * columnPadding);
-			var columnWidth = documentWidth / numberOfColumns;
-			
-			var documentHeight = $(document).height() - (numberOfRows * 2 * rowPadding);
-			var rowHeight = documentHeight / numberOfRows;
-
-			$(selector).height(rowHeight);
-			$(selector).width(columnWidth);
-		};
 	}
 	return Panel;
 });

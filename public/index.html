@@ -24,34 +24,12 @@
   <link rel="stylesheet" href="stylesheets/panels.css" />
   <link rel="stylesheet" href="stylesheets/lists.css" />
   <link rel="stylesheet" href="stylesheets/lines.css" />
-  <link rel="stylesheet" href="stylesheets/articles.css" />
   <link rel="stylesheet" href="stylesheets/tiles.css" />
+  <link rel="stylesheet" href="stylesheets/style.css" />
 
+  <!--script src="javascripts/scale.fix.js"></script-->
   <script src="javascripts/vendor/prettify/prettify.js?autoload=true&amp;lang=basic"></script>
-
   <script data-main="javascripts/application.js" src="javascripts/vendor/require.js"></script>
-
-  <style>
-    #editor {
-        position: absolute;
-        top: 114px;
-        width: 50%;
-        bottom: 40px;
-        left: 0;
-    }
-    #output {
-        position: absolute;
-        top: 114px;
-        width: 50%;
-        bottom: 40px;
-        left: 50%;
-        color: #929292;
-        font-size: 13px;
-        background-color: #191919;
-        overflow: auto;
-        overflow-y:scroll;
-    }
-  </style>
 
 </head>
 
@@ -111,61 +89,7 @@
 
       <div class="spacer" style="height: 110px"></div>
 
-      <div id="content">
-
-        <div id="leftContainer" style="border: solid 0px green; width: 50%;float: left;">
-          <div id="navigationOptionsPanel">
-            THING
-          </div>
-        </div>
-
-        <div id="rightContainer" style="border: solid 0px green; width: 50%; float: right;">
-          <div id="tryScarletNowPanel">
-            <div id="editor">// Try Scarlet Now :) (Click Here &amp;&amp; WIN=Ctrl-X, MAC=Cmd+X to execute)
-
-// A simple javascript object
-function MyClass() {
-  this.anyProperty = "oldValue";
-  this.anyMethod = function(param1, param2){
-    return 0;
-  };
-}
-
-// Instantiate Scarlet
-var scarlet = new Scarlet();
-
-// Create Interceptor
-var interceptor = function(info, method, args){
-  var result = method.call(this, info, method, args);
-  var query = scarlet.interceptQuery(info, method, args, result);
-  query.traceTo(print);
-  return result;
-};
-
-// Create proxy
-var MyClassProxy = scarlet
-  .intercept(MyClass, scarlet.PROTOTYPE)
-  .using(interceptor)
-  .proxy();
-
-// Instantiate MyClass
-var instance = new MyClassProxy();
-
-// Set property
-instance.anyProperty = "newValue";
-
-// Get property
-var anyResult = instance.anyProperty;
-
-// Execute method
-var result = instance.anyMethod("param1Val", "param2Val");
-</div>
-        <div id="outputContainer">
-          <div style='color: #3C403B'>Trace Console</div>
-          <div id="output">
-          </div>
-        </div>
-
+      <div id="content" x-get-target="#content" x-get-uri="partials/default/index.html">
       </div>
 
     </section>

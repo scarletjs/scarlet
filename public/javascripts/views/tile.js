@@ -3,10 +3,10 @@ define("views/tile", function() {
 
 		var self = this;
 		self.style = style.getInstance();
-		
+
 		self.preferredWidth = null;
 		self.preferredHeight = null;
-		
+
 		self.parentWidth = null;
 		self.parentHeight = null;
 
@@ -54,10 +54,10 @@ define("views/tile", function() {
 		};
 
 		self.initialiseSize = function(numberOfColumns, numberOfRows){
-			
+
 			var documentWidth = $(document).width() - (numberOfColumns * 2 * columnPadding);
 			var columnWidth = documentWidth / numberOfColumns;
-			
+
 			var documentHeight = $(document).height() - (numberOfRows * 2 * rowPadding);
 			var rowHeight = documentHeight / numberOfRows;
 

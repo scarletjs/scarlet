@@ -14,12 +14,10 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		};
 
 		self.subscribeEvents = function(){
-			console.log("> Subscribing Events");
 			self.editor.commands.addCommand({
 			    name: "execute",
 			    bindKey: {win: "Ctrl-X",  mac: "Command-X"},
 			    exec: function(editor) {
-						console.log("EXECUTING");
 			    	var args = {
 			    		self: self,
 			    		key: "Ctrl-X",
@@ -47,7 +45,7 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		self.render = function() {
 			self.style
 				.for(selector)
-				.addClassDelay("animated fadeIn", 200);
+				.addClassDelay("animated fadeIn", 100);
 			self.renderEditor();
 			self.subscribeEvents();
 		};

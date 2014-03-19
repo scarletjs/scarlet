@@ -15,21 +15,13 @@ function MyClass() {
 // Instantiate Scarlet
 var scarlet = new Scarlet();
 
-// Create Interceptor
-var interceptor = function(info, method, args){
-  var result = method.call(this, info, method, args);
-  var query = scarlet.interceptQuery(info, method, args, result);
-  query.traceTo(print);
-  return result;
-};
-
 // Instantiate MyClass
 var instance = new MyClass();
 
 // Create proxy
 scarlet
   .intercept(instance, scarlet.INSTANCE)
-  .using(interceptor)
+  .using(traceInterceptor)
   .proxy();
 
 // Set property

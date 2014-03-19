@@ -5,10 +5,10 @@ define("views/footer", function() {
 		self.style = style.getInstance();
 
 		self.render = function() {
-			/*self.style
+			self.style
 				.for (selector)
 				.css("opacity", "1")
-				.addClass("animated fadeInUpBig");*/
+				.addClassDelay("animated fadeOutDownBig", 1000);
 		};
 
 	}

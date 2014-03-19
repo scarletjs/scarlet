@@ -8,7 +8,7 @@ define("views/index",
 		"views/panel",
 		"views/tile",
 		"views/editor"
-	], 
+	],
 	function(Style, Header, Navigation, Content, Footer, Panel, Tile, Editor) {
 		return {
 			Style: Style,

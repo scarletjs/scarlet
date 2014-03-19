@@ -5,9 +5,6 @@ define("views/content", function() {
 		self.style = style.getInstance();
 
 		self.render = function() {
-			self.style
-				.for(selector)
-				.addClassDelay("animated fadeIn", 200);
 		};
 	}
 	return Content;

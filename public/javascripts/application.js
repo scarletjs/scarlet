@@ -34,6 +34,79 @@ require([
 	],
 	function($, gf, jqg, sf, Views, Interpreter, Scarlet, DateFormat) {
 
+		function XGetElement(element) {
+
+			var self = this;
+			self.element = element;
+			self.namespace = "x-get-";
+
+			self.markAsVisited = function() {
+				$(element).attr(self.namespace + "visited", "yes");
+			};
+
+			self.clearVisited = function() {
+				$(element).attr(self.namespace + "visited", "no");
+			};
+
+			self.wasVisited = function() {
+				return $(element).attr(self.namespace + "visited") == "yes";
+			};
+
+			self.getUri = function() {
+				return $(element).attr(self.namespace + "uri");
+			};
+
+			self.getTarget = function() {
+				return $(element).attr(self.namespace + "target");
+			};
+
+			self.execute = function(callback) {
+				var uri = self.getUri();
+				var target = self.getTarget();
+				$.get(uri).done(function(html) {
+					$(target).html(html);
+					if (callback)
+						callback(self);
+				});
+			};
+
+			self.click = function(callback) {
+				$(element).click(function() {
+					if (callback) callback(self);
+				});
+			};
+
+			self.query = function(){
+				return $(element);
+			};
+		}
+
+		function XGet() {
+
+			var self = this;
+			self.namespace = "x-get-";
+
+			self.forEach = function(selector, callback) {
+				$(selector).each(function(index, element) {
+					var xgetElement = new XGetElement(element);
+					if (!xgetElement.wasVisited()) {
+						callback(xgetElement);
+						xgetElement.markAsVisited();
+					}
+				});
+			};
+		}
+
+		function XEvents() {
+
+			var self = this;
+			self.namespace = "x-event-";
+
+			self.applyEvents = function() {
+
+			};
+		}
+
 		var style = new Views.Style();
 
 		var header = new Views.Header("#header", style);
@@ -48,17 +121,20 @@ require([
 		var footer = new Views.Footer("#footer", style);
 		footer.render();
 
-		function PartialViewFactory(){
+		function PartialViewFactory() {
 
 			var editor = new Views.Editor("#editor", style);
 
-			editor.addEventListener("execute", function(args){
+			editor.addEventListener("execute", function(args) {
 				var shell = new Interpreter.Shell();
 				var result = shell.execute(args.text);
 				$("#output").html(result);
 			});
 
 			editor.render();
+
+			var navigationContainer = new Views.Panel("#navigationContainer", style);
+			navigationContainer.render();
 
 			var editor = new Views.Panel("#editorContainer", style);
 			editor.render();
@@ -78,32 +154,35 @@ require([
 			var helpWalkthroughTitle = new Views.Panel("#helpWalkthroughContainer #helpWalkthroughTitle", style);
 			helpWalkthroughTitle.render();
 
-			$("a[x-get-uri]").each(function(index, element){
-				var $element = $(element);
-				var uri = $element.attr("x-get-uri");
-				var selector = $element.attr("x-get-target");
-				$element.click(function(){
-					console.log(uri);
-					$.get(uri).done(function(partial){
-						console.log(partial);
-						$(selector).html(partial);
+			new XGet().forEach("a[x-get-uri]", function(xgetElement) {
+				xgetElement.click(function() {
+					xgetElement.execute(function() {
+						xgetElement.clearVisited();
 						new PartialViewFactory();
 					});
 				});
 			});
 
+			new XGet().forEach("div[x-get-uri]", function(xgetElement) {
+				xgetElement.execute(function() {
+					new PartialViewFactory();
+				});
+			});
 		}
 
+		new XGet().forEach("a[x-get-uri]", function(xgetElement) {
+			xgetElement.click(function() {
+				xgetElement.execute(function() {
+					xgetElement.clearVisited();
+					new PartialViewFactory();
+				});
+			});
+		});
 
-		$("[x-get-uri]").each(function(index, element){
-			var $element = $(element);
-			var uri = $element.attr("x-get-uri");
-			var selector = $element.attr("x-get-target");
-			$.get(uri).done(function(partial){
-				$(selector).html(partial);
+		new XGet().forEach("div[x-get-uri]", function(xgetElement){
+			xgetElement.execute(function() {
 				new PartialViewFactory();
 			});
 		});
 
-
-});
+	});

@@ -1,4 +1,5 @@
 body {
+  background-color: #232323;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -16,25 +17,29 @@ li {
   position: absolute;
 }
 
-.title {
+.x-title {
   color: #bbb;
-  height: 28px;
+  height: 38px;
   font-size: 15px;
   font-weight: normal;
-  background-color: #930000;
-  padding-left: 7px;
-  padding-top: 5px;
+  background-color: #650000;
+  padding-left: 10px;
+  padding-top: 10px;
   width: 100%;
   font-family: "Roboto", sans-serif;
+  border-right: solid 3px black;
+  border-bottom: solid 3px black;
 }
 
-.content {
+.x-content {
   overflow: auto;
   overflow-y:scroll;
   color: #929292;
   background-color: #232323;
   width: 100%;
   height: 100%;
+  border-right: solid 3px black;
+  border-bottom: solid 3px black;
 }
 
 .index {

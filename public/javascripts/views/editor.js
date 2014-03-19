@@ -43,9 +43,6 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		};
 
 		self.render = function() {
-			self.style
-				.for(selector)
-				.addClassDelay("animated fadeIn", 100);
 			self.renderEditor();
 			self.subscribeEvents();
 		};

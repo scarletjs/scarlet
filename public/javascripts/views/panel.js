@@ -10,8 +10,10 @@ define("views/panel", function() {
 
 		self.render = function(){
 			var results = $(selector);
+			
 			if (results.length === 0)
-				throw "Cannot process panel with id " + selector;
+				return;
+
 			var element = $(results[0]);
 			var top = $(element).attr("x-top");
 			if (isDefined(top)) $(element).css("top", top);

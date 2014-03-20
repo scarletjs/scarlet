@@ -43,6 +43,10 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 		};
 
 		self.render = function() {
+			
+			if($(selector).length == 0)
+				return;
+
 			self.renderEditor();
 			self.subscribeEvents();
 		};

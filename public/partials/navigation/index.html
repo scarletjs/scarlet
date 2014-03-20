@@ -1,11 +1,18 @@
-<div id="helpWalkthroughContainer" style="width:100%; height: 100%; position: relative;">
+<div 
+  id="helpWalkthroughContainer"
+  x-type="x-panel"
+  x-width="100%"
+  x-height="100%">
 
   <div id="helpWalkthroughTitle" class="x-title">
-    <b>Walkthrough</b> - { 
-    math.pow(x,y); }
+    <b>Walkthrough</b> - { math.pow(x,y); }
   </div>
 
-  <div id="helpWalkthroughs" class="content index">
+  <div 
+    id="helpWalkthroughs" 
+    x-type="x-panel"
+    x-height="100%"
+    class="x-content index">
     <ul>
       <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/function/index.html">Functions</a></li>
       <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/prototype/index.html">Prototypes</a></li>

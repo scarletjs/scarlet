@@ -1,5 +1,5 @@
-define("views/style", function() {
-	function Style() {
+define("library/x-style", function() {
+	function XStyle() {
 
 		var self = this;
 		self.childSelector = null;
@@ -14,7 +14,7 @@ define("views/style", function() {
 		};
 
 		self.getInstance = function(){
-			return new Style();
+			return new XStyle();
 		};
 
 		self.for = function(parentSelector){
@@ -67,5 +67,5 @@ define("views/style", function() {
 			return self;
 		};
 	}
-	return Style;
+	return XStyle;
 });

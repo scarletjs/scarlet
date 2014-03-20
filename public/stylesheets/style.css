@@ -1,4 +1,5 @@
 body {
+  color: #bbb;
   background-color: #232323;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
@@ -27,8 +28,10 @@ li {
   padding-top: 10px;
   width: 100%;
   font-family: "Roboto", sans-serif;
-  border-right: solid 3px black;
-  border-bottom: solid 3px black;
+  border-top: solid 1px black;
+  border-left: solid 1px black;
+  border-right: solid 1px black;
+  border-bottom: solid 1px black;
 }
 
 .x-content {
@@ -37,9 +40,10 @@ li {
   color: #929292;
   background-color: #232323;
   width: 100%;
-  height: 100%;
-  border-right: solid 3px black;
-  border-bottom: solid 3px black;
+  border-top: solid 1px black;
+  border-left: solid 1px black;
+  border-right: solid 1px black;
+  border-bottom: solid 1px black;
 }
 
 .index {
@@ -49,3 +53,12 @@ li {
 .index a{
   color: #bbb;
 }
+
+.index-med {
+  font-size: 24px;
+}
+
+.index-med a{
+  color: #bbb;
+}
+

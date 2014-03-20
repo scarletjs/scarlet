@@ -1,5 +1,5 @@
-define("views/tile", function() {
-	function Tile(selector, style) {
+define("library/x-size", function() {
+	function XSize(selector, style) {
 
 		var self = this;
 		self.style = style.getInstance();
@@ -20,32 +20,32 @@ define("views/tile", function() {
 			self.parentWidth = $(selector).width();
 			self.parentHeight = $(selector).height();
 
-			console.log("Tile::parentWidth = " + self.parentWidth);
-			console.log("Tile::parentHeight = " + self.parentHeight);
+			console.log("XSize::parentWidth = " + self.parentWidth);
+			console.log("XSize::parentHeight = " + self.parentHeight);
 		}
 
 		self.render = function(numberOfColumns, numberOfRows, templateSelector) {
 			//self.initialiseSize(numberOfColumns, numberOfRows);
 
-			console.log("Tile::size(width, height)::" + $(selector).width(), $(selector).height());
+			console.log("XSize::size(width, height)::" + $(selector).width(), $(selector).height());
 
 			var documentWidth = $(document).width();
-			console.log("Document Height:" + documentWidth);
+			console.log("XSize::Document Height:" + documentWidth);
 
 			var documentHeight = $(document).height();
-			console.log("Document Height:" + documentHeight);
+			console.log("XSize::Document Height:" + documentHeight);
 
 			var headerHeight = $("#header").outerHeight();
-			console.log("Header Height:" + headerHeight);
+			console.log("XSize::Header Height:" + headerHeight);
 
 			var footerHeight = $("#footer").outerHeight();
-			console.log("Footer Height:" + footerHeight);
+			console.log("XSize::Footer Height:" + footerHeight);
 
 			var preferredHeight = (documentHeight - headerHeight - footerHeight) / numberOfRows;
 			var preferredWidth = documentWidth / numberOfColumns;
 
 			//$(selector).height(documentHeight - headerHeight - footerHeight);
-			console.log("Setting height to ::" + (documentHeight - headerHeight - footerHeight));
+			console.log("XSize::Setting height to ::" + (documentHeight - headerHeight - footerHeight));
 
 			var component = $(templateSelector).html();
 			$(selector).append(component);
@@ -65,5 +65,5 @@ define("views/tile", function() {
 			$(selector).width(columnWidth);
 		};
 	}
-	return Tile;
+	return XSize;
 });

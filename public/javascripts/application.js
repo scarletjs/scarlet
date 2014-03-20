@@ -29,85 +29,13 @@ require([
 		"stringformat",
 		"views/index",
 		"interpreter/index",
+		"library/index",
 		"scarlet",
 		"dateformat"
 	],
-	function($, gf, jqg, sf, Views, Interpreter, Scarlet, DateFormat) {
+	function($, gf, jqg, sf, Views, Interpreter, Library, Scarlet, DateFormat) {
 
-		function XGetElement(element) {
-
-			var self = this;
-			self.element = element;
-			self.namespace = "x-get-";
-
-			self.markAsVisited = function() {
-				$(element).attr(self.namespace + "visited", "yes");
-			};
-
-			self.clearVisited = function() {
-				$(element).attr(self.namespace + "visited", "no");
-			};
-
-			self.wasVisited = function() {
-				return $(element).attr(self.namespace + "visited") == "yes";
-			};
-
-			self.getUri = function() {
-				return $(element).attr(self.namespace + "uri");
-			};
-
-			self.getTarget = function() {
-				return $(element).attr(self.namespace + "target");
-			};
-
-			self.execute = function(callback) {
-				var uri = self.getUri();
-				var target = self.getTarget();
-				$.get(uri).done(function(html) {
-					$(target).html(html);
-					if (callback)
-						callback(self);
-				});
-			};
-
-			self.click = function(callback) {
-				$(element).click(function() {
-					if (callback) callback(self);
-				});
-			};
-
-			self.query = function(){
-				return $(element);
-			};
-		}
-
-		function XGet() {
-
-			var self = this;
-			self.namespace = "x-get-";
-
-			self.forEach = function(selector, callback) {
-				$(selector).each(function(index, element) {
-					var xgetElement = new XGetElement(element);
-					if (!xgetElement.wasVisited()) {
-						callback(xgetElement);
-						xgetElement.markAsVisited();
-					}
-				});
-			};
-		}
-
-		function XEvents() {
-
-			var self = this;
-			self.namespace = "x-event-";
-
-			self.applyEvents = function() {
-
-			};
-		}
-
-		var style = new Views.Style();
+		var style = new Library.XStyle();
 
 		var header = new Views.Header("#header", style);
 		header.render();
@@ -121,68 +49,37 @@ require([
 		var footer = new Views.Footer("#footer", style);
 		footer.render();
 
-		function PartialViewFactory() {
+		function ViewFactory() {
 
 			var editor = new Views.Editor("#editor", style);
-
 			editor.addEventListener("execute", function(args) {
 				var shell = new Interpreter.Shell();
 				var result = shell.execute(args.text);
 				$("#output").html(result);
 			});
-
 			editor.render();
 
-			var navigationContainer = new Views.Panel("#navigationContainer", style);
-			navigationContainer.render();
+			new Library.XPanel("[x-type='x-panel']")
+				.render();
 
-			var editor = new Views.Panel("#editorContainer", style);
-			editor.render();
-
-			var editorTitle = new Views.Panel("#editorContainer #editorTitle", style);
-			editorTitle.render();
-
-			var output = new Views.Panel("#outputContainer", style);
-			output.render();
-
-			var outputTitle = new Views.Panel("#outputContainer #outputTitle", style);
-			outputTitle.render();
-
-			var helpWalkthroughs = new Views.Panel("#helpWalkthroughContainer", style);
-			helpWalkthroughs.render();
-
-			var helpWalkthroughTitle = new Views.Panel("#helpWalkthroughContainer #helpWalkthroughTitle", style);
-			helpWalkthroughTitle.render();
-
-			new XGet().forEach("a[x-get-uri]", function(xgetElement) {
-				xgetElement.click(function() {
-					xgetElement.execute(function() {
-						xgetElement.clearVisited();
-						new PartialViewFactory();
+			new Library.XGet("a[x-get-uri]")
+				.forEach(function(xgetElement) {
+					xgetElement.click(function() {
+						xgetElement.executeGet(function() {
+							xgetElement.clearVisited();
+							new ViewFactory();
+						});
 					});
 				});
-			});
 
-			new XGet().forEach("div[x-get-uri]", function(xgetElement) {
-				xgetElement.execute(function() {
-					new PartialViewFactory();
+			new Library.XGet("div[x-get-uri]")
+				.forEach(function(xgetElement) {
+					xgetElement.executeGet(function() {
+						new ViewFactory();
+					});
 				});
-			});
 		}
 
-		new XGet().forEach("a[x-get-uri]", function(xgetElement) {
-			xgetElement.click(function() {
-				xgetElement.execute(function() {
-					xgetElement.clearVisited();
-					new PartialViewFactory();
-				});
-			});
-		});
-
-		new XGet().forEach("div[x-get-uri]", function(xgetElement){
-			xgetElement.execute(function() {
-				new PartialViewFactory();
-			});
-		});
+		new ViewFactory();
 
 	});

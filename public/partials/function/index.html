@@ -1,10 +1,7 @@
-<div id="editorContainer" 
-  x-type="x-panel" 
-  class="abs-pos" 
-  x-width="80%" 
-  x-top="114px" 
-  x-left="0" 
-  x-bottom="238px">
+<div 
+  id="editorContainer" 
+  x-type="x-panel"
+  x-height="70%">
 
   <div id="editorTitle" class="x-title">
     <b>Editor</b> - { eval(code); }
@@ -45,15 +42,19 @@ var result = instance.anyMethod("param1Val", "param2Val");
 
 </div>
 
-<div id="outputContainer" 
+<div 
+  id="outputContainer" 
   x-type="x-panel" 
-  class="abs-pos" 
   x-left="0" 
-  x-width="80%" 
-  x-height="200px" 
-  x-bottom="0">
+  x-width="100%" 
+  x-bottom="0"
+  x-height="160px">
 
-  <div id="outputTitle" class="x-title">
+  <div 
+    id="outputTitle" 
+    x-type="x-panel"
+    x-width="100%"
+    class="x-title">
     <b>Output</b> - { print("any"); }
   </div>
 
@@ -62,12 +63,13 @@ var result = instance.anyMethod("param1Val", "param2Val");
 
 </div>
 
-<div id="navigationContainer" 
+<div 
+  id="navigationContainer" 
   x-type="x-panel" 
-  class="abs-pos" 
+  x-pos="absolute"
   x-right="0" 
   x-width="20%" 
-  x-top="114px" 
+  x-top="0" 
   x-bottom="0px"
   x-get-uri="partials/navigation/index.html">
 </div>

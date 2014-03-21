@@ -5,6 +5,10 @@ define("library/x-get", ["lodash", "jquery"], function(_, $) {
 		self.element = element;
 		self.namespace = "x-get-";
 
+		var isDefined = function(value) {
+			return typeof(value) != "undefined"
+		};
+
 		self.markAsVisited = function() {
 			$(element).attr(self.namespace + "visited", "yes");
 		};
@@ -21,10 +25,21 @@ define("library/x-get", ["lodash", "jquery"], function(_, $) {
 			return $(element).attr(self.namespace + "uri");
 		};
 
+		self.getTarget = function() {
+			return $(element).attr(self.namespace + "target");
+		};
+
 		self.executeGet = function(callback) {
 			var uri = self.getUri();
+			var target = self.getTarget();
 			$.get(uri).done(function(html) {
-				$(element).html(html);
+				if (isDefined(target)) {
+					$(target).html("");
+					$(target).html(html);
+				} else {
+					$(element).html("");
+					$(element).html(html);
+				}
 				if (callback)
 					callback(self);
 			});

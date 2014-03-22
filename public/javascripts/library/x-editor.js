@@ -8,19 +8,23 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 		self.id = $element.attr("id");
 		self.executeEventTargets = [];
 
+		var dispatchEvent = function(){
+			var text = self.editor.getValue();
+			var args = {
+				self: self,
+				text: text
+			};
+	    	_.each(self.executeEventTargets, function(executeTarget){
+	    		executeTarget(args);
+	    	});
+		};
+
 		var subscribeEvents = function(){
 			self.editor.commands.addCommand({
 			    name: "execute",
 			    bindKey: {win: "Ctrl-X",  mac: "Command-X"},
 			    exec: function(editor) {
-			    	var args = {
-			    		self: self,
-			    		key: "Ctrl-X",
-			    		text: self.editor.getValue()
-			    	};
-			    	_.each(self.executeEventTargets, function(executeTarget){
-			    		executeTarget(args);
-			    	});
+			    	dispatchEvent();
 			    },
 			    readOnly: false
 			});
@@ -41,6 +45,12 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 		self.addListener = function(callback){
 			self.executeEventTargets.push(callback);
 			console.log("XEditorElement::addListener for " + self.id);
+		};
+
+		self.fireEvents = function(){
+			var shouldAutoFire = self.element.attr("x-run-onload");
+			if (shouldAutoFire == "true")
+				dispatchEvent();
 		};
 
 		self.render = function(){
@@ -69,6 +79,12 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 					editorElement.render();
 					self.editors.push(editorElement);
 				});
+		};
+
+		self.fireEvents = function(){
+			_(self.editors).each(function(editor){
+				editor.fireEvents();
+			});
 		};
 	}
 	return XEditor;

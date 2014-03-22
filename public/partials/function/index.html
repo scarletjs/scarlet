@@ -26,23 +26,66 @@
         class="fa fa-subscript fa-2x">
       </i> 
       <h1><a name="sampleFunctionLink">Sample Function</a></h1>
-      <p>In this example we are going to take a look at Math.min. By definition we know that this functions returns the 
-      lowest number from an array of numbers</p>
+      <p>In this example we are going to take a look at Math.min. Below we have an interactive demo of the function. You can
+      change the code and press Ctrl-X for Windows or Cmd-X for Macintosh to run it.</p>
       
-      <div class="x-spacer x-clear"></div>
+      Example
 
       <div 
         id="sampleFunctionEditor" 
+        class="x-border"
         x-type="x-editor" 
         x-width="100%"
-        x-height="200px" 
-        x-output="#sampleFunctionOutput"></div>
+        x-height="35px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#sampleFunctionOutput">var result = Math.min(1,2,3);
+print(result);</div>
+
+      Output
 
       <div 
         id="sampleFunctionOutput" 
+        class="x-border x-output"
         x-type="x-output"
+        x-margin="10px"
         x-width="100%"
-        x-height="200px">
+        x-height="19px">
+      </div>
+
+      <p>Now lets take a look at how we use Scarlet to listen to this function once it is called. First we have to instantiate
+      Scarlet. After that we have to tell Scarlet we would like to listen to Math.min. Once done we then tell Scarlet where to 
+      call to once this function is called.</p>
+
+      <div 
+        id="sampleFunctionWithScarletEditor" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="184px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#sampleFunctionWithScarletOutput">var scarlet = new Scarlet();
+
+Math.min = scarlet
+  .intercept(Math.min, scarlet.FUNCTION)
+  .using(function(info, method, args){
+    var result = method.call(this, info, method, args);
+    print("Math.min called with args=" + args + " and result=" + result);
+    return result;
+  }).proxy();
+
+var result = Math.min(1,2,3);</div>
+
+      Output
+
+      <div 
+        id="sampleFunctionWithScarletOutput" 
+        class="x-border x-output"
+        x-type="x-output"
+        x-margin="10px"
+        x-width="100%"
+        x-height="19px">
       </div>
 
     </div>

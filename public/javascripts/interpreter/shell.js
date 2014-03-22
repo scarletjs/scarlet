@@ -8,7 +8,7 @@ define("interpreter/shell", ["lodash", "scarlet"], function(_, Scarlet) {
 			var __outputBuffer = "";
 
 			function print(str){
-				__outputBuffer += "<span style='color: #3C403B'># " + new Date().format("hh:mm:ss") + ":</span>&gt; " + str + "<br/>\n";
+				__outputBuffer += "<span style='color: #3C403B'>[" + new Date().format("hh:mm:ss") + "]</span>: " + str + "<br/>\n";
 			}
 
 			var traceInterceptor = function(info, method, args){

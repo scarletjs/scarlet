@@ -79,6 +79,8 @@ require([
 				outputs.render(outputSelector, result);
 			});
 
+			editors.fireEvents();
+
 			new Library.XGet("a[x-get-uri]")
 				.forEach(function(xgetElement) {
 					xgetElement.click(function() {

@@ -54,23 +54,36 @@ li {
 .x-spacer {
   height: 25px;
 }
+
 .x-clear{
   clear:both;
 }
 
-.index {
+.x-scroll {
+    position:absolute
+    top:210px
+
+}
+.x-scroll.fixed {
+    position:fixed;
+    top:0;
+} 
+
+.x-links {
   font-size: 30px;
+  overflow:scroll;
 }
 
-.index a{
+.x-links a{
   color: #bbb;
 }
 
-.index-med {
+.x-links-alt {
   font-size: 24px;
+  overflow: scroll;
 }
 
-.index-med a{
+.x-links-alt a{
   color: #bbb;
 }
 

@@ -49,6 +49,8 @@ define("views/editor", ["lodash", "ace/ace"], function(_, ace) {
 
 			self.renderEditor();
 			self.subscribeEvents();
+
+			var outputSelector = $();
 		};
 	}
 	return Editor;

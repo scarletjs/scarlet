@@ -3,15 +3,13 @@ define("views/index",
 		"views/header",
 		"views/navigation",
 		"views/content",
-		"views/footer",
-		"views/editor"
+		"views/footer"
 	],
-	function(Header, Navigation, Content, Footer, Editor) {
+	function(Header, Navigation, Content, Footer) {
 		return {
 			Header: Header,
 			Navigation: Navigation,
 			Content: Content,
-			Footer: Footer,
-			Editor: Editor
+			Footer: Footer
 		};
 	});

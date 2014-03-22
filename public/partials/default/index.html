@@ -61,7 +61,7 @@
       <p>Suggestions, comments and rants are welcome on twitter. If you think you have found a bug and would like to let us 
         know about it, please visit github and raise an issue. Pull requests are welcome as long as all the tests pass. Also
         have a look at the contributing markdown document in the root of the project and follow the guide before submitting
-        changes. Pull requests that have not followed this procedure will be ignored. </p>
+        changes. </p>
     </div>
 
   </div>
@@ -71,40 +71,29 @@
   <div
     id="rightContainer"
     x-type="x-panel"
-    x-float="right"
+    x-position="absolute"
+    x-overflow="scroll"
+    x-right="0"
     x-width="20%">
 
     <div
       id="navContainer"
-      x-type="x-panel"
+      x-type="x-scroll"
       x-get-uri="partials/navigation/index.html">
     </div>
     
     <div
       id="subNavContainer"
-      x-type="x-panel">
+      x-type="x-scroll">
       
       <div id="helpTitle" class="x-title">
         <b>Skip Links!?</b> - { for(...) continue; }
       </div>
       
       <div 
-        id="helpWalkthroughContainer"
-        x-type="x-panel"
-        x-width="100%"
-        x-height="100%"
-        class="x-content">
-
-        <div id="helpWalkthroughs" class="content index-med">
-          <ul>
-            <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/function/index.html">Functions</a></li>
-            <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/prototype/index.html">Prototypes</a></li>
-            <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/property/index.html">Properties</a></li>
-            <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/method/index.html">Methods</a></li>
-            <li><a href="javascript: void(0)" x-get-target="#content" x-get-uri="partials/proxies/index.html">Proxies</a></li>
-          </ul>
-        </div>
-
+        id="helpWalkthroughs" 
+        x-type="x-links" 
+        class="x-content x-links-alt">
       </div>
 
     </div>

@@ -51,16 +51,33 @@ require([
 
 		function ViewFactory() {
 
-			var editor = new Views.Editor("#editor", style);
-			editor.addEventListener("execute", function(args) {
-				var shell = new Interpreter.Shell();
-				var result = shell.execute(args.text);
-				$("#output").html(result);
-			});
-			editor.render();
+			new Library.XScroll("[x-type='x-scroll']")
+				.render();
+
+			new Library.XLinks(document)
+				.render("[x-type='x-links']");
 
 			new Library.XPanel("[x-type='x-panel']")
 				.render();
+
+			new Library.XPanel("[x-type='x-editor']")
+				.render();
+
+			new Library.XPanel("[x-type='x-output']")
+				.render();
+
+			var editors = new Library.XEditor("[x-type='x-editor']");
+			editors.render();
+
+			var outputs = new Library.XOutput("[x-type='x-output']");
+			outputs.render();
+
+			editors.addListener(function(args){
+				var $editorElement = $("#" + args.self.id);
+				var result = new Interpreter.Shell().execute(args.text);
+				var outputSelector = $editorElement.attr("x-output");
+				outputs.render(outputSelector, result);
+			});
 
 			new Library.XGet("a[x-get-uri]")
 				.forEach(function(xgetElement) {

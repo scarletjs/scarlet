@@ -28,7 +28,8 @@ define("library/x-panel", ["lodash", "jquery"], function(_, $) {
 			"margin" : calculateSynonymArray("margin"),
 			"position" : calculateSynonymArray("position"),
 			"float": calculateSynonymArray("float"),
-			"border" : calculateSynonymArray("border")
+			"border" : calculateSynonymArray("border"),
+			"overflow" : calculateSynonymArray("overflow")
 		};
 
 		var isDefined = function(any) {
@@ -40,14 +41,14 @@ define("library/x-panel", ["lodash", "jquery"], function(_, $) {
 			if(isDefined(value)) {
 				addCssAttribute(asAttributeName);
 				$element.css(asAttributeName, value);
-				console.log("XPanel::Applying " + attributeName + "(" + value + ") as '" + asAttributeName + "'' to #" + $element.attr("id"));
+				console.log("XPanel::applyToElement " + attributeName + "(" + value + ") as '" + asAttributeName + "'' to #" + $element.attr("id"));
 			}
 		};
 
 		var applyAsDefault = function(attributeName, attributeValue, $element) {
 			if (!_(cssAttributes).any(function(a){return a == attributeName})) {
 				$element.css(attributeName, attributeValue);
-				console.log("XPanel::Applying " + attributeName + "(" + attributeValue + ") as 'default' to #" + $element.attr("id"));
+				//console.log("XPanel::applyAsDefault " + attributeName + "(" + attributeValue + ") as 'default' to #" + $element.attr("id"));
 			}
 		};
 
@@ -74,7 +75,7 @@ define("library/x-panel", ["lodash", "jquery"], function(_, $) {
 		};
 
 		self.render = function(){
-			console.log("XPanel::Apply x-panel render() for " + selector);
+			console.log("XPanel::render x-panel " + selector);
 			$(selector).each(function(index, element){
 				resetCssAttributes($(element));
 				_(synonyms).each(function(synonymArr, synonym){

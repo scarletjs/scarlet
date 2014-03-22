@@ -23,7 +23,7 @@ li {
   height: 38px;
   font-size: 15px;
   font-weight: normal;
-  background-color: #650000;
+  background-color: #8C1717;
   padding-left: 10px;
   padding-top: 10px;
   width: 100%;
@@ -40,10 +40,22 @@ li {
   color: #929292;
   background-color: #232323;
   width: 100%;
-  border-top: solid 1px black;
-  border-left: solid 1px black;
-  border-right: solid 1px black;
-  border-bottom: solid 1px black;
+  text-align: justify;
+}
+
+.x-content a {
+  color: #929292;
+}
+
+.x-content li {
+  color: #929292;
+}
+
+.x-spacer {
+  height: 25px;
+}
+.x-clear{
+  clear:both;
 }
 
 .index {

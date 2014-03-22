@@ -1,96 +1,90 @@
-<div 
-	id="helpContainer" 
-	x-type="x-panel" 
-	x-pos="absolute" 
-  x-width="100%" 
-  x-padding="0"
-  x-margin="0"
-  x-height="100%">
-
-  <div id="helpTitle" class="x-title">
-    <b>Help</b> - { assert(util); }
-  </div>
+  <!-- LEFT CONTAINER -->
 
   <div 
-  	id="help" 
+  	id="leftContainer" 
   	x-type="x-panel" 
-  	x-top="0"
-    x-padding="0"
-    x-margin="0"
-    x-height="100%"
-    x-width="100%"
-  	class="x-content">
-  	
-    <div
-      id="leftContainer"
-      x-type="x-panel"
-      x-float="left"
-      x-padding="0"
-      x-margin="0"
-      x-height="100%"
-      x-width="60%">
-      <div id="helpTitle" class="x-title">
-        <b>What is Scarlet?</b>
-      </div>
-      <div class="x-content">
-        <p>
-          <div
-            id="leadingPanel1"
-            x-type="x-panel"
-            x-float="left"
-            x-margin="15px">
-            <i class="fa fa-info-circle fa-4x"></i> 
-          </div>
-          <h1>What Is Scarlet?</h1>
-          Scarlet is a framework that gives you the ability to intercept(either listen or change) javascript functions and prototypes(objects) at runtime without having to change the original source code. There are numerous reasons you would want to do
-          this. One good example is logging. 
-        </p>
-      </div>
-      <div id="helpTitle" class="x-title">
-        <b>What is Scarlet?</b>
-      </div>
-      <div class="x-content">
-        <p>
-          <div
-            id="leadingPanel2"
-            x-type="x-panel"
-            x-float="left"
-            x-margin="15px">
-            <i class="fa fa-info-circle fa-4x"></i> 
-          </div>
-          <h1>What Is Scarlet?</h1>
-          Scarlet is a framework that gives you the ability to intercept(either listen or change) javascript functions and prototypes(objects) at runtime without having to change the original source code. There are numerous reasons you would want to do
-          this. One good example is logging. 
-        </p>
-      </div>
-      <div id="helpTitle" class="x-title">
-        <b>What is Scarlet?</b>
-      </div>
-      <div class="x-content">
-        <p>
-          <div
-            id="leadingPanel3"
-            x-type="x-panel"
-            x-float="left"
-            x-margin="15px">
-            <i class="fa fa-info-circle fa-4x"></i> 
-          </div>
-          <h1>What Is Scarlet?</h1>
-          Scarlet is a framework that gives you the ability to intercept(either listen or change) javascript functions and prototypes(objects) at runtime without having to change the original source code. There are numerous reasons you would want to do
-          this. One good example is logging. 
-        </p>
-      </div>
+    x-float="left"
+    x-width="80%">
+
+    <!-- SAMPLE CONTENT -->
+    
+    <div id="helpTitle" class="x-title">
+      <b>What is Scarlet?</b> - { assert(util); }
     </div>
 
-    <div
-      id="centerContainer"
+    <div 
+      id="helpContent"
       x-type="x-panel"
-      x-float="left"
-      x-height="100%"
-      x-width="20%">
+      x-top="0"
+      x-padding="15px"
+      class="x-content">
+      <i 
+        id="helpLogo" 
+        x-type="x-panel" 
+        x-float="left" 
+        x-margin="4px"
+        class="fa fa-question-circle fa-2x">
+      </i> 
+      <h1>What Is Scarlet</h1>
+      <p>Scarlet is a framework that gives you the ability to intercept(either listen or change) javascript functions and 
+      prototypes(objects) at runtime. This happens without changing the original source code. There are many reasons you 
+      would want to do this. One good example of its use is error handling or general logging. Another might be mocking or 
+      even for debugging. This website hopes to walk you through how it works in a concise way. Use the 'walkthrough' to 
+      navigate scarlet concepts as pages and 'skip links' to navigate within a particular page.</p>
+      
+      <div class="x-spacer x-clear"></div>
+
+      <i 
+        id="tryNowLogo" 
+        x-type="x-panel" 
+        x-float="left" 
+        x-margin="4px"
+        class="fa fa-gears fa-2x">
+      </i> 
+      <h1>Try It Out</h1>
+      <p>Take a look at how Scarlet works with functions. We have taken our github math.min example and created an
+      interactive demo. You can play around with it and see what the effects are. This example shows you how to manipulate
+      the behaviour of any function in a controlled way. You would need a basic level understanding of how javascript works
+      in terms of declaring functions and calling them to continue. </p>
+      
+      <div class="x-spacer x-clear"></div>
+
+      <i 
+        id="changeItLogo" 
+        x-type="x-panel" 
+        x-float="left" 
+        x-margin="4px"
+        class="fa fa-plus-circle fa-2x">
+      </i> 
+      <h1>Contribute</h1>
+      <p>Suggestions, comments and rants are welcome on twitter. If you think you have found a bug and would like to let us 
+        know about it, please visit github and raise an issue. Pull requests are welcome as long as all the tests pass.</p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT CONTAINER -->
+
+  <div
+    id="rightContainer"
+    x-type="x-panel"
+    x-float="right"
+    x-width="20%">
+
+    <div
+      id="navContainer"
+      x-type="x-panel"
+      x-get-uri="partials/navigation/index.html">
+    </div>
+    
+    <div
+      id="subNavContainer"
+      x-type="x-panel">
+      
       <div id="helpTitle" class="x-title">
         <b>Skip Links!?</b> - { for(...) continue; }
       </div>
+      
       <div 
         id="helpWalkthroughContainer"
         x-type="x-panel"
@@ -111,24 +105,5 @@
       </div>
 
     </div>
-    
-    <div
-      id="rightContainer"
-      x-type="x-panel"
-      x-float="left"
-      x-height="100%"
-      x-pos: "fixed"
-      x-width="20%">
-      <div 
-        id="navigationContainer" 
-        x-type="x-panel" 
-        x-width="100%"
-        x-height="100%"
-        x-get-uri="partials/navigation/index.html">
-      </div>
-    </div>
-    
+
   </div>
-
-</div>
-

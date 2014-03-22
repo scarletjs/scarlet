@@ -8,7 +8,7 @@ require.config({
 		"jquery.gridify": "vendor/gridify",
 		"jquery.jqgrid": "vendor/jqgrid/js/jquery.jqGrid.min",
 		"stringformat": "vendor/string-format",
-		"scarlet": "https://raw2.github.com/scarletjs/scarlet/master/pub/scarlet"
+		"scarlet": "vendor/scarlet/scarlet"
 	},
 	shim: {
 		"jquery.gridify": {

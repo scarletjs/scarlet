@@ -1,5 +1,6 @@
-var g = require("../../../include");
+var assert = require("assert")
 var dummies = require("./dummies");
+var enumerable = require("../../../lib/extensions/enumerable");
 
 function ScarletBuilder(scarlet){
 	
@@ -51,14 +52,14 @@ function ScarletBuilder(scarlet){
 	};
 
 	self.withInterceptor = function() {
-		g.assert(self.instances.length != 0, "Please make sure you allocate an instance first using 'withNamedFunction()', 'withObjectLiteral()', 'withPrototypeFunction()' or 'withUnamedFunction()'");
+		assert(self.instances.length != 0, "Please make sure you allocate an instance first using 'withNamedFunction()', 'withObjectLiteral()', 'withPrototypeFunction()' or 'withUnamedFunction()'");
 		self.interceptor = new InterceptorBuilder(self, self.instances, function(proxiedInstances){ self.instances = proxiedInstances; });
 		self.log.info(ScarletBuilder, "withInterceptor", "Creating Interceptor", [self.interceptor]);
 		return self;
 	};
 
 	self.withCustomInterceptor = function(interceptor){
-		g.assert(self.instances.length != 0, "Please make sure you allocate an instance first using 'withNamedFunction()', 'withObjectLiteral()', 'withPrototypeFunction()' or 'withUnamedFunction()'");
+		assert(self.instances.length != 0, "Please make sure you allocate an instance first using 'withNamedFunction()', 'withObjectLiteral()', 'withPrototypeFunction()' or 'withUnamedFunction()'");
 		self.log.info(ScarletBuilder, "withCustomInterceptor", "Creating Custom Interceptor", [interceptor]);
 		self.interceptor = interceptor;
 		return self;
@@ -66,7 +67,7 @@ function ScarletBuilder(scarlet){
 
 	self.invokeMethod = function(){
 		self.log.debug(ScarletBuilder, "invokeMethod", "Invoking Methods");
-		g.ext.enumerable.forEach(self.instances, function(instance){
+		enumerable.forEach(self.instances, function(instance){
 			self.log.debug(instance, "method", "Before Invoking Instance Method", [instance]);
 			instance.method();
 			self.log.debug(instance, "method", "After Invoking Instance Method", [instance]);
@@ -77,7 +78,7 @@ function ScarletBuilder(scarlet){
 	self.invokeMethodWithReturn = function(){
 		self.results = [];
 		self.log.debug(ScarletBuilder, "invokeMethodWithReturn", "Invoking Methods with Return Values");
-		g.ext.enumerable.forEach(self.instances, function(instance){
+		enumerable.forEach(self.instances, function(instance){
 			self.log.debug(instance, "methodWithReturn", "Before Invoking Instance Method With Return", [instance]);
 			var result = instance.methodWithReturn();
 			self.log.debug(instance, "methodWithReturn", "After Invoking Instance Method With Return", [instance, result]);

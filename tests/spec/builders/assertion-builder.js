@@ -1,5 +1,6 @@
-var g = require("../../../include");
+var assert = require("assert");
 var dummies = require("./dummies");
+var enumerable = require("../../../lib/extensions/enumerable");
 
 function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
@@ -8,31 +9,31 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
 	self.methodWasCalled = function(){
 		self.log.debug(AssertionBuilder, "methodWasCalled", "Checking Methods Called");
-		g.ext.enumerable.forEach(instances, function(instance){
+		enumerable.forEach(instances, function(instance){
 			self.log.info(AssertionBuilder, "methodWasCalled", "Asserting Method Called for Instance", [instance]);
-			g.assert(instance.methodCalled);
+			assert(instance.methodCalled);
 		});
 		interceptor.methodCalled();
 		return self;
 	};
 
 	self.methodWithReturnWasCalled = function(){
-		g.ext.enumerable.forEach(instances, function(instance){
+		enumerable.forEach(instances, function(instance){
 			self.log.info(AssertionBuilder, "methodWithReturnWasCalled", "Asserting Method With Return Called for Instance", [instance]);
-			g.assert(instance.methodWithReturnCalled);
+			assert(instance.methodWithReturnCalled);
 		});
 		interceptor.methodWithReturnCalled();
 		return self;
 	};
 
 	self.anyMethodWasCalled = function(){
-		g.assert(self.methodWasCalled() || self.methodWithReturnWasCalled());
+		assert(self.methodWasCalled() || self.methodWithReturnWasCalled());
 		interceptor.methodCalled();
 		return self;
 	};
 
 	self.allInvoked = function(){
-		g.assert(self.methodWasCalled() && self.methodWithReturnWasCalled());
+		assert(self.methodWasCalled() && self.methodWithReturnWasCalled());
 		interceptor.methodCalled();
 		return self;
 	};

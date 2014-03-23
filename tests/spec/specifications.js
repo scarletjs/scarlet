@@ -1,4 +1,4 @@
-var g = require("../../include");
+var assert = require("assert");
 var builder = require("./builders");
 var Scarlet = require("../../lib/scarlet");
 
@@ -30,14 +30,16 @@ describe("Given we are using scarlet", function() {
 			
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
 				.using(function(proceed, info) {
+					console.log(info.memberName());
+					console.log(info.contextName());
 					proceed();
 					interceptorCalled = true;
 				}).proxy();
 
 			var result = Math.min(1, 2, 3);
 			
-			g.assert(result === 1, "Function is broken, should return '1'");
-			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
+			assert(result === 1, "Function is broken, should return '1'");
+			assert(interceptorCalled, "The interceptor was not called for Math.min");
 
 		});
 
@@ -46,16 +48,16 @@ describe("Given we are using scarlet", function() {
 			var interceptorCalled = false;
 
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-				.using(function(proceed, invocation) {
-					interceptorCalled = true;
-					var result = proceed();
-					invocation.result = 3;
-				}).proxy();
+								.using(function(proceed, invocation) {
+									interceptorCalled = true;
+									var result = proceed();
+									invocation.result = 3;
+								}).proxy();
 
 			var result = Math.min(1, 2, 3);
 
-			g.assert(result === 3, "Function is broken, should return '1'");
-			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
+			assert(result === 3, "Function is broken, should return '1'");
+			assert(interceptorCalled, "The interceptor was not called for Math.min");
 
 		});
 
@@ -91,7 +93,7 @@ describe("Given we are using scarlet", function() {
 			instance.memberFunction1();
 			instance.memberFunction2();
 
-			g.assert(interceptorTimesCalled === 4);
+			assert(interceptorTimesCalled === 4);
 
 		});
 

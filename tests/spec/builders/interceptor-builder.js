@@ -1,5 +1,7 @@
-var g = require("../../../include");
+var assert = require("assert");
 var dummies = require("./dummies");
+var object = require("../../../lib/extensions/object");
+var enumerable = require("../../../lib/extensions/enumerable");
 
 function Interceptor(scarletBuilder) {
 
@@ -41,18 +43,18 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 	self.methodCalled = function(times) {
 		self.log.debug(InterceptorBuilder, "methodCalled", "Inside Method Called", [self.interceptor, self.interceptor.results]);
 		if (typeof(times) == "undefined")
-			g.assert(self.interceptor.results["method"].timesCalled > 0);
+			assert(self.interceptor.results["method"].timesCalled > 0);
 		else
-			g.assert(self.interceptor.results["method"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["method"].timesCalled);
+			assert(self.interceptor.results["method"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["method"].timesCalled);
 		return self;
 	};
 
 	self.methodWithReturnCalled = function(times) {
 		self.log.debug(InterceptorBuilder, "methodWithReturnCalled", "Inside Method With Return Called", [self.interceptor, self.interceptor.results]);
 		if (typeof(times) == "undefined")
-			g.assert(self.interceptor.results["methodWithReturn"].timesCalled > 0);
+			assert(self.interceptor.results["methodWithReturn"].timesCalled > 0);
 		else
-			g.assert(self.interceptor.results["methodWithReturn"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["methodWithReturn"].timesCalled);
+			assert(self.interceptor.results["methodWithReturn"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["methodWithReturn"].timesCalled);
 		return self;
 	};
 
@@ -61,7 +63,7 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 	};
 
 	var proxiedInstances = [];
-	g.ext.enumerable.forEach(instances, function(instance) {
+	enumerable.forEach(instances, function(instance) {
 		var proxiedTypeOrInstance =
 			scarletBuilder
 				.scarlet
@@ -71,7 +73,7 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 		proxiedInstances.push(proxiedTypeOrInstance);
 	});
 
-	if (!g.ext.object.isNull(replaceInstancesCallback)) {
+	if (!object.isNull(replaceInstancesCallback)) {
 		self.log.debug(InterceptorBuilder, InterceptorBuilder, "Replacing Instances with Proxies", proxiedInstances);
 		replaceInstancesCallback(proxiedInstances);
 	}

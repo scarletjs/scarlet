@@ -1,4 +1,7 @@
-var g = require("../../../include");
+var log = console.log;
+var util = require("util");
+var inspect = util.inspect;
+var object = require("../../../lib/extensions/object");
 
 function BuilderLogger() {
 
@@ -48,34 +51,34 @@ function BuilderLogger() {
 		if (args == null)
 			args = "";
 		else
-			args = "\n" + g.i(args).replace(/\n/g, "\n");
+			args = "\n" + inspect(args).replace(/\n/g, "\n");
 
 		if (typeof(msg) == "object" || typeof(msg) == "function")
-			msg = g.i(msg, {
+			msg = inspect(msg, {
 				depth: 10,
 				showHidden: true
 			});
 
 		// Exceptional but very useful case
-		if (typeof(func) == "string" && !g.ext.object.isNull(obj) && !g.ext.object.isNull(obj[func])) {
+		if (typeof(func) == "string" && !object.isNull(obj) && !object.isNull(obj[func])) {
 			var funcName = func;
 			var actualFunc = obj[func];
-			g.l(type + getFunctionName(obj) + "::" + funcName + "(" + getParamNames(actualFunc).join(",") + ") - " + msg + args + "\n");
+			log(type + getFunctionName(obj) + "::" + funcName + "(" + getParamNames(actualFunc).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (!g.ext.object.isNull(obj) && g.ext.object.isNull(func)) {
-			g.l(type + getFunctionName(func) + "(" + getParamNames(obj).join(",") + ") - " + msg + args + "\n");
+		if (!object.isNull(obj) && object.isNull(func)) {
+			log(type + getFunctionName(func) + "(" + getParamNames(obj).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (g.ext.object.isNull(obj) && !g.ext.object.isNull(func)) {
-			g.l(type + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
+		if (object.isNull(obj) && !object.isNull(func)) {
+			log(type + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (!g.ext.object.isNull(obj) && !g.ext.object.isNull(func)) {
-			g.l(type + getFunctionName(obj) + "::" + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
+		if (!object.isNull(obj) && !object.isNull(func)) {
+			log(type + getFunctionName(obj) + "::" + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 	};

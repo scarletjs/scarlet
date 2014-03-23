@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 var Scarlet = require("../../../../lib/scarlet");
 
 var scarlet = new Scarlet();
@@ -11,7 +11,7 @@ describe("NamedFunction", function() {
 	describe("#method", function() {
 		instance.method();
 		it("It should be able to track whether the method was called", function() {
-			g.assert(instance.methodCalled);
+			assert(instance.methodCalled);
 		});
 
 	});
@@ -19,8 +19,8 @@ describe("NamedFunction", function() {
 	describe("#methodWithReturn", function(){
 		var value = instance.methodWithReturn();
 		it("It should be able to track whether the method with return was called", function(){
-			g.assert(value == "any");
-			g.assert(instance.methodWithReturnCalled);
+			assert(value == "any");
+			assert(instance.methodWithReturnCalled);
 		});
 	});
 
@@ -33,7 +33,7 @@ describe("ObjectLiteral", function() {
 	describe("#method", function() {
 		instance.method();
 		it("It should be able to track whether the method was called", function() {
-			g.assert(instance.methodCalled);
+			assert(instance.methodCalled);
 		});
 
 	});
@@ -41,8 +41,8 @@ describe("ObjectLiteral", function() {
 	describe("#methodWithReturn", function(){
 		var value = instance.methodWithReturn();
 		it("It should be able to track whether the method with return was called", function(){
-			g.assert(value == "any");
-			g.assert(instance.methodWithReturnCalled);
+			assert(value == "any");
+			assert(instance.methodWithReturnCalled);
 		});
 	});
 
@@ -56,7 +56,7 @@ describe("PrototypeFunction", function() {
 	describe("#method", function() {
 		instance.method();
 		it("It should be able to track whether the method was called", function() {
-			g.assert(instance.methodCalled);
+			assert(instance.methodCalled);
 		});
 
 	});
@@ -64,8 +64,8 @@ describe("PrototypeFunction", function() {
 	describe("#methodWithReturn", function(){
 		var value = instance.methodWithReturn();
 		it("It should be able to track whether the method with return was called", function(){
-			g.assert(value == "any");
-			g.assert(instance.methodWithReturnCalled);
+			assert(value == "any");
+			assert(instance.methodWithReturnCalled);
 		});
 	});
 
@@ -79,7 +79,7 @@ describe("UnnamedFunction", function() {
 	describe("#method", function() {
 		instance.method();
 		it("It should be able to track whether the method was called", function() {
-			g.assert(instance.methodCalled);
+			assert(instance.methodCalled);
 		});
 
 	});
@@ -87,8 +87,8 @@ describe("UnnamedFunction", function() {
 	describe("#methodWithReturn", function(){
 		var value = instance.methodWithReturn();
 		it("It should be able to track whether the method with return was called", function(){
-			g.assert(value == "any");
-			g.assert(instance.methodWithReturnCalled);
+			assert(value == "any");
+			assert(instance.methodWithReturnCalled);
 		});
 	});
 

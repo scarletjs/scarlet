@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 function AnyClass() {
 	var self = this;
@@ -30,7 +30,7 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 		var info = null;
 		var AugmentedClass = null;
 
-		var proxy = new ProxyPrototype(AnyClass, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyPrototype(AnyClass, function(proceed, args,proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -44,46 +44,46 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
-			g.assert(proceedWasCalled);
-			g.assert(instance.anyProperty == 6);
+			assert(proceedWasCalled);
+			assert(instance.anyProperty == 6);
 		});
 
 		it("Then should invoke whenCalled delegate for 'prototypeProperty' set", function() {
 			instance.prototypeProperty = 6;
-			g.assert(proceedWasCalled);
-			g.assert(instance.prototypeProperty == 6);
+			assert(proceedWasCalled);
+			assert(instance.prototypeProperty == 6);
 		});
 
 		it("Then should invoke whenCalled delegate for 'property' get", function() {
 			instance.anyProperty = "apple";
 			var result = instance.anyProperty;
-			g.assert(proceedWasCalled);
-			g.assert(result == "apple");
+			assert(proceedWasCalled);
+			assert(result == "apple");
 		});
 
 		it("Then should invoke whenCalled delegate for 'prototypeProperty' get", function() {
 			instance.prototypeProperty = "apple";
 			var result = instance.prototypeProperty;
-			g.assert(proceedWasCalled);
-			g.assert(result == "apple");
+			assert(proceedWasCalled);
+			assert(result == "apple");
 		});
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(proceedWasCalled);
-			g.assert(result == 6);
+			assert(proceedWasCalled);
+			assert(result == 6);
 		});
 
 		it("Then should invoke whenCalled delegate for 'prototypeMethod'", function() {
 			var result = instance.prototypeMethod(6);
-			g.assert(proceedWasCalled);
-			g.assert(result == 6);
+			assert(proceedWasCalled);
+			assert(result == 6);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			var result = instance.anyMethod(7);
-			g.assert(instance == proceedThisContext);
-			g.assert(result == 7);
+			assert(instance == proceedThisContext);
+			assert(result == 7);
 		});
 
 	});
@@ -92,7 +92,7 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 		var info = null;
 
-		var proxy = new ProxyPrototype(AnyClass, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyPrototype(AnyClass, function(proceed, args,proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -104,36 +104,36 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 		it("Then should not invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'prototypeProperty' set", function() {
 			instance.prototypeProperty = 6;
-			g.assert(!proceedWasCalled);
-			g.assert(instance.prototypeProperty == 6);
+			assert(!proceedWasCalled);
+			assert(instance.prototypeProperty == 6);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'property' get", function() {
 			var result = instance.anyProperty;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'prototypeProperty' get", function() {
 			instance.prototypeProperty = "apple";
 			var result = instance.prototypeProperty;
-			g.assert(!proceedWasCalled);
-			g.assert(result == "apple");
+			assert(!proceedWasCalled);
+			assert(result == "apple");
 		});
 
 		it("Then should not invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'prototypeMethod'", function() {
 			var result = instance.prototypeMethod(6);
-			g.assert(!proceedWasCalled);
-			g.assert(result == 6);
+			assert(!proceedWasCalled);
+			assert(result == 6);
 		});
 
 	});

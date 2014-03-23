@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 function AnyClass() {
 	var self = this;
@@ -24,7 +24,7 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 		var instance = new AnyClass();
 		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proxyInfo, proceed) {
+		var proxy = new ProxyProperty(info, function(proceed,args, proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed();
@@ -34,22 +34,22 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 
 		it("Then should invoke whenCalled delegate for 'get'", function() {
 			var result = instance.anyProperty;
-			g.assert(proceedWasCalled);
-			g.assert(result == "anyValue");
+			assert(proceedWasCalled);
+			assert(result == "anyValue");
 		});
 
 		it("Then should invoke whenCalled delegate for 'get'", function() {
 			instance.anyProperty = "anyValue";
-			g.assert(proceedWasCalled);
+			assert(proceedWasCalled);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			instance.anyProperty = "anyValue";
-			g.assert(instance == proceedThisContext);
+			assert(instance == proceedThisContext);
 		});
 
 		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet__);
+			assert(instance.__scarlet__);
 		});
 
 	});
@@ -59,7 +59,7 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 		var instance = new AnyClass();
 		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proxyInfo, proceed) {
+		var proxy = new ProxyProperty(info, function(proceed,args,proxyInfo) {
 			proceedWasCalled = true;
 			return proceed();
 		});
@@ -68,12 +68,12 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 
 		it("Then should not invoke whenCalled delegate for 'get'", function() {
 			var result = instance.anyProperty;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'get'", function() {
 			instance.anyProperty = "anyValue";
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 	});

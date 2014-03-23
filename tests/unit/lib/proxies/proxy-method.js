@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 function AnyClass() {
 	var self = this;
@@ -24,7 +24,7 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 		var instance = new AnyClass();
 		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyMethod(info, function(proceed, args, proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -34,18 +34,18 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(proceedWasCalled);
-			g.assert(result == 6);
+			assert(proceedWasCalled);
+			assert(result == 6);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			var result = instance.anyMethod(7);
-			g.assert(instance == proceedThisContext);
-			g.assert(result == 7);
+			assert(instance == proceedThisContext);
+			assert(result == 7);
 		});
 
 		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet__);
+			assert(instance.__scarlet__);
 		});
 
 	});
@@ -55,7 +55,7 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 		var instance = new AnyClass();
 		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyMethod(info, function(proceed, args, proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed.call(proxyInfo.instance, args);
@@ -65,8 +65,8 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		it("Then should not invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(!proceedWasCalled);
-			g.assert(result == 6);
+			assert(!proceedWasCalled);
+			assert(result == 6);
 		});
 
 	});

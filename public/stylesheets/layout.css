@@ -7,7 +7,6 @@ html, body {
 }
 
 header #header{
-    top: 0;
     margin: 0;
     z-index: 100;
     padding: 0;
@@ -48,7 +47,7 @@ footer #footer {
 	opacity: 0;
 	padding-top: 10px;
 	padding-left: 15px;
-	font-size: 32px;
+	font-size: 38px;
 	width: 50%;
 }
 
@@ -61,7 +60,9 @@ footer #footer {
 
 #logo .contact i {
 	opacity: 0;
-	padding: 10px;
+	padding: 0px;
+	font-size: 40px;
+	margin-right: 20px;
 }
 
 #navigation {

@@ -27,7 +27,18 @@ define("library/x-size", function() {
 		self.render = function(numberOfColumns, numberOfRows, templateSelector) {
 			//self.initialiseSize(numberOfColumns, numberOfRows);
 
+			console.log("XSize::disabled");
+			return;
+
 			console.log("XSize::size(width, height)::" + $(selector).width(), $(selector).height());
+
+
+			new XGet(selector, "size-visited")
+				.forEach(function(xgetElement) {
+					var $element = $(xgetElement.element);
+					console.log("XEditor::render applying to " + $element.attr("id"))
+				});
+
 
 			var documentWidth = $(document).width();
 			console.log("XSize::Document Height:" + documentWidth);

@@ -71,7 +71,7 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 		};
 
 		self.render = function(){
-			new XGet(selector)
+			new XGet(selector, "editor-visited")
 				.forEach(function(xgetElement) {
 					var $element = $(xgetElement.element);
 					console.log("XEditor::render applying to " + $element.attr("id"))

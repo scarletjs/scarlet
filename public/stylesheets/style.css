@@ -89,6 +89,7 @@ li {
 .x-links {
   font-size: 30px;
   overflow:scroll;
+  opacity: 0.6;
 }
 
 .x-links a{
@@ -98,6 +99,7 @@ li {
 .x-links-alt {
   font-size: 24px;
   overflow: scroll;
+  opacity: 0.6;
 }
 
 .x-links-alt a{

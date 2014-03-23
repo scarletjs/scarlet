@@ -81,7 +81,7 @@ require([
 
 			editors.fireEvents();
 
-			new Library.XGet("a[x-get-uri]")
+			new Library.XGet("a[x-get-uri]", "get-uri-click-visited")
 				.forEach(function(xgetElement) {
 					xgetElement.click(function() {
 						xgetElement.executeGet(function() {
@@ -91,12 +91,16 @@ require([
 					});
 				});
 
-			new Library.XGet("div[x-get-uri]")
+			new Library.XGet("div[x-get-uri]", "get-uri-now-visited")
 				.forEach(function(xgetElement) {
 					xgetElement.executeGet(function() {
 						new ViewFactory();
 					});
 				});
+
+			style
+				.for("#rightContainer")
+				.addClassDelay("animated fadeInRight");
 		}
 
 		new ViewFactory();

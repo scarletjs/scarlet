@@ -1,4 +1,4 @@
-define("library/x-panel", ["lodash", "jquery"], function(_, $) {
+define("library/x-panel", ["lodash", "jquery", "library/x-get"], function(_, $, XGet) {
 	function XPanel(selector) {
 
 		var self = this;
@@ -76,16 +76,19 @@ define("library/x-panel", ["lodash", "jquery"], function(_, $) {
 
 		self.render = function(){
 			console.log("XPanel::render x-panel " + selector);
-			$(selector).each(function(index, element){
-				resetCssAttributes($(element));
-				_(synonyms).each(function(synonymArr, synonym){
-					for(var index=0; index < synonymArr.length; index++) {
-						var synonymAlias = synonymArr[index];
-						applyToElement("x-"+synonymAlias, synonym, $(element));
-					}
+			new XGet(selector, "panel-visited")
+				.forEach(function(xgetElement) {
+					var $element = $(xgetElement.element);
+					console.log("XEditor::render applying to " + $element.attr("id"))
+					resetCssAttributes($element);
+					_(synonyms).each(function(synonymArr, synonym){
+						for(var index=0; index < synonymArr.length; index++) {
+							var synonymAlias = synonymArr[index];
+							applyToElement("x-"+synonymAlias, synonym, $element);
+						}
+					});
+					cssAttributesComplete($element);
 				});
-				cssAttributesComplete($(element));
-			});
 		};
 
 	}

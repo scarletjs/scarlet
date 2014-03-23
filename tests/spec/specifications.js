@@ -3,15 +3,14 @@ var builder = require("./builders");
 var Scarlet = require("../../lib/scarlet");
 
 describe("Given we are using scarlet", function() {
-	// var scarlet; 
-	// beforeEach(function(){
-	// 	scarlet = new Scarlet();
-	// });
+	
 	var scarlet = new Scarlet();
+
 	describe("When invoking all kinds of instances", function() {
 
 		var assertThat =
-			builder.for (scarlet)
+			builder.for(scarlet)
+				.withNamedFunction()
 				.withInstances()
 				.withInterceptor()
 				.invokeAll()
@@ -25,32 +24,32 @@ describe("Given we are using scarlet", function() {
 
 	describe("When intercepting Math.min", function() {
 
-		// it("Should call out to the interceptor", function() {
+		it("Should call out to the interceptor", function() {
 
-		// 	var interceptorCalled = false;
+			var interceptorCalled = false;
 			
-		// 	Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-		// 		.using(function(info, method, args) {
-		// 			var result = method.call(this, info, method, args);
-		// 			interceptorCalled = true;
-		// 			return result;
-		// 		}).proxy();
+			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
+				.using(function(proceed, info) {
+					proceed();
+					interceptorCalled = true;
+				}).proxy();
 
-		// 	var result = Math.min(1, 2, 3);
+			var result = Math.min(1, 2, 3);
 			
-		// 	g.assert(result === 1, "Function is broken, should return '1'");
-		// 	g.assert(interceptorCalled, "The interceptor was not called for Math.min");
+			g.assert(result === 1, "Function is broken, should return '1'");
+			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
 
-		// });
+		});
 
 		it("Should be able to override results", function() {
 
 			var interceptorCalled = false;
 
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-				.using(function(info, method, args) {
+				.using(function(proceed, invocation) {
 					interceptorCalled = true;
-					return 3;
+					var result = proceed();
+					invocation.result = 3;
 				}).proxy();
 
 			var result = Math.min(1, 2, 3);
@@ -68,9 +67,9 @@ describe("Given we are using scarlet", function() {
 
 			var interceptorTimesCalled = 0;
 
-			function someInterceptor(info, method, args) {
+			function someInterceptor(proceed,info) {
 				// 'Prelude Code' or 'Before Advice'
-				var result = method.call(this, info, method, args); // 'Target Method' or 'Join Point'
+				var result = proceed();// 'Target Method' or 'Join Point'
 				interceptorTimesCalled += 1;
 				// 'Postlude Code' or 'After Advice'
 				return result;

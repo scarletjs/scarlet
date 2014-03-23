@@ -9,21 +9,21 @@ function Interceptor(scarletBuilder) {
 	self.proxyInfo = null;
 	self.log = scarletBuilder.log;
 
-	self.intercept = function(info, method, args) {
+	self.intercept = function(proceed,info) {
 		
 		self.log.debug(Interceptor, "methodCalled", "Inside Interceptor ", [self, info]);
-		
-		if (typeof(self.results[info.memberName]) == "undefined")
-			self.results[info.memberName] = {
+
+		var memberName = info.memberName();
+		if (typeof(self.results[memberName]) == "undefined")
+			self.results[memberName] = {
 				timesCalled: 0,
 				results: []
 			};
-		
-		var current = self.results[info.memberName];
-		current.timesCalled += 1;
-		current.proxyInfo = info;
-		current.result = method.apply(this, args);
 
+		var current = self.results[memberName];
+		current.timesCalled += 1;
+		current.proxyInfo = info.proxyInfo;
+		current.result = proceed();
 		return current.result;
 	};
 

@@ -66,6 +66,10 @@ li {
   height: 25px;
 }
 
+.x-spacer-alt {
+  height: 15px;
+}
+
 .x-clear{
   clear:both;
 }

@@ -9,14 +9,14 @@ define("views/header", function() {
 				.for(selector)
 				.and(".title")
 				.css("opacity", "1")
-				.addClass("animated fadeInLeftBig");
+				.addClass("animated fadeInLeft");
 		};
 
 		self.animateLinks = function(){
 			self.style
 				.for(selector)
 				.and("#logo .contact i")
-				.addClass("animated fadeInRightBig");
+				.addClass("animated fadeInRight");
 		};
 
 		self.render = function() {

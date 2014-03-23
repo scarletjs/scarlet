@@ -25,11 +25,16 @@
         x-margin="4px"
         class="fa fa-subscript fa-2x">
       </i> 
-      <h1><a name="sampleFunctionLink">Sample Function</a></h1>
-      <p>In this example we are going to take a look at Math.min. Below we have an interactive demo of the function. Click on 
-      the code sample, change it and then press Ctrl-X for Windows or Cmd-X for Macintosh to run it and see output.</p>
       
-      Example
+      <h1><a name="sampleFunctionLink">Math.min</a></h1>
+      
+      <p>In this example we are going to take a look at Math.min and how we can use Scarlet to listen to this function. Later on we will explore how to mutate the results of this function. All code in this page is interactive. Click on it, change it and press Ctrl-X for Windows or Cmd-X for Macintosh to run it and see the results.</p>
+      
+      <div class="x-spacer-alt x-clear"></div>
+
+      <h4>Vanilla Math.min</h4>
+
+      <p>This function is part of the base library for any javascript interpreter. Here we invoke it with a set of numbers [1,2,3] and we can see from the output that the result is 1.</p>
 
       <div 
         id="sampleFunctionEditor" 
@@ -42,8 +47,6 @@
         x-output="#sampleFunctionOutput">var result = Math.min(1,2,3);
 print(result);</div>
 
-      Output
-
       <div 
         id="sampleFunctionOutput" 
         class="x-border x-output"
@@ -53,11 +56,11 @@ print(result);</div>
         x-height="19px">
       </div>
 
-      <p>Now lets take a look at how we use Scarlet to listen to this function once it is called. First we have to instantiate
-      Scarlet. After that we have to tell Scarlet we would like to listen to Math.min. We then tell Scarlet where to call 
-      out to when Math.min is called. In short we have 'intercepted' Math.min using a custom interceptor.</p>
+      <div class="x-spacer-alt x-clear"></div>
 
-      Example 
+      <h4>Intercepting Math.min</h4>
+
+      <p>Now let's take a look at how we use Scarlet to intercept this function. First we have to instantiate Scarlet. Then we tell Scarlet that we would like to know when Math.min is called. We do this by passing Math.min to the <i><b>intercept</b></i> function. Finally, we define a callback or interceptor function which listens to Math.min through Scarlet's <i><b>using</b></i> function. Proxy is discussed in detail in the <i><b>Proxies</b></i> section. So for now let's assume it always has to be called.</p>
 
       <div 
         id="sampleFunctionWithScarletEditor" 
@@ -79,8 +82,6 @@ Math.min = scarlet
 
 var result = Math.min(1,2,3);</div>
 
-      Output
-
       <div 
         id="sampleFunctionWithScarletOutput" 
         class="x-border x-output"
@@ -89,6 +90,80 @@ var result = Math.min(1,2,3);</div>
         x-width="100%"
         x-height="19px">
       </div>
+
+      <div class="x-spacer-alt x-clear"></div>
+
+      <h4>Mutating Math.min</h4>
+
+      <p>Now that we have a handle on intercepting. Lets look at mutating the results of what Math.min does by forward Math.min function calls on to the Math.max function instead. We achieve this by replacing the function call to <i><b>method</b></i> with <i><b>Math.max</b></i> in the interceptor. 
+
+      <div 
+        id="sampleFunctionWithMutationEditorOldLine" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="19px" 
+        x-margin="10px"
+        x-run-onload="true">var result = method.call(this, info, method, args);</div>
+
+      <div 
+        id="sampleFunctionWithMutationEditorNewLine" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="19px" 
+        x-margin="10px"
+        x-run-onload="true">var result = Math.max.apply(this, args);</div>
+
+
+      <p>We should now have the full example as follows</p>
+
+      <div 
+        id="sampleFunctionWithMutationEditor" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="184px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#sampleFunctionWithMutationOutput">var scarlet = new Scarlet();
+
+Math.min = scarlet
+  .intercept(Math.min, scarlet.FUNCTION)
+  .using(function(info, method, args){
+    var result = Math.max.apply(this, args);
+    print("Math.min called with args=" + args + " and result=" + result);
+    return result;
+  }).proxy();
+
+var result = Math.min(1,2,3);</div>
+
+      <div 
+        id="sampleFunctionWithMutationOutput" 
+        class="x-border x-output"
+        x-type="x-output"
+        x-margin="10px"
+        x-width="100%"
+        x-height="19px">
+      </div>
+
+      <p>See how the result has now changed from 1 to 3? Math.min is now actually a proxy function for Math.max.</p>
+
+      <div class="x-spacer x-clear"></div>
+
+      <i 
+        id="usefulTipsLogo" 
+        x-type="x-panel" 
+        x-float="left" 
+        x-margin="4px"
+        class="fa fa-bug fa-2x">
+      </i> 
+      
+      <h1><a name="usefulTipsLink">Useful Tips</a></h1>
+      
+      <p>We don't recommend using Scarlet primarily as outlined in this example purely because it is considered bad practice to mess around with global objects like Math.min especially if you are changing their behaviours. This is for demonstration purposes so that you are familiar with how Scarlet intercepts functions. The second important thing to note is that you could also equally have implemented this kind of behaviour without using Scarlet at all! If you are interested in seeing what Scarlet is really useful for please move on to the prototypes section.</p>
+      
+      <div class="x-spacer x-clear"></div>
 
     </div>
 

@@ -1,9 +1,27 @@
 var gulp = require('gulp');
+var bump = require('gulp-bump');
 var gutil = require('gulp-util');
 var mocha = require('gulp-mocha');
 var jshint = require('gulp-jshint');
+var browserify = require('gulp-browserify');
 
 gulp.task('default', ['lint','test']);
+
+gulp.task('release',['lint','test','browserify','bump']);
+
+gulp.task('browserify', function() {
+    gulp.src('./index.js')
+        .pipe(browserify({
+            standalone: 'scarlet'
+        }))
+        .pipe(gulp.dest('./pub/scarlet.js'))
+});
+
+gulp.task('bump', function(){
+  gulp.src('./package.json')
+  .pipe(bump())
+  .pipe(gulp.dest('./'));
+});
 
 gulp.task('watch', function() {
     gulp.watch(['lib/**/*.js','tests/**/*.js'], ["catchErrorTest"]);

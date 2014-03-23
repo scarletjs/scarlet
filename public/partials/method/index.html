@@ -1,73 +1,38 @@
-<div id="editorContainer" 
-  x-type="x-panel" 
-  class="abs-pos" 
-  x-width="80%" 
-  x-top="114px" 
-  x-left="0" 
-  x-bottom="238px">
+  <!-- CONTENT CONTAINER -->
 
-  <div id="editorTitle" class="x-title">
-    <b>Editor</b> - { eval(code); }
+  <div 
+    id="leftContainer" 
+    x-type="x-panel" 
+    x-width="100%">
+
+    <!-- CONTENT -->
+    
+    <div 
+      id="helpTitle" 
+      class="x-title">
+      <b>Coming Soon!</b> - { process.quickSort(); }
+    </div>
+
+    <div 
+      id="helpContent"
+      x-type="x-panel"
+      x-padding="15px"
+      class="x-content">
+      
+      <i 
+        id="helpLogo" 
+        x-type="x-panel" 
+        x-float="left" 
+        x-margin="4px"
+        class="fa fa-frown-o fa-2x">
+      </i> 
+      
+      <h1><a name="sampleFunctionLink">Coming Soon!</a></h1>
+      
+      <p>We have fifty thousand monkey's using typewriters right this very minute, trying to complete this page. You were just too quick. Please come back later :)</p>
+
+    </div>
+
   </div>
 
-  <div id="editor" class="x-content">
-// Try Scarlet Now :) (Click Here &amp;&amp; WIN=Ctrl-X, MAC=Cmd+X to execute)
-
-// A simple javascript object
-function MyClass() {
-  this.anyProperty = "oldValue";
-  this.anyMethod = function(param1, param2){
-    return 0;
-  };
-}
-
-// Instantiate Scarlet
-var scarlet = new Scarlet();
-
-// Create proxy
-var MyClassProxy = scarlet
-  .intercept(MyClass, scarlet.PROTOTYPE)
-  .using(traceInterceptor)
-  .proxy();
-
-// Instantiate MyClass
-var instance = new MyClassProxy();
-
-// Set property
-instance.anyProperty = "newValue";
-
-// Get property
-var anyResult = instance.anyProperty;
-
-// Execute method
-var result = instance.anyMethod("param1Val", "param2Val");
-  </div>
-
-</div>
-
-<div id="outputContainer" 
-  x-type="x-panel" 
-  class="abs-pos" 
-  x-left="0" 
-  x-width="80%" 
-  x-height="200px" 
-  x-bottom="0">
-
-  <div id="outputTitle" class="x-title">
-    <b>Output</b> - { print("any"); }
-  </div>
-
-  <div id="output" class="x-content">
-  </div>
-
-</div>
-
-<div id="navigationContainer" 
-  x-type="x-panel" 
-  class="abs-pos" 
-  x-right="0" 
-  x-width="20%" 
-  x-top="114px" 
-  x-bottom="0px"
-  x-get-uri="partials/navigation/index.html">
 </div>

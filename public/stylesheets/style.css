@@ -24,6 +24,8 @@ li {
   font-size: 15px;
   font-weight: normal;
   background-color: #8C1717;
+  padding:0;
+  margin:0;
   padding-left: 10px;
   padding-top: 10px;
   width: 100%;

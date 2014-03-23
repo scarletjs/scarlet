@@ -1,14 +1,15 @@
-  <!-- LEFT CONTAINER -->
+  <!-- CONTENT CONTAINER -->
 
   <div 
     id="leftContainer" 
     x-type="x-panel" 
-    x-float="left"
-    x-width="80%">
+    x-width="100%">
 
-    <!-- SAMPLE CONTENT -->
+    <!-- CONTENT -->
     
-    <div id="helpTitle" class="x-title">
+    <div 
+      id="helpTitle" 
+      class="x-title">
       <b>Functions</b> - { Math.min(); }
     </div>
 
@@ -28,7 +29,7 @@
       
       <h1><a name="sampleFunctionLink">Math.min</a></h1>
       
-      <p>In this example we are going to take a look at Math.min and how we can use Scarlet to listen to this function. Later on we will explore how to mutate the results of this function. All code in this page is interactive. Click on it, change it and press Ctrl-X for Windows or Cmd-X for Macintosh to run it and see the results.</p>
+      <p>In this example we are going to take a look at <i><b>Math.min</i></b> and how we can use Scarlet to listen to this function. Later on we will explore how to mutate the results of this function. All code in this page is interactive. Click on it, change it and press Ctrl-X for Windows or Cmd-X for Macintosh to run it and see the results.</p>
       
       <div class="x-spacer-alt x-clear"></div>
 
@@ -60,7 +61,7 @@ print(result);</div>
 
       <h4>Intercepting Math.min</h4>
 
-      <p>Now let's take a look at how we use Scarlet to intercept this function. First we have to instantiate Scarlet. Then we tell Scarlet that we would like to know when Math.min is called. We do this by passing Math.min to the <i><b>intercept</b></i> function. Finally, we define a callback or interceptor function which listens to Math.min through Scarlet's <i><b>using</b></i> function. Proxy is discussed in detail in the <i><b>Proxies</b></i> section. So for now let's assume it always has to be called.</p>
+      <p>Now let's take a look at how we use Scarlet to intercept this function. First we have to instantiate Scarlet. Then we tell Scarlet that we would like to know when <i><b>Math.min</i></b> is called. We do this by passing <i><b>Math.min</i></b> to the <i><b>intercept</b></i> function. Finally, we define a callback or interceptor function which listens to <i><b>Math.min</i></b> through Scarlet's <i><b>using</b></i> function. Proxy is discussed in detail in the <i><b>Proxies</b></i> section. So for now let's assume it always has to be called. If you can't wait click on <i><b>Proxies</b></i>.</p>
 
       <div 
         id="sampleFunctionWithScarletEditor" 
@@ -95,7 +96,7 @@ var result = Math.min(1,2,3);</div>
 
       <h4>Mutating Math.min</h4>
 
-      <p>Now that we have a handle on intercepting. Lets look at mutating the results of what Math.min does by forward Math.min function calls on to the Math.max function instead. We achieve this by replacing the function call to <i><b>method</b></i> with <i><b>Math.max</b></i> in the interceptor. 
+      <p>Now that we have a handle on intercepting. Lets look at mutating the results of what <i><b>Math.min</i></b> does by forward <i><b>Math.min</i></b> function calls on to the <i><b>Math.max</i></b> function instead. We achieve this by replacing the function call to <i><b>method</b></i> with <i><b>Math.max</b></i> in the interceptor. 
 
       <div 
         id="sampleFunctionWithMutationEditorOldLine" 
@@ -147,7 +148,7 @@ var result = Math.min(1,2,3);</div>
         x-height="19px">
       </div>
 
-      <p>See how the result has now changed from 1 to 3? Math.min is now actually a proxy function for Math.max.</p>
+      <p>See how the result has now changed from 1 to 3? <i><b>Math.min</i></b> is now actually a proxy function for <i><b>Math.max</i></b>.</p>
 
       <div class="x-spacer x-clear"></div>
 
@@ -159,9 +160,9 @@ var result = Math.min(1,2,3);</div>
         class="fa fa-bug fa-2x">
       </i> 
       
-      <h1><a name="usefulTipsLink">Useful Tips</a></h1>
+      <h1><a name="disclaimerLink">Disclaimer</a></h1>
       
-      <p>We don't recommend using Scarlet primarily as outlined in this example purely because it is considered bad practice to mess around with global objects like Math.min especially if you are changing their behaviours. This is for demonstration purposes so that you are familiar with how Scarlet intercepts functions. The second important thing to note is that you could also equally have implemented this kind of behaviour without using Scarlet at all! If you are interested in seeing what Scarlet is really useful for please move on to the prototypes section.</p>
+      <p>We don't recommend using Scarlet primarily as outlined in this example purely because it is considered bad practice to mess around with global objects like Object, Math, String etc. especially if you are changing behaviour. This is for demonstration purposes so that you are familiar with how Scarlet intercepts functions. The second important thing to note is that you could also equally have implemented this kind of behaviour without using Scarlet at all! If you are interested in seeing what Scarlet is really useful for please move on to the prototypes section.</p>
       
       <div class="x-spacer x-clear"></div>
 
@@ -169,36 +170,4 @@ var result = Math.min(1,2,3);</div>
 
   </div>
 
-  <!-- RIGHT CONTAINER -->
-
-  <div
-    id="rightContainer"
-    x-type="x-panel"
-    x-position="absolute"
-    x-overflow="scroll"
-    x-right="0"
-    x-width="20%">
-
-    <div
-      id="navContainer"
-      x-type="x-scroll"
-      x-get-uri="partials/navigation/index.html">
-    </div>
-    
-    <div
-      id="subNavContainer"
-      x-type="x-scroll">
-      
-      <div id="helpTitle" class="x-title">
-        <b>Skip Links!?</b> - { for(...) continue; }
-      </div>
-      
-      <div 
-        id="helpWalkthroughs" 
-        x-type="x-links" 
-        class="x-content x-links-alt">
-      </div>
-
-    </div>
-
-  </div>
+</div>

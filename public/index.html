@@ -92,13 +92,41 @@
         x-type="x-panel" 
         x-pos="absolute"
         x-top="114px"
-        x-bottom="0"
-        x-left = "0"
-        x-right="0"
-        x-border="0"
+        x-width="80%"
+        x-left="0"
         class="animated fadeIn"
         x-get-uri="partials/default/index.html">
       </div>
+
+      <div
+        id="rightContainer"
+        x-type="x-panel"
+        x-position="absolute"
+        x-overflow="scroll"
+        x-right="0"
+        x-width="20%">
+
+        <div
+          id="navContainer"
+          x-type="x-panel"
+          x-get-uri="partials/navigation/index.html">
+        </div>
+        
+        <div 
+          id="subNavContainer"
+          x-type="x-panel">
+          
+          <div id="helpTitle" class="x-title">
+            <b>Skip Links!?</b> - { for(...) continue; }
+          </div>
+          
+          <div 
+            id="helpWalkthroughs" 
+            x-type="x-links" 
+            class="x-content x-links-alt">
+          </div>
+
+        </div>
 
     </section>
 

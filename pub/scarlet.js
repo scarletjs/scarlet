@@ -17,7 +17,7 @@ module.exports = {
 };
 
 
-},{"./lib/extensions":4,"assert":18,"events":19,"path":22,"util":24}],2:[function(require,module,exports){
+},{"./lib/extensions":4,"assert":18,"events":21,"path":24,"util":26}],2:[function(require,module,exports){
 module.exports = require("./lib/scarlet.js");
 
 },{"./lib/scarlet.js":17}],3:[function(require,module,exports){
@@ -217,7 +217,7 @@ function Logger() {
 }
 
 module.exports = new Logger();
-},{"./object":6,"assert":18,"util":24}],6:[function(require,module,exports){
+},{"./object":6,"assert":18,"util":26}],6:[function(require,module,exports){
 function ObjectExtended() {
 
 	"use strict";
@@ -368,24 +368,24 @@ function ProxyFunction(proxyInfo, whenCalled) {
 
 	self.wrap = function(replaceFunctionCallback) {
 		g.ext.logger.info(ProxyFunction, "wrap", "Wrapping Proxy Function", [self.proxyInfo]);
-		
 		var actualFunction = self.proxyInfo.instanceOrType;
 		var proxiedFunction = function() {
 			var args = Array.prototype.slice.call(arguments);
+			self.proxyInfo.type.isFunction = true;
 			return self.whenCalled.call(
 				self.proxyInfo.instanceOrType,
 				self.proxyInfo,
 				actualFunction,
 				args);
 		};
-		
+
 		proxiedFunction.__scarlet__ = {};
 		proxiedFunction.__scarlet__.__function__ = actualFunction;
 		self.proxyInfo.instanceOrType = proxiedFunction;
-		
+
 		if (replaceFunctionCallback)
 			replaceFunctionCallback(proxiedFunction);
-		
+
 		return self;
 	};
 
@@ -396,6 +396,7 @@ function ProxyFunction(proxyInfo, whenCalled) {
 }
 
 module.exports = ProxyFunction;
+
 },{"../../include":1}],10:[function(require,module,exports){
 var g = require("../../include");
 
@@ -406,67 +407,74 @@ function ProxyInfo(instanceOrType, memberName) {
 	g.assert(instanceOrType);
 
 	var self = this;
+
+	self.type = {
+		isMethod: false,
+		isFunction: false,
+		isProperty: false,
+		isPrototype: false,
+		isConstructor: false
+	};
+
 	self.memberName = memberName;
 	self.instanceOrType = instanceOrType;
-	self.__isConstructor__ = false;
 	self.__typename__ = "scarlet.lib.proxies.ProxyInfo";
 
-	self.isAllowed = function() {
-		var result = memberName != "__scarlet__";
+	self.reflection = {};
+
+	self.reflection.isAllowed = function() {
+		var result = self.memberName != "__scarlet__";
 		g.ext.logger.debug(ProxyInfo, "isAllowed", "Is Allowed For Proxy?", [result]);
 		return result;
 	};
 
-	self.ensureShadow = function() {
-		if (!self.isPrototype() && !g.ext.object.has(self.instanceOrType, "__scarlet__"))
+	self.reflection.ensureShadow = function() {
+		if (!self.reflection.isPrototype() && !g.ext.object.has(self.instanceOrType, "__scarlet__"))
 			self.instanceOrType.__scarlet__ = {};
 		g.ext.logger.debug(ProxyInfo, "ensureShadow", "Shadow Object Created", [self.instanceOrType]);
 		return self;
 	};
 
-	self.isConstructor = function(){
-		return self.__isConstructor__;
-	};
-
-	self.isMethod = function() {
+	self.reflection.isMethod = function() {
 		var result = !g.ext.object.isNull(self.instanceOrType) && !g.ext.object.isNull(self.memberName) && !g.ext.object.isNull(self.instanceOrType[memberName]) && g.ext.object.isFunction(self.instanceOrType[self.memberName]);
 		g.ext.logger.info(ProxyInfo, "isMethod", "Is Method?", [result]);
 		return result;
 	};
 
-	self.isFunction = function() {
+	self.reflection.isFunction = function() {
 		var result = g.ext.object.isNull(memberName) && g.ext.object.isFunction(self.instanceOrType);
 		g.ext.logger.info(ProxyInfo, "isFunction", "Is Function?", [result]);
 		return result;
 	};
 
-	self.isProperty = function() {
+	self.reflection.isProperty = function() {
 		var result = !g.ext.object.isFunction(self.instanceOrType[self.memberName]);
 		g.ext.logger.info(ProxyInfo, "isProperty", "Is Property?", [result]);
 		return result;
 	};
 
-	self.isInstance = function() {
+	self.reflection.isInstance = function() {
 		this.isFunction();
 		var result = g.ext.object.isNull(memberName) && g.ext.object.isObject(self.instanceOrType);
 		g.ext.logger.info(ProxyInfo, "isInstance", "Is Instance?", [result]);
 		return result;
 	};
 
-	self.isPrototype = function() {
+	self.reflection.isPrototype = function() {
 		var result = g.ext.object.isNull(memberName) && g.ext.object.isFunction(self.instanceOrType) && !g.ext.object.isNull(self.instanceOrType.prototype);
 		g.ext.logger.info(ProxyInfo, "isPrototype", "Is Prototype?", [result]);
 		return result;
 	};
 
-	self.hasMember = function() {
+	self.reflection.hasMember = function() {
 		return !g.ext.object.isNull(self.memberName);
 	};
 
-	self.ensureShadow();
+	self.reflection.ensureShadow();
 }
 
 module.exports = ProxyInfo;
+
 },{"../../include":1}],11:[function(require,module,exports){
 var g = require("../../include");
 
@@ -507,10 +515,10 @@ function ProxyInstance(instance, whenCalled) {
 		g.ext.logger.info(ProxyInstance, "wrap", "Wrapping Instance", [self.instance]);
 		eachMember(function(instance, memberName) {
 			var proxyInfo = new ProxyInfo(self.instance, memberName);
-			if (proxyInfo.isAllowed()) {
-				if (proxyInfo.isMethod()) {
+			if (proxyInfo.reflection.isAllowed()) {
+				if (proxyInfo.reflection.isMethod()) {
 					new ProxyMethod(proxyInfo, whenCalled).wrap();
-				} else if (proxyInfo.isProperty()) {
+				} else if (proxyInfo.reflection.isProperty()) {
 					new ProxyProperty(proxyInfo, whenCalled).wrap();
 				}
 			}
@@ -522,10 +530,10 @@ function ProxyInstance(instance, whenCalled) {
 		g.ext.logger.info(ProxyInstance, "unwrap", "Unwrapping Instance", [self.instance]);
 		eachMember(function(instance, memberName) {
 			var proxyInfo = new ProxyInfo(self.instance, memberName);
-			if (proxyInfo.isAllowed()) {
-				if (proxyInfo.isMethod()) {
+			if (proxyInfo.reflection.isAllowed()) {
+				if (proxyInfo.reflection.isMethod()) {
 					new ProxyMethod(proxyInfo, whenCalled).unwrap();
-				} else if (proxyInfo.isProperty()) {
+				} else if (proxyInfo.reflection.isProperty()) {
 					new ProxyProperty(proxyInfo, whenCalled).unwrap();
 				}
 			}
@@ -535,6 +543,7 @@ function ProxyInstance(instance, whenCalled) {
 }
 
 module.exports = ProxyInstance;
+
 },{"../../include":1,"./proxy-info":10,"./proxy-method":13,"./proxy-property":14}],12:[function(require,module,exports){
 var g = require("../../include");
 
@@ -618,6 +627,7 @@ function ProxyInterceptor(typeOrInstance, memberName) {
 g.util.inherits(ProxyInterceptor, g.events.EventEmitter);
 
 module.exports = ProxyInterceptor;
+
 },{"../../include":1,"./proxy-function":9,"./proxy-info":10,"./proxy-instance":11,"./proxy-method":13,"./proxy-property":14,"./proxy-prototype":15,"./proxy-type":16}],13:[function(require,module,exports){
 var g = require("../../include");
 
@@ -637,6 +647,7 @@ function ProxyMethod(proxyInfo, whenCalled) {
 		self.proxyInfo.instanceOrType.__scarlet__[self.proxyInfo.memberName] = self.proxyInfo.instanceOrType[self.proxyInfo.memberName];
 		self.proxyInfo.instanceOrType[self.proxyInfo.memberName] = function() {
 			var args = Array.prototype.slice.call(arguments);
+			self.proxyInfo.type.isMethod = true;
 			return self.whenCalled.call(
 				self.proxyInfo.instanceOrType,
 				self.proxyInfo,
@@ -655,6 +666,7 @@ function ProxyMethod(proxyInfo, whenCalled) {
 }
 
 module.exports = ProxyMethod;
+
 },{"../../include":1}],14:[function(require,module,exports){
 var g = require("../../include");
 
@@ -670,15 +682,17 @@ function ProxyProperty(proxyInfo, whenCalled) {
 	self.__typename__ = "scarlet.lib.proxies.ProxyProperty";
 
 	var invokeWhenCalledForGet = function() {
+		self.proxyInfo.type.isProperty = true;
 		return whenCalled.call(self.proxyInfo.instanceOrType, self.proxyInfo, function() {
 			return proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName];
-		});
+		}, [proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName]]);
 	};
 
 	var invokeWhenCalledForSet = function(value) {
+		self.proxyInfo.type.isProperty = true;
 		return whenCalled.call(self.proxyInfo.instanceOrType, self.proxyInfo, function() {
 			proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName] = value;
-		});
+		}, [proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName], value]);
 	};
 
 	self.wrap = function() {
@@ -704,6 +718,7 @@ function ProxyProperty(proxyInfo, whenCalled) {
 }
 
 module.exports = ProxyProperty;
+
 },{"../../include":1}],15:[function(require,module,exports){
 var g = require("../../include");
 
@@ -723,7 +738,12 @@ function ProxyPrototype(type, whenCalled) {
 	self.__typename__ = "scarlet.lib.proxies.ProxyPrototype";
 
 	var getArguments = function(args) {
-		return Array.prototype.slice.call(args);
+		var result = Array.prototype.slice.call(args);
+		if (typeof(result) == "undefined")
+			return null;
+		if (typeof(result) != "undefined" && typeof(result.length) != "undefined" && result.length == 0)
+			return null;
+		return result;
 	};
 
 	var initializeShadow = function(thisContext) {
@@ -746,6 +766,7 @@ function ProxyPrototype(type, whenCalled) {
 	var invokeWhenCalled = function(thisContext, proxyInfo, callArguments, resultCallback) {
 		var args = callArguments;
 		var proceed = buildProceed(thisContext, callArguments, resultCallback);
+		proxyInfo.type.isPrototype = true;
 		whenCalled.call(
 			thisContext,
 			proxyInfo,
@@ -757,7 +778,7 @@ function ProxyPrototype(type, whenCalled) {
 		var methodResult = null;
 		var thisContext = this || {};
 		var proxyInfo = new ProxyInfo(type);
-		proxyInfo.__isConstructor__ = true;
+		proxyInfo.type.isConstructor = true;
 		var callArguments = getArguments(arguments);
 		invokeWhenCalled(
 			thisContext,
@@ -783,6 +804,7 @@ function ProxyPrototype(type, whenCalled) {
 }
 
 module.exports = ProxyPrototype;
+
 },{"../../include":1,"./proxy-info":10,"./proxy-instance":11}],16:[function(require,module,exports){
 var g = require("../../include");
 
@@ -846,9 +868,89 @@ function ProxyType() {
 }
 
 module.exports = ProxyType;
+
 },{"../../include":1}],17:[function(require,module,exports){
 var g = require("../include");
 
+var ScarletTrace = function(info, method, args, result){
+
+	g.assert(info, "info=null");
+	g.assert(method, "method=null");
+
+	var self = this;
+
+	self.args = args;
+	self.result = result;
+	self.memberName = info.memberName;
+	self.isConstructor = info.type.isConstructor;
+	self.isPropertyGetter = info.type.isProperty && args.length === 1;
+	self.isPropertySetter = info.type.isProperty && args.length === 2;
+	self.isMethod = info.type.isMethod;
+	self.isFunction = info.type.isFunction;
+	self.hasResult = typeof(result) != "undefined";
+	self.hasArgs = typeof(args) != "undefined";
+	self.argsEmpty = args != null && typeof(args) != "undefined" && args.length === 0;
+
+	self.traceTo = function(io) {
+		var formattedResult =
+			(self.isConstructor)
+				? typeof(this)
+				: (self.isPropertySetter)
+					? args[1]
+					: (!self.hasResult)
+						? "void"
+						: result;
+		var formattedName =
+			(self.isConstructor)
+				? "ctor"
+				: (self.isPropertySetter)
+					? "set " + info.memberName
+					: (self.isPropertyGetter)
+						? "get " + info.memberName
+						: info.memberName;
+		var formattedArgs =
+			(self.isPropertySetter)
+				? args[0]
+				: (self.isPropertyGetter)
+					? ""
+					: (!self.hasArgs)
+						? ""
+						: (self.argsEmpty)
+							? ""
+							: JSON.stringify(args);
+		io(formattedName+"("+formattedArgs+"):"+formattedResult);
+	};
+}
+
+/**
+For creating a new instance of Scarlet
+@namespace scarlet.lib
+@method ctor
+@param {array|string} pluginArr
+@return scarlet.lib.Scarlet
+@example
+
+	var Scarlet = require("scarlet");
+	var scarlet = new Scarlet();
+
+	// A function that does addition
+	function add(arg1, arg2){
+		return arg1 + arg2;
+	}
+
+	// Log arguments and result of add
+	add = scarlet
+		.intercept(add, scarlet.FUNCTION)
+		.using(function(info, method, args){
+			console.log("Adding '" + args[0] + "'' and '" + args[1] + "'");
+			var result = method.call(this, info, method, args);
+			console.log("Result is '" + result + "'");
+			return result;
+		}).proxy();
+
+	add(1,2); // Output -> Adding '1' and '2'\n Result is '3'
+	add(3,5); // Output -> Adding '3' and '5'\n Result is '8'
+*/
 function Scarlet(pluginArr) {
 
 	"use strict";
@@ -865,11 +967,134 @@ function Scarlet(pluginArr) {
 	self.type = new ProxyType().asUndefined();
 	self.__typename__ = "scarlet.lib.Scarlet";
 
-	self.INSTANCE = self.type.asInstance();
-	self.FUNCTION = self.type.asFunction();
 	self.UNDEFINED = self.type.asUndefined();
+
+	/**
+		Constant used to coerce proxy for type only
+		@property INSTANCE
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
+	self.INSTANCE = self.type.asInstance();
+
+	/**
+		Constant used to coerce proxy for a normal function
+		@property FUNCTION
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Function that we would like to intercept
+			function any(arg1, arg2) {
+				return arg1 + arg2;
+			}
+
+			// Create a proxy of the function using scarlet
+			var anyProxy = scarlet
+				.intercept(any, scarlet.FUNCTION)
+				.using(function(info, method, args){
+					// ...
+				}).proxy();
+
+			anyProxy(1,2) // -> will invoke interceptor
+			any(1,2) // -> wont invoke interceptor
+	*/
+	self.FUNCTION = self.type.asFunction();
+
+	/**
+		Constant used to coerce proxy for prototype functions, includes constructor interception
+		@property PROTOTYPE
+		@type scarlet.lib.proxies.ProxyType
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Function or prototypical object that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.anyProperty = 5;
+				self.anyMethod = function(){
+				};
+			}
+
+			MyClass.prototype.anyOtherMethod = function(){
+			};
+
+			// Intercept type
+			MyClass = scarlet
+				.intercept(MyClass)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			var instance = new MyClass(); // -> Calls interceptor for constructor
+			instance.anyMethod(); // -> Calls interceptor again for method
+			instance.anyOtherMethod(); -> Calls interceptor again for prototype function
+			instance.anyProperty = 6; // -> Calls interceptor for the property setter
+			var result = instance.anyProperty; // -> Calls the interceptor again for property getter
+	*/
 	self.PROTOTYPE = self.type.asPrototype();
 
+	/**
+		Method for proxying types, functions and instances
+		@method intercept
+		@param {object} typeOrInstance
+		@param {scarlet.lib.proxies.ProxyType} proxyType
+		@return {scarlet.lib.Scarlet}
+		@chainable
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
 	self.intercept = function(typeOrInstance, proxyType) {
 		g.assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
 		g.assert(proxyType, "Please make sure you supply a type. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());")
@@ -882,6 +1107,44 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
+	/**
+		Method for chaining interceptors onto a proxied type or function
+		@method using
+		@param {Function} callback
+		@return {scarlet.lib.Scarlet}
+		@chainable
+		@example
+
+			var Scarlet = require("scarlet");
+			var scarlet = new Scarlet();
+
+			// Type for that we would like to intercept
+			function MyClass(){
+				var self = this;
+				self.myMethod = function(arg1, arg2){
+					return arg1 + arg2;
+				};
+			}
+
+			// First instantiate the type
+			var instance = new MyClass();
+
+			// Scarlet will only intercept the instance
+			instance = scarlet
+				.intercept(instance, scarlet.INSTANCE)
+				.using(function(info, method, args){ // Interceptor 1
+					return method.call(this, info, method, args);
+				})
+				.using(function(info, method, args){ // Interceptor 2
+					return method.call(this, info, method, args);
+				})
+				.using(function(info, method, args){ // Interceptor 3
+					return method.call(this, info, method, args);
+				}).proxy();
+
+			// Invoke
+			var result = instance.myMethod(1,2);
+	*/
 	self.using = function(callback) {
 		g.assert(callback);
 		g.assert(interceptor);
@@ -906,6 +1169,7 @@ function Scarlet(pluginArr) {
 					self: thisContext
 				});
 			} catch(err){
+				console.log(err);
 				self.emit("error", {
 					info: info,
 					args: args,
@@ -928,6 +1192,11 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
+	/**
+		Method for retrieving a reference to a proxy type, this is for types that need to be instantiated using 'new'
+		@method proxy
+		@return {Object}
+	*/
 	self.proxy = function() {
 		g.assert(interceptor);
 		g.assert(interceptor.observable);
@@ -935,10 +1204,20 @@ function Scarlet(pluginArr) {
 		return interceptor.observable;
 	};
 
+	/**
+		Method for loading a plugin into scarlet
+		@param {String} pluginPath
+		@method load
+		@return {scarlet.lib.Scarlet}
+	*/
 	self.load = function(pluginPath) {
 		g.assert(pluginPath);
 		pluginManager.load(self, pluginPath);
 		return self;
+	};
+
+	self.interceptQuery = function(info, method, args, result){
+		return new ScarletTrace(info, method, args, result);
 	};
 
 	var initializePlugins = function() {
@@ -961,6 +1240,7 @@ function Scarlet(pluginArr) {
 g.util.inherits(Scarlet, g.events.EventEmitter);
 
 module.exports = Scarlet;
+
 },{"../include":1,"./interceptors/interceptor":7,"./plugins/plugin-manager":8,"./proxies/proxy-type":16}],18:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
@@ -1304,621 +1584,14 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":24}],19:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-function EventEmitter() {
-  this._events = this._events || {};
-  this._maxListeners = this._maxListeners || undefined;
-}
-module.exports = EventEmitter;
-
-// Backwards-compat with node 0.10.x
-EventEmitter.EventEmitter = EventEmitter;
-
-EventEmitter.prototype._events = undefined;
-EventEmitter.prototype._maxListeners = undefined;
-
-// By default EventEmitters will print a warning if more than 10 listeners are
-// added to it. This is a useful default which helps finding memory leaks.
-EventEmitter.defaultMaxListeners = 10;
-
-// Obviously not all Emitters should be limited to 10. This function allows
-// that to be increased. Set to zero for unlimited.
-EventEmitter.prototype.setMaxListeners = function(n) {
-  if (!isNumber(n) || n < 0 || isNaN(n))
-    throw TypeError('n must be a positive number');
-  this._maxListeners = n;
-  return this;
-};
-
-EventEmitter.prototype.emit = function(type) {
-  var er, handler, len, args, i, listeners;
-
-  if (!this._events)
-    this._events = {};
-
-  // If there is no 'error' event listener then throw.
-  if (type === 'error') {
-    if (!this._events.error ||
-        (isObject(this._events.error) && !this._events.error.length)) {
-      er = arguments[1];
-      if (er instanceof Error) {
-        throw er; // Unhandled 'error' event
-      } else {
-        throw TypeError('Uncaught, unspecified "error" event.');
-      }
-      return false;
-    }
-  }
-
-  handler = this._events[type];
-
-  if (isUndefined(handler))
-    return false;
-
-  if (isFunction(handler)) {
-    switch (arguments.length) {
-      // fast cases
-      case 1:
-        handler.call(this);
-        break;
-      case 2:
-        handler.call(this, arguments[1]);
-        break;
-      case 3:
-        handler.call(this, arguments[1], arguments[2]);
-        break;
-      // slower
-      default:
-        len = arguments.length;
-        args = new Array(len - 1);
-        for (i = 1; i < len; i++)
-          args[i - 1] = arguments[i];
-        handler.apply(this, args);
-    }
-  } else if (isObject(handler)) {
-    len = arguments.length;
-    args = new Array(len - 1);
-    for (i = 1; i < len; i++)
-      args[i - 1] = arguments[i];
-
-    listeners = handler.slice();
-    len = listeners.length;
-    for (i = 0; i < len; i++)
-      listeners[i].apply(this, args);
-  }
-
-  return true;
-};
-
-EventEmitter.prototype.addListener = function(type, listener) {
-  var m;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events)
-    this._events = {};
-
-  // To avoid recursion in the case that type === "newListener"! Before
-  // adding it to the listeners, first emit "newListener".
-  if (this._events.newListener)
-    this.emit('newListener', type,
-              isFunction(listener.listener) ?
-              listener.listener : listener);
-
-  if (!this._events[type])
-    // Optimize the case of one listener. Don't need the extra array object.
-    this._events[type] = listener;
-  else if (isObject(this._events[type]))
-    // If we've already got an array, just append.
-    this._events[type].push(listener);
-  else
-    // Adding the second element, need to change to array.
-    this._events[type] = [this._events[type], listener];
-
-  // Check for listener leak
-  if (isObject(this._events[type]) && !this._events[type].warned) {
-    var m;
-    if (!isUndefined(this._maxListeners)) {
-      m = this._maxListeners;
-    } else {
-      m = EventEmitter.defaultMaxListeners;
-    }
-
-    if (m && m > 0 && this._events[type].length > m) {
-      this._events[type].warned = true;
-      console.error('(node) warning: possible EventEmitter memory ' +
-                    'leak detected. %d listeners added. ' +
-                    'Use emitter.setMaxListeners() to increase limit.',
-                    this._events[type].length);
-      console.trace();
-    }
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-EventEmitter.prototype.once = function(type, listener) {
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  var fired = false;
-
-  function g() {
-    this.removeListener(type, g);
-
-    if (!fired) {
-      fired = true;
-      listener.apply(this, arguments);
-    }
-  }
-
-  g.listener = listener;
-  this.on(type, g);
-
-  return this;
-};
-
-// emits a 'removeListener' event iff the listener was removed
-EventEmitter.prototype.removeListener = function(type, listener) {
-  var list, position, length, i;
-
-  if (!isFunction(listener))
-    throw TypeError('listener must be a function');
-
-  if (!this._events || !this._events[type])
-    return this;
-
-  list = this._events[type];
-  length = list.length;
-  position = -1;
-
-  if (list === listener ||
-      (isFunction(list.listener) && list.listener === listener)) {
-    delete this._events[type];
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-
-  } else if (isObject(list)) {
-    for (i = length; i-- > 0;) {
-      if (list[i] === listener ||
-          (list[i].listener && list[i].listener === listener)) {
-        position = i;
-        break;
-      }
-    }
-
-    if (position < 0)
-      return this;
-
-    if (list.length === 1) {
-      list.length = 0;
-      delete this._events[type];
-    } else {
-      list.splice(position, 1);
-    }
-
-    if (this._events.removeListener)
-      this.emit('removeListener', type, listener);
-  }
-
-  return this;
-};
-
-EventEmitter.prototype.removeAllListeners = function(type) {
-  var key, listeners;
-
-  if (!this._events)
-    return this;
-
-  // not listening for removeListener, no need to emit
-  if (!this._events.removeListener) {
-    if (arguments.length === 0)
-      this._events = {};
-    else if (this._events[type])
-      delete this._events[type];
-    return this;
-  }
-
-  // emit removeListener for all listeners on all events
-  if (arguments.length === 0) {
-    for (key in this._events) {
-      if (key === 'removeListener') continue;
-      this.removeAllListeners(key);
-    }
-    this.removeAllListeners('removeListener');
-    this._events = {};
-    return this;
-  }
-
-  listeners = this._events[type];
-
-  if (isFunction(listeners)) {
-    this.removeListener(type, listeners);
-  } else {
-    // LIFO order
-    while (listeners.length)
-      this.removeListener(type, listeners[listeners.length - 1]);
-  }
-  delete this._events[type];
-
-  return this;
-};
-
-EventEmitter.prototype.listeners = function(type) {
-  var ret;
-  if (!this._events || !this._events[type])
-    ret = [];
-  else if (isFunction(this._events[type]))
-    ret = [this._events[type]];
-  else
-    ret = this._events[type].slice();
-  return ret;
-};
-
-EventEmitter.listenerCount = function(emitter, type) {
-  var ret;
-  if (!emitter._events || !emitter._events[type])
-    ret = 0;
-  else if (isFunction(emitter._events[type]))
-    ret = 1;
-  else
-    ret = emitter._events[type].length;
-  return ret;
-};
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-
-},{}],20:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-},{}],21:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],22:[function(require,module,exports){
-var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-},{"__browserify_process":21}],23:[function(require,module,exports){
+},{"util/":20}],19:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],24:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2506,6 +2179,618 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"./support/isBuffer":23,"__browserify_process":21,"inherits":20}]},{},[2])
+},{"./support/isBuffer":19,"__browserify_process":23,"inherits":22}],21:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      } else {
+        throw TypeError('Uncaught, unspecified "error" event.');
+      }
+      return false;
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        len = arguments.length;
+        args = new Array(len - 1);
+        for (i = 1; i < len; i++)
+          args[i - 1] = arguments[i];
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    len = arguments.length;
+    args = new Array(len - 1);
+    for (i = 1; i < len; i++)
+      args[i - 1] = arguments[i];
+
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    var m;
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
+    }
+
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      console.trace();
+    }
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  var fired = false;
+
+  function g() {
+    this.removeListener(type, g);
+
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
+
+  g.listener = listener;
+  this.on(type, g);
+
+  return this;
+};
+
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events || !this._events[type])
+    return this;
+
+  list = this._events[type];
+  length = list.length;
+  position = -1;
+
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position < 0)
+      return this;
+
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
+
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
+
+  return this;
+};
+
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
+
+  if (!this._events)
+    return this;
+
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
+
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
+
+  listeners = this._events[type];
+
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  var ret;
+  if (!emitter._events || !emitter._events[type])
+    ret = 0;
+  else if (isFunction(emitter._events[type]))
+    ret = 1;
+  else
+    ret = emitter._events[type].length;
+  return ret;
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
+},{}],22:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],23:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
+},{}],24:[function(require,module,exports){
+var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+},{"__browserify_process":23}],25:[function(require,module,exports){
+module.exports=require(19)
+},{}],26:[function(require,module,exports){
+module.exports=require(20)
+},{"./support/isBuffer":25,"__browserify_process":23,"inherits":22}]},{},[2])
 (2)
 });

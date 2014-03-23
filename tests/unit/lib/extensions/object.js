@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 describe("Given lib/extensions/Object", function(){
 
@@ -27,7 +27,7 @@ describe("Given lib/extensions/Object", function(){
 
 		it("Then should find 'anyProperty' on a named function", function(){
 			var hasPropertyOnType = ext.object.has(new NamedFunction(), "anyProperty");
-			g.assert(hasPropertyOnType);
+			assert(hasPropertyOnType);
 		});
 
 	});
@@ -38,15 +38,15 @@ describe("Given lib/extensions/Object", function(){
 		var undefObj = undefined;
 
 		it("Then should return true for null reference", function(){
-			g.assert(ext.object.isNull(nullObj));
+			assert(ext.object.isNull(nullObj));
 		});
 
 		it("Then should return true for undefined", function(){
-			g.assert(ext.object.isNull(undefObj));
+			assert(ext.object.isNull(undefObj));
 		});
 
 		it("Then should return false for non null reference", function(){
-			g.assert(!ext.object.isNull(new function(){}));
+			assert(!ext.object.isNull(new function(){}));
 		});
 
 	});

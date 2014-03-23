@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 describe("Given lib/extensions/Enumerable", function(){
 
@@ -16,13 +16,13 @@ describe("Given lib/extensions/Enumerable", function(){
 		});
 
 		it("Then our callback should execute 3 times", function(){
-			g.assert(counter == 3, "Callback for array was not executed correctly");
+			assert(counter == 3, "Callback for array was not executed correctly");
 		});
 
 		it("Then we should be called with all the array element values", function(){
-			g.assert(result[0] == "apple", "Could not find array element 'apple'");
-			g.assert(result[1] == "pear", "Could not find array element 'pear'");
-			g.assert(result[2] == "bananna", "Could not find array element 'bananna'");
+			assert(result[0] == "apple", "Could not find array element 'apple'");
+			assert(result[1] == "pear", "Could not find array element 'pear'");
+			assert(result[2] == "bananna", "Could not find array element 'bananna'");
 		});
 
 	});
@@ -45,13 +45,13 @@ describe("Given lib/extensions/Enumerable", function(){
 		});
 
 		it("Then our callback should execute 3 times", function(){
-			g.assert(counter == 3, "Callback for function was not executed correctly");
+			assert(counter == 3, "Callback for function was not executed correctly");
 		});
 
 		it("Then we should be called with all the array element values", function(){
-			g.assert(result[0] == "apple", "Could not find array element 'apple'");
-			g.assert(result[1] == "pear", "Could not find array element 'pear'");
-			g.assert(result[2] == "bananna", "Could not find array element 'bananna'");
+			assert(result[0] == "apple", "Could not find array element 'apple'");
+			assert(result[1] == "pear", "Could not find array element 'pear'");
+			assert(result[2] == "bananna", "Could not find array element 'bananna'");
 		});
 
 	});
@@ -68,13 +68,13 @@ describe("Given lib/extensions/Enumerable", function(){
 		})
 
 		it("Then our callback should execute 3 times", function(){
-			g.assert(counter == 3, "Callback for string was not executed correctly");
+			assert(counter == 3, "Callback for string was not executed correctly");
 		});
 
 		it("Then we should be called with all the array element values", function(){
-			g.assert(result[0] == "A", "Could not find character 'A'");
-			g.assert(result[1] == "B", "Could not find character 'B'");
-			g.assert(result[2] == "C", "Could not find character 'C'");
+			assert(result[0] == "A", "Could not find character 'A'");
+			assert(result[1] == "B", "Could not find character 'B'");
+			assert(result[2] == "C", "Could not find character 'C'");
 		});
 
 	});

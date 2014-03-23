@@ -19,7 +19,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 		interceptor
 			.intercept(
 				function(proceed,args,info) {
-					var methodResult = proceed();
+					var methodResult = proceed.apply(this, args);
 					var result = {
 						info: info,
 						method: proceed,

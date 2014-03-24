@@ -43,7 +43,6 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 		interceptor.reset();
 		return self;
 	};
-
-};
+}
 
 module.exports = AssertionBuilder;

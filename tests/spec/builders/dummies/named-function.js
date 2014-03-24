@@ -19,6 +19,6 @@ function NamedFunction(){
 		self.methodCalled = false;
 		self.methodWithReturnCalled = false;
 	};
-};
+}
 
 module.exports = NamedFunction;

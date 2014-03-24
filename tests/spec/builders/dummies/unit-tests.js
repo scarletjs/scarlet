@@ -5,7 +5,7 @@ var scarlet = new Scarlet();
 
 describe("NamedFunction", function() {
 
-	var NamedFunction = require("./named-function");;
+	var NamedFunction = require("./named-function");
 	var instance = new NamedFunction();
 
 	describe("#method", function() {
@@ -50,7 +50,7 @@ describe("ObjectLiteral", function() {
 
 describe("PrototypeFunction", function() {
 
-	var PrototypeFunction = require("./prototype-function");;
+	var PrototypeFunction = require("./prototype-function");
 	var instance = new PrototypeFunction();
 
 	describe("#method", function() {
@@ -73,7 +73,7 @@ describe("PrototypeFunction", function() {
 
 describe("UnnamedFunction", function() {
 
-	var UnnamedFunction = require("./unnamed-function");;
+	var UnnamedFunction = require("./unnamed-function");
 	var instance = new UnnamedFunction();
 
 	describe("#method", function() {

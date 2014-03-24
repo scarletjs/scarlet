@@ -42,10 +42,10 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 
 	self.methodCalled = function(times) {
 		self.log.debug(InterceptorBuilder, "methodCalled", "Inside Method Called", [self.interceptor, self.interceptor.results]);
-		if (typeof(times) == "undefined")
+		if (typeof(times) === "undefined")
 			assert(self.interceptor.results["method"].timesCalled > 0);
 		else
-			assert(self.interceptor.results["method"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["method"].timesCalled);
+			assert(self.interceptor.results["method"].timesCalled === times, "Expected " + times + " call(s) but only got " + self.interceptor.results["method"].timesCalled);
 		return self;
 	};
 
@@ -77,7 +77,6 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 		self.log.debug(InterceptorBuilder, InterceptorBuilder, "Replacing Instances with Proxies", proxiedInstances);
 		replaceInstancesCallback(proxiedInstances);
 	}
-
-};
+}
 
 module.exports = InterceptorBuilder;

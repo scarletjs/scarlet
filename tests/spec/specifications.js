@@ -77,14 +77,14 @@ describe("Given we are using scarlet", function() {
 				return result;
 			}
 
-			function someFunction() {
+			var someFunction = function() {
 				var self = this;
 				self.memberProperty1 = "any";
 				self.memberFunction1 = function() {};
 				self.memberFunction2 = function() {};
-			}
+			};
 
-			someFunction = scarlet.intercept(someFunction, scarlet.PROTOTYPE) //-> memberFunction1 and 2 will now be intercepted
+			someFunction = scarlet.intercept(someFunction) //-> memberFunction1 and 2 will now be intercepted
 				.using(someInterceptor)
 				.proxy();
 

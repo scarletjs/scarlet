@@ -31,7 +31,7 @@ describe("Given lib/extensions/Enumerable", function(){
 
 		function Fake(){
 			this.apple = 1;
-			this.pear = function(){}
+			this.pear = function(){};
 			this.bananna = null;
 		}
 
@@ -65,7 +65,7 @@ describe("Given lib/extensions/Enumerable", function(){
 		ext.enumerable.forEach(instance, function(character) {
 			counter++;
 			result.push(character);
-		})
+		});
 
 		it("Then our callback should execute 3 times", function(){
 			assert(counter == 3, "Callback for string was not executed correctly");

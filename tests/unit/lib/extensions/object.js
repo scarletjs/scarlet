@@ -8,12 +8,12 @@ describe("Given lib/extensions/Object", function(){
 
 		function NamedFunction(){
 			this.anyProperty = "any";
-			this.anyMethod = function(){}
+			this.anyMethod = function(){};
 		}
 
 		var UnamedFunction = function(){
 			this.anyProperty = "any";
-			this.anyMethod = function(){}
+			this.anyMethod = function(){};
 		};
 
 		var ObjectLiteral = {
@@ -23,7 +23,7 @@ describe("Given lib/extensions/Object", function(){
 
 		function PrototypeFunction(){}
 		PrototypeFunction.prototype.anyProperty = "any";
-		PrototypeFunction.prototype.anyMethod = function(){}
+		PrototypeFunction.prototype.anyMethod = function(){};
 
 		it("Then should find 'anyProperty' on a named function", function(){
 			var hasPropertyOnType = ext.object.has(new NamedFunction(), "anyProperty");
@@ -34,19 +34,16 @@ describe("Given lib/extensions/Object", function(){
 
 	describe("When #isNull()", function(){
 
-		var nullObj = null;
-		var undefObj = undefined;
-
 		it("Then should return true for null reference", function(){
-			assert(ext.object.isNull(nullObj));
+			assert(ext.object.isNull(null));
 		});
 
 		it("Then should return true for undefined", function(){
-			assert(ext.object.isNull(undefObj));
+			assert(ext.object.isNull(undefined));
 		});
 
 		it("Then should return false for non null reference", function(){
-			assert(!ext.object.isNull(new function(){}));
+			assert(!ext.object.isNull(function(){}));
 		});
 
 	});

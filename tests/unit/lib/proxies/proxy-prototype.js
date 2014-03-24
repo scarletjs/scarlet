@@ -10,7 +10,7 @@ AnyClass.prototype.prototypeProperty = "anyPrototypeValue";
 
 AnyClass.prototype.prototypeMethod = function(val) {
 	return val;
-}
+};
 
 describe("Given /lib/proxies/ProxyPrototype", function() {
 

@@ -6,9 +6,9 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 	var enumerable = require("../../../../lib/extensions/enumerable");
 	describe("When #ctor() with a normal function", function() {
 
-		function AnyFunction(anyParameter) {
+		var AnyFunction = function(anyParameter) {
 			return anyParameter;
-		}
+		};
 
 		var methodCalls = [];
 		var interceptor = new ProxyInterceptor(AnyFunction);
@@ -48,7 +48,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 
 	describe("When #ctor() with named function", function() {
 		
-		function AnyClass() {
+		var AnyClass = function  () {
 			var self = this;
 			self.methodCalled = false;
 			self.anyProperty = "anyValue";
@@ -56,7 +56,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				self.methodCalled = true;
 				return anyParameter;
 			};
-		}
+		};
 
 		var methodCalls = [];
 		var interceptor = new ProxyInterceptor(AnyClass);

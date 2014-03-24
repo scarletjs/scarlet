@@ -46,9 +46,6 @@ describe("Given /lib/Scarlet", function() {
 					callQueries.push(query);
 					return result;
 				})
-				.on('error',function(error){
-					console.log("ERROR"+error);
-				})
 				.proxy();
 
 		beforeEach(function() {

@@ -1,6 +1,6 @@
 var assert = require("assert");
 var inspect = require("util").inspect;
-var ll = function(val) { console.log(inspect(val)); }
+var ll = function(val) { console.log(inspect(val)); };
 
 describe("Given /lib/interceptors/Interceptor", function(){
 
@@ -36,7 +36,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 				return proceed();
 			};
 
-			var interceptor3Args = null
+			var interceptor3Args = null;
 			var interceptor3Called = false;
 			var interceptor3 = function(proceed,info){
 				interceptor3Called = true;
@@ -66,4 +66,4 @@ describe("Given /lib/interceptors/Interceptor", function(){
 
 	});
 
-})
+});

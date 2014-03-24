@@ -49,7 +49,6 @@ li {
 
 .x-content {
   overflow: auto;
-  overflow-y:scroll;
   color: #929292;
   background-color: #232323;
   width: 100%;
@@ -88,7 +87,6 @@ li {
 
 .x-links {
   font-size: 30px;
-  overflow:scroll;
   opacity: 0.6;
 }
 
@@ -98,7 +96,6 @@ li {
 
 .x-links-alt {
   font-size: 24px;
-  overflow: scroll;
   opacity: 0.6;
 }
 

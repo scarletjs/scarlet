@@ -1,6 +1,6 @@
 var assert = require("assert");
 var dummies = require("./dummies");
-var logger = require("../../../lib/extensions/enumerable");
+var logger = require("../../../lib/extensions/logger");
 var enumerable = require("../../../lib/extensions/enumerable");
 
 function ScarletBuilder(scarlet){

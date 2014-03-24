@@ -78,5 +78,28 @@ describe("Given lib/extensions/Enumerable", function(){
 		});
 
 	});
+	describe("When #mapSeries() ", function(){
+		var didCallFunction1 = false;
+		var didCallFunction2 = false;
+		var lastFunction;
+		beforeEach(function(){
+			var f1 = function(callback){ didCallFunction1 = true; callback();};
+			var f2 = function(callback){didCallFunction2 =true; callback()};
+
+			ext.enumerable.mapSeries([f1,f2],function(func,callback){
+				lastFunction = func;
+				if(!func)
+					return;
+				func(callback)
+			})			
+		})
+		it("Then last function should be undefined",function(){
+			assert(lastFunction === undefined);
+		});
+		it("Then should call for each function",function(){
+			assert(didCallFunction1 === true);
+			assert(didCallFunction1 === true);
+		});
+	});
 
 });

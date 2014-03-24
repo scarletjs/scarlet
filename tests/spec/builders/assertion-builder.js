@@ -1,16 +1,16 @@
 var assert = require("assert");
 var dummies = require("./dummies");
+var logger = require("../../../lib/extensions/logger");
 var enumerable = require("../../../lib/extensions/enumerable");
 
 function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
 	var self = this;
-	self.log = scarletBuilder.log;
 
 	self.methodWasCalled = function(){
-		self.log.debug(AssertionBuilder, "methodWasCalled", "Checking Methods Called");
+		logger.debug(AssertionBuilder, "methodWasCalled", "Checking Methods Called");
 		enumerable.forEach(instances, function(instance){
-			self.log.info(AssertionBuilder, "methodWasCalled", "Asserting Method Called for Instance", [instance]);
+			logger.info(AssertionBuilder, "methodWasCalled", "Asserting Method Called for Instance", [instance]);
 			assert(instance.methodCalled);
 		});
 		interceptor.methodCalled();
@@ -19,7 +19,7 @@ function AssertionBuilder(scarletBuilder, instances, interceptor) {
 
 	self.methodWithReturnWasCalled = function(){
 		enumerable.forEach(instances, function(instance){
-			self.log.info(AssertionBuilder, "methodWithReturnWasCalled", "Asserting Method With Return Called for Instance", [instance]);
+			logger.info(AssertionBuilder, "methodWithReturnWasCalled", "Asserting Method With Return Called for Instance", [instance]);
 			assert(instance.methodWithReturnCalled);
 		});
 		interceptor.methodWithReturnCalled();

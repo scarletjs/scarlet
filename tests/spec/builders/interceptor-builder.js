@@ -1,5 +1,6 @@
 var assert = require("assert");
 var dummies = require("./dummies");
+var logger = require("../../../lib/extensions/logger");
 var object = require("../../../lib/extensions/object");
 var enumerable = require("../../../lib/extensions/enumerable");
 
@@ -9,11 +10,10 @@ function Interceptor(scarletBuilder) {
 	self.results = [];
 	self.timesCalled = 0;
 	self.proxyInfo = null;
-	self.log = scarletBuilder.log;
 
 	self.intercept = function(proceed,info) {
 		
-		self.log.debug(Interceptor, "methodCalled", "Inside Interceptor ", [self, info]);
+		logger.debug(Interceptor, "methodCalled", "Inside Interceptor ", [self, info]);
 
 		var memberName = info.memberName();
 		if (typeof(self.results[memberName]) == "undefined")
@@ -37,11 +37,10 @@ function Interceptor(scarletBuilder) {
 function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback) {
 
 	var self = this;
-	self.log = scarletBuilder.log;
 	self.interceptor = new Interceptor(scarletBuilder);
 
 	self.methodCalled = function(times) {
-		self.log.debug(InterceptorBuilder, "methodCalled", "Inside Method Called", [self.interceptor, self.interceptor.results]);
+		logger.debug(InterceptorBuilder, "methodCalled", "Inside Method Called", [self.interceptor, self.interceptor.results]);
 		if (typeof(times) === "undefined")
 			assert(self.interceptor.results["method"].timesCalled > 0);
 		else
@@ -50,11 +49,11 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 	};
 
 	self.methodWithReturnCalled = function(times) {
-		self.log.debug(InterceptorBuilder, "methodWithReturnCalled", "Inside Method With Return Called", [self.interceptor, self.interceptor.results]);
+		logger.debug(InterceptorBuilder, "methodWithReturnCalled", "Inside Method With Return Called", [self.interceptor, self.interceptor.results]);
 		if (typeof(times) == "undefined")
 			assert(self.interceptor.results["methodWithReturn"].timesCalled > 0);
 		else
-			assert(self.interceptor.results["methodWithReturn"].timesCalled == times, "Expected " + times + " call(s) but only got " + self.interceptor.results["methodWithReturn"].timesCalled);
+			assert(self.interceptor.results["methodWithReturn"].timesCalled === times, "Expected " + times + " call(s) but only got " + self.interceptor.results["methodWithReturn"].timesCalled);
 		return self;
 	};
 
@@ -74,7 +73,7 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 	});
 
 	if (!object.isNull(replaceInstancesCallback)) {
-		self.log.debug(InterceptorBuilder, InterceptorBuilder, "Replacing Instances with Proxies", proxiedInstances);
+		logger.debug(InterceptorBuilder, InterceptorBuilder, "Replacing Instances with Proxies", proxiedInstances);
 		replaceInstancesCallback(proxiedInstances);
 	}
 }

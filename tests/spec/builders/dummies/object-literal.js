@@ -1,6 +1,4 @@
 function createNew() {
-	var BuilderLogger = require("./../builder-logger");
-	var log = new BuilderLogger();
 
 	var instance = {
 		methodCalled: false,
@@ -10,12 +8,10 @@ function createNew() {
 
 	instance.method = function() {
 		instance.methodCalled = true;
-		log.debug(instance, "method", "Set instance.methodCalled", [instance]);
 	};
 
 	instance.methodWithReturn = function() {
 		instance.methodWithReturnCalled = true;
-		log.debug(instance, "method", "Set instance.methodWithReturnCalled", [instance]);
 		return "any";
 	};
 

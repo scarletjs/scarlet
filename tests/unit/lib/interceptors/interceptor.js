@@ -4,14 +4,11 @@ var ll = function(val) { console.log(inspect(val)); }
 
 describe("Given /lib/interceptors/Interceptor", function(){
 
-	var ProxyType = require("../../../../lib/proxies/proxy-type");
 	var Interceptor = require("../../../../lib/interceptors/interceptor");
 
 	describe("When using multiple interceptors", function(){
 
 		it("Then I should have a fully working call cycle", function(){
-
-			var type = new ProxyType().asPrototype();
 
 			var thisContext = {};
 
@@ -53,7 +50,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 			};
 
 			interceptor
-				.intercept(target, replace, type)
+				.intercept(target, replace)
 				.using(interceptor1)
 				.using(interceptor2)
 				.using(interceptor3);

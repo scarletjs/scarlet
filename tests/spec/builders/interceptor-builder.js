@@ -67,7 +67,7 @@ function InterceptorBuilder(scarletBuilder, instances, replaceInstancesCallback)
 		var proxiedTypeOrInstance =
 			scarletBuilder
 				.scarlet
-				.intercept(instance, scarletBuilder.scarlet.type.asInstance())
+				.intercept(instance)
 				.using(self.interceptor.intercept)
 				.proxy();
 		proxiedInstances.push(proxiedTypeOrInstance);

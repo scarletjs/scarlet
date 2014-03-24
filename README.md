@@ -19,7 +19,7 @@ The simple fast javascript interceptor.
 var Scarlet = require('scarlet');
 var scarlet = Scarlet();
 
-Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
+Math.min = scarlet.intercept(Math.min)
                 .using(function(proceed){ 
                     console.log("In interceptor");
                     proceed(); 
@@ -64,7 +64,7 @@ Here is an example where we intercept Math.min using an anonymous function as an
 var Scarlet = require('scarlet');
 var scarlet = new Scarlet();
 
-Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
+Math.min = scarlet.intercept(Math.min)
     .using(function(proceed){
         proceed();
     }).proxy();
@@ -78,7 +78,7 @@ We could just as easily change the behaviour or Math.min to always return the re
 var Scarlet = require('scarlet');
 var scarlet = new Scarlet();
 
-Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
+Math.min = scarlet.intercept(Math.min)
     .using(function(proceed, invocation){ 
         proceed();
         invocation.result = Math.max(invocation.args);
@@ -116,7 +116,7 @@ function MyClass() {
 }
 
 MyProxiedClass = scarlet
-    .intercept(MyClass, scarlet.PROTOTYPE)
+    .intercept(MyClass)
     .using(myInterceptor)
     .proxy();
 
@@ -141,7 +141,7 @@ function myInterceptor(info, method, args){}
 function myFunction(any) {/*do stuff*/}
 
 myFunction = scarlet
-    .intercept(myFunction, scarlet.FUNCTION)
+    .intercept(myFunction)
     .using(function(proceed, invocation){
         var thisContext = this;
         process.nextTick(function(){ //Asynchronous interceptor method dispatch
@@ -186,7 +186,7 @@ Scarlet interceptors emit the following events:
  - **error**: emitted if an error occurs
 
 ```javascript
-Scarlet.intercept(Math.min, scarlet.FUNCTION)
+Scarlet.intercept(Math.min)
         .on('before', beforeFunction)
         .on('after', afterFunction)
         .on('done', doneFunction)
@@ -343,7 +343,7 @@ Here is a sample page.
                 console.log("In doStuff");
             }
             doStuff = scarlet
-                .intercept(doStuff, scarlet.FUNCTION)
+                .intercept(doStuff)
                 .using(interceptor)
                 .proxy();
 

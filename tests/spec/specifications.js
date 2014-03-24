@@ -10,7 +10,6 @@ describe("Given we are using scarlet", function() {
 
 		var assertThat =
 			builder.for(scarlet)
-				.withNamedFunction()
 				.withInstances()
 				.withInterceptor()
 				.invokeAll()
@@ -23,15 +22,16 @@ describe("Given we are using scarlet", function() {
 	});
 
 	describe("When intercepting Math.min", function() {
-
+		var original = Math.min;
+		beforeEach(function(){
+			Math.min = original;
+		});
 		it("Should call out to the interceptor", function() {
 
 			var interceptorCalled = false;
 			
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
 				.using(function(proceed, info) {
-					console.log(info.memberName());
-					console.log(info.contextName());
 					proceed();
 					interceptorCalled = true;
 				}).proxy();

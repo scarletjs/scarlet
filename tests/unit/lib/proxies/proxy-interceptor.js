@@ -2,12 +2,9 @@ var assert = require("assert");
 
 describe("Given /lib/proxies/ProxyInterceptor", function() {
 
-	var ProxyType = require("../../../../lib/proxies/proxy-type");
 	var ProxyInterceptor = require("../../../../lib/proxies/proxy-interceptor");
 	var enumerable = require("../../../../lib/extensions/enumerable");
 	describe("When #ctor() with a normal function", function() {
-
-		var type = new ProxyType().asPrototype();
 
 		function AnyFunction(anyParameter) {
 			return anyParameter;
@@ -32,7 +29,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				},
 				function(observableType) {
 					AnyFunction = observableType;
-				}, type);
+				});
 
 		beforeEach(function() {
 			methodCalls = [];
@@ -50,8 +47,6 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 	});
 
 	describe("When #ctor() with named function", function() {
-
-		var type = new ProxyType().asPrototype();
 		
 		function AnyClass() {
 			var self = this;
@@ -82,7 +77,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				},
 				function(observableType) {
 					AnyClass = observableType;
-				}, type);
+				});
 
 		beforeEach(function() {
 			methodCalls = [];

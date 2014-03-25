@@ -26,7 +26,7 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 			    exec: function(editor) {
 			    	dispatchEvent();
 			    },
-			    readOnly: false
+			    readOnly: true
 			});
 		};
 
@@ -34,11 +34,15 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 			self.editor = ace.edit(self.id);
 			self.editor.setTheme("ace/theme/clouds_midnight");
 			self.editor.getSession().setMode("ace/mode/javascript");
-			self.editor.setReadOnly(false);
-			self.editor.setShowPrintMargin(false);
-			self.editor.getSession().setTabSize(4);
-			self.editor.setHighlightActiveLine(true);
-			self.editor.getSession().setUseWrapMode(false);
+			// One of these properties are evil
+			//self.editor.setReadOnly(false);
+			//self.editor.setShowPrintMargin(false);
+			//self.editor.getSession().setTabSize(4);
+			//self.editor.setHighlightActiveLine(true);
+			//self.editor.getSession().setUseWrapMode(false);
+			var code = self.editor.getValue();
+			self.editor.setValue("");
+			setTimeout(function(){ self.editor.setValue(code); /*setTimeout(function(){self.fireEvents();}, 1500);*/ }, 1500);
 			console.log("XEditorElement::createEditor for " + self.id);
 		};
 

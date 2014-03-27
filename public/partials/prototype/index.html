@@ -10,7 +10,7 @@
     <div 
       id="helpTitle" 
       class="x-title">
-      <b>Coming Soon!</b> - { process.quickSort(); }
+      <b>Prototypes</b> - { Object.create(myType); }
     </div>
 
     <div 
@@ -24,12 +24,147 @@
         x-type="x-panel" 
         x-float="left" 
         x-margin="4px"
-        class="fa fa-frown-o fa-2x">
+        class="fa fa-code fa-2x">
       </i> 
       
-      <h1><a name="sampleFunctionLink">Coming Soon!</a></h1>
+      <div x-shell-addref class="hidden">
+function Comment(content, email) {
+  var self = this;
+  self.email = email;
+  self.content = content;
+  self.created = new Date();
+}
+
+function Blog(title, content, author) {
+  var self = this;
+  self.comments = [];
+  self.title = title;
+  self.author = author;
+  self.content = content;
+  self.created = new Date();
+  self.addComment = function(comment){
+    self.comments.push(comment);
+  };
+}</div>
+
+      <h1><a name="prototypesLink">Prototypes</a></h1>
       
-      <p>We have fifty thousand monkey's using typewriters right this very minute, trying to complete this page. You were just too quick. Please come back later :)</p>
+      <p>Here we take a look at using Scarlet with JavaScript prototypes(or javascript objects). Scarlet is really good at
+        discovering constructors, properties and methods of instances and prototype definitions using the same API.</p>
+      
+      <div class="x-spacer-alt x-clear"></div>
+
+      <h4><a name="prototypesLink">An Object</a></h4>
+
+      <p>For the purposes of the rest of this article let's assume an example prototype. A blog for the purposes of driving
+        the domain of executing a blogging site. We have a <b><i>Comment</b></i> which is what users who read the blog leave behind. The blog itself is composed of a title and content in text format. Lets define and instantiate them. They will be omitted from the rest of the examples in this page just trust that they magically exist :) </p>
+
+      <div 
+        id="prototypeExampleObjectEditor" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="385px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#prototypeExampleObjectOutput">
+function Comment(content, email) {
+  var self = this;
+  self.email = email;
+  self.content = content;
+  self.created = new Date();
+}
+
+function Blog(title, content, author) {
+  var self = this;
+  self.comments = [];
+  self.title = title;
+  self.author = author;
+  self.content = content;
+  self.created = new Date();
+  self.addComment = function(comment){
+    self.comments.push(comment);
+  };
+}
+
+var anyBlog = new Blog("Example", "Hello World!", "anon");
+anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
+print("Completed creating objects!");
+</div>
+
+      <!-- THIS INDENT FOR NEXT -->
+      <div 
+        id="prototypeExampleObjectOutput" 
+        class="x-border x-output"
+        x-type="x-output"
+        x-margin="10px"
+        x-width="100%"
+        x-height="19px">
+      </div>
+
+      <div class="x-spacer-alt x-clear"></div>
+
+      <h4><a name="prototypesWithScarletLink">With Scarlet</a></h4>
+
+      <p>Now we are going to use Scarlet to build a naive logging interceptor. We will run the Blog prototype through Scarlet and use it's proxy for instantiating the same <b><i>anyArticle</i></b> you saw in the earlier code example. When we run the example we should see output relating to how the interceptor get's called.</p>
+
+      <div 
+        id="prototypeExampleWithScarletObjectEditor" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="610px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#prototypeExampleWithScarletObjectOutput">
+var scarlet = new Scarlet();
+
+var formatMember = function(info, args){
+  if (info.type.isConstructor)
+    return "ctor";
+  if (info.type.isProperty &amp;&amp; (args &amp;&amp; args.length === 1))
+    return "get prop '" + info.memberName + "'";
+  if (info.type.isProperty &amp;&amp; (args &amp;&amp; args.length === 2))
+    return "set prop '" + info.memberName + "'=" + args[1]+ "";
+  return "member '" + info.memberName + "'";
+};
+
+var formatArgs = function(args){
+  return !_.isEmpty(args) ? "called with args " + JSON.stringify(args) + "'" : "";
+};
+
+var formatResult = function(result){
+  return !_.isEmpty(result) ? "with result " + JSON.stringify(result) : "";
+};
+
+var loggingInterceptor = function(info, method, args){
+  var result = method.call(this, info, method, args);
+  print(formatMember(info, args) + " " + formatArgs(args) + " " + formatResult(result));
+  return result;
+};
+
+var BlogProxy = scarlet
+  .intercept(Blog, scarlet.PROTOTYPE)
+  .using(loggingInterceptor)
+  .proxy();
+
+var anyBlog = new BlogProxy("Example", "Hello World!", "anon");
+anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
+anyBlog.title = "New Title";
+anyBlog.content = "New Content";
+print("Completed creating objects!");
+</div>
+
+      <!-- THIS INDENT FOR NEXT -->
+      <div 
+        id="prototypeExampleWithScarletObjectOutput" 
+        class="x-border x-output"
+        x-type="x-output"
+        x-margin="10px"
+        x-width="100%"
+        x-height="93px">
+      </div>
+
 
     </div>
 

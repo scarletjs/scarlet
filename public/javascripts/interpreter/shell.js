@@ -1,4 +1,4 @@
-define("interpreter/shell", ["lodash", "scarlet"], function(_, Scarlet) {
+define("interpreter/shell", ["lodash", "jquery", "scarlet", "library/x-get"], function(_, $, Scarlet, XGet) {
 	function Shell() {
 
 		var self = this;
@@ -20,7 +20,17 @@ define("interpreter/shell", ["lodash", "scarlet"], function(_, Scarlet) {
 
 			try
 			{
-				eval(command);
+				new XGet("div[x-shell-addref]", "shell-addref-visited")
+					.forEach(function(xgetElement) {
+						var $element = $(xgetElement.element);
+						var refs = $element.html();
+						$element.attr("x-shell-ref-live", refs);
+						console.log("XShell::execute adding permanent reference to {0} for page lifecycle".format($element.html()))
+					});
+				var refs = $("[x-shell-ref-live]").html();
+				var code = refs + ";" + command;
+				console.log("XShell::executing code {0}".format(code))
+				eval(code);
 			} catch (err) {
 				__outputBuffer += err.toString();
 			}

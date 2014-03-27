@@ -87,7 +87,7 @@ function Blog(title, content, author) {
   };
 }
 
-var anyBlog = new Blog("Example", "Hello World!", "anon");
+var anyBlog = new Blog("Example", "Hello World!", "anonymous");
 anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
 print("Completed creating objects!");
 </div>
@@ -119,35 +119,35 @@ print("Completed creating objects!");
         x-output="#prototypeExampleWithScarletObjectOutput">
 var scarlet = new Scarlet();
 
-var formatMember = function(info, args){
-  if (info.type.isConstructor)
+function formatMember(info, args){
+  if (info.type.isConstructor) 
     return "ctor";
   if (info.type.isProperty &amp;&amp; (args &amp;&amp; args.length === 1))
     return "get prop '" + info.memberName + "'";
   if (info.type.isProperty &amp;&amp; (args &amp;&amp; args.length === 2))
-    return "set prop '" + info.memberName + "'=" + args[1]+ "";
+    return "set prop '" + info.memberName + "'='" + args[1]+ "'";
   return "member '" + info.memberName + "'";
-};
+}
 
-var format = function(result){
-  return !_.isEmpty(result) ? "with result " + JSON.stringify(result) : "";
-};
+function formatArgs(result){
+  return !_.isEmpty(result) ? "with " + JSON.stringify(result) : "";
+}
 
-var loggingInterceptor = function(info, method, args){
+function logger(info, method, args){
   var result = method.call(this, info, method, args);
-  print(formatMember(info, args) + " " + format(args) + " " + format(result));
+  print(formatMember(info, args) + " " + formatArgs(args) + " " + formatArgs(result));
   return result;
-};
+}
 
 var BlogProxy = scarlet
   .intercept(Blog, scarlet.PROTOTYPE)
-  .using(loggingInterceptor)
+  .using(logger)
   .proxy();
 
-var anyBlog = new BlogProxy("Example", "Hello World!", "anon");
+var anyBlog = new BlogProxy("Example", "Hello World!", "anonymous");
 anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
-anyBlog.title = "New Title";
-anyBlog.content = "New Content";
+anyBlog.title = "Updated Example";
+anyBlog.content = "Updated Content";
 print("Completed creating objects!");
 </div>
 

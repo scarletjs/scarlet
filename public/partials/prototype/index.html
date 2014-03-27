@@ -113,7 +113,7 @@ print("Completed creating objects!");
         class="x-border"
         x-type="x-editor" 
         x-width="100%"
-        x-height="610px" 
+        x-height="554px" 
         x-margin="10px"
         x-run-onload="true"
         x-output="#prototypeExampleWithScarletObjectOutput">
@@ -129,17 +129,13 @@ var formatMember = function(info, args){
   return "member '" + info.memberName + "'";
 };
 
-var formatArgs = function(args){
-  return !_.isEmpty(args) ? "called with args " + JSON.stringify(args) + "'" : "";
-};
-
-var formatResult = function(result){
+var format = function(result){
   return !_.isEmpty(result) ? "with result " + JSON.stringify(result) : "";
 };
 
 var loggingInterceptor = function(info, method, args){
   var result = method.call(this, info, method, args);
-  print(formatMember(info, args) + " " + formatArgs(args) + " " + formatResult(result));
+  print(formatMember(info, args) + " " + format(args) + " " + format(result));
   return result;
 };
 

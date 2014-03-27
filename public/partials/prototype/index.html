@@ -139,12 +139,12 @@ function logger(info, method, args){
   return result;
 }
 
-var BlogProxy = scarlet
+var Blog = scarlet
   .intercept(Blog, scarlet.PROTOTYPE)
   .using(logger)
   .proxy();
 
-var anyBlog = new BlogProxy("Example", "Hello World!", "anonymous");
+var anyBlog = new Blog("Example", "Hello World!", "anonymous");
 anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
 anyBlog.title = "Updated Example";
 anyBlog.content = "Updated Content";

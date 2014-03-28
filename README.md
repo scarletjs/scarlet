@@ -80,8 +80,7 @@ var scarlet = new Scarlet();
 
 Math.min = scarlet.intercept(Math.min)
     .using(function(proceed, invocation){ 
-        proceed();
-        invocation.result = Math.max(invocation.args);
+        proceed(null, Math.max(invocation.args));
     }).proxy();
 
 var result = Math.min(1, 2, 3); //result = 3;
@@ -142,7 +141,7 @@ function myFunction(any) {/*do stuff*/}
 
 myFunction = scarlet
     .intercept(myFunction)
-    .using(function(proceed, invocation){
+    .using(function(proceed){
         var thisContext = this;
         process.nextTick(function(){ //Asynchronous interceptor method dispatch
             proceed(); // Continuation, without in asynchronously will break synchronous methods
@@ -201,17 +200,45 @@ var min = Math.min(1,2,3);
 
 ## Interceptor Parameters
 
-The typical declaration of any interceptor is as follows:
+# Interceptor Single Parameter
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(proceed) {
     proceed();
 }
 ```
 It is important to note a few things about this. 
 
  - **this**: Is always the context of the instance of the object.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
+
+# Interceptor Two Parameters
+
+```javascript
+function myInterceptor1(invocation,proceed) {
+    proceed();
+}
+```
+It is important to note a few things about this. 
+
+ - **this**: Is always the context of the instance of the object.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
  - **invocation**: Is an object which contains meta data about the function being intercepted. 
+
+
+# Interceptor Three Parameters
+
+```javascript
+function myInterceptor1(error, invocation,proceed) {
+    proceed();
+}
+```
+It is important to note a few things about this. 
+
+ - **this**: Is always the context of the instance of the object.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
+ - **invocation**: Is an object which contains meta data about the function being intercepted. 
+ - **error**: Is the error, if any that has been returned by any previous interceptors.
 
 ## Invocation properties
 
@@ -220,7 +247,7 @@ It is important to note a few things about this.
 A property which can be used to determine the arguments of the proxied method
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     console.log(invocation.args); //args -> [1,2,3];
     proceed();
 };
@@ -236,7 +263,7 @@ Math.min(1,2,3);
 A property which can be used to determine or change the result of the proxied method
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     proceed();
     console.log(invocation.result); //result -> 1;
     invocation.result = 100; //Modifies the result to be 100;
@@ -254,7 +281,7 @@ console.log(result); //result -> 100
 A property which can be used to determine the name of the proxied method.
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     proceed();
     console.log(invocation.memberName); //result -> min;
 };
@@ -273,7 +300,7 @@ The **invocation.type** parameter object has the following properties and functi
 A property which can be used to determine if the current function begin called is used as a constructor function. 
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     if(invocation.type.isConstructor) // Only invokes if constructor
         return proceed();
 }
@@ -284,7 +311,7 @@ function myInterceptor1(proceed, invocation) {
 A property which determines whether the info object represents an object that is a function.
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     if(invocation.type.isConstructor) // Only invokes if function
         return proceed();
 }
@@ -295,7 +322,7 @@ function myInterceptor1(proceed, invocation) {
 A property which determines whether the info object represents a property.
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     if(info.isProperty) // Only invokes if property
         return proceed();
 }
@@ -306,7 +333,7 @@ function myInterceptor1(proceed, invocation) {
 A property which determines whether the info object represents an instance object.
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     if(info.isInstance) // Only invokes if instance
         return proceed();
 }
@@ -317,7 +344,7 @@ function myInterceptor1(proceed, invocation) {
 A property which determines whether the info object represents a prototype.
 
 ```javascript
-function myInterceptor1(proceed, invocation) {
+function myInterceptor1(invocation, proceed) {
     if(info.isPrototype // Only invokes if prototype
         return proceed();
 }
@@ -335,7 +362,7 @@ Here is a sample page.
     <head>
         <script type="text/javascript" src="js/scarlet.js"></script> 
         <script type="text/javascript">
-            function interceptor(proceed, invocation){
+            function interceptor(proceed)
                 console.log("In interceptor");
                 proceed();
             };

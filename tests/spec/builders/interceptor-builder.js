@@ -11,7 +11,7 @@ function Interceptor(scarletBuilder) {
 	self.timesCalled = 0;
 	self.proxyInfo = null;
 
-	self.intercept = function(proceed,info) {
+	self.intercept = function(info, proceed) {
 		
 		logger.debug(Interceptor, "methodCalled", "Inside Interceptor ", [self, info]);
 

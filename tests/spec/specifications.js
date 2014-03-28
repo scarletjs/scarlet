@@ -31,7 +31,7 @@ describe("Given we are using scarlet", function() {
 			var interceptorCalled = false;
 			
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-				.using(function(proceed, info) {
+				.using(function(proceed) {
 					proceed();
 					interceptorCalled = true;
 				}).proxy();
@@ -48,10 +48,9 @@ describe("Given we are using scarlet", function() {
 			var interceptorCalled = false;
 
 			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-								.using(function(proceed, invocation) {
+								.using(function(proceed) {
 									interceptorCalled = true;
-									var result = proceed();
-									invocation.result = 3;
+									var result = proceed(null,3);
 								}).proxy();
 
 			var result = Math.min(1, 2, 3);
@@ -69,7 +68,7 @@ describe("Given we are using scarlet", function() {
 
 			var interceptorTimesCalled = 0;
 
-			function someInterceptor(proceed,info) {
+			function someInterceptor(proceed) {
 				// 'Prelude Code' or 'Before Advice'
 				var result = proceed();// 'Target Method' or 'Join Point'
 				interceptorTimesCalled += 1;

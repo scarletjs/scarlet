@@ -93,7 +93,7 @@ describe("Given lib/extensions/Enumerable", function(){
 				callback()
 			};
 
-			ext.enumerable.mapSeries([f1,f2],function(func,callback){
+			ext.enumerable.mapSeries([f1,f2],function(error,func,callback){
 				func(callback)
 			},function(){
 				didCallResult = true;

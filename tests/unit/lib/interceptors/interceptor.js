@@ -20,7 +20,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 
 			var interceptor1Args = null;
 			var interceptor1Called = false;
-			var interceptor1 = function(proceed, info){
+			var interceptor1 = function(info,proceed){
 				interceptor1Called = true;
 				interceptor1Args = info.args;
 				info.args = ["blinky", "pinkey", "dinkey"];
@@ -29,7 +29,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 
 			var interceptor2Args = null;
 			var interceptor2Called = false;
-			var interceptor2 = function(proceed,info){
+			var interceptor2 = function(info,proceed){
 				interceptor2Called = true;
 				interceptor2Args = info.args;
 				info.args = ["phoebie", "fubu", "fanzie"];
@@ -38,7 +38,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 
 			var interceptor3Args = null;
 			var interceptor3Called = false;
-			var interceptor3 = function(proceed,info){
+			var interceptor3 = function(info,proceed){
 				interceptor3Called = true;
 				interceptor3Args = info.args;
 				info.args = ["mickey", "mikey", "joe"];

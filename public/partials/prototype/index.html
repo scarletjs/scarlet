@@ -49,15 +49,13 @@ function Blog(title, content, author) {
 
       <h1><a name="prototypesLink">Prototypes</a></h1>
       
-      <p>Here we take a look at using Scarlet with JavaScript prototypes(or javascript objects). Scarlet is really good at
-        discovering constructors, properties and methods of instances and prototype definitions using the same API.</p>
+      <p>Here we take a look at using <b><i>Scarlet</b></i> with JavaScript prototypes(or javascript objects). Scarlet is really good at discovering constructors, properties and methods of instances and prototype definitions using the same API.</p>
       
       <div class="x-spacer-alt x-clear"></div>
 
       <h4><a name="prototypesLink">An Object</a></h4>
 
-      <p>For the purposes of the rest of this article let's assume an example prototype. A blog for the purposes of driving
-        the domain of executing a blogging site. We have a <b><i>Comment</b></i> which is what users who read the blog leave behind. The blog itself is composed of a title and content in text format. Lets define and instantiate them. They will be omitted from the rest of the examples in this page just trust that they magically exist :) </p>
+      <p>For the purposes of the rest of this article let's assume an example prototype. Let's say we run a blog. We have a <b><i>Comment</b></i> which is what users who read the blog leave behind and the <b><i>Blog</i></b> article itself, composed out of a <b><i>title</b></i> and <b><i>content</b></i> properties. Lets define and instantiate them. They will be omitted from the rest of the examples in this page just trust that they magically exist :) </p>
 
       <div 
         id="prototypeExampleObjectEditor" 
@@ -106,7 +104,7 @@ print("Completed creating objects!");
 
       <h4><a name="prototypesWithScarletLink">Logging</a></h4>
 
-      <p>Now we are going to use Scarlet to build a naive logging interceptor. We will run the Blog prototype through Scarlet and use it's proxy for instantiating the same <b><i>anyBlog</i></b> you saw in the earlier code example. When we run the example we should see output relating to how the interceptor get's called.</p>
+      <p>Now we are going to use <b><i>Scarlet</b></i> to build a naive logging interceptor. We will run the Blog prototype through Scarlet and use it's proxy for instantiating the same <b><i>anyBlog</i></b> you saw in the earlier code example. When we run the example we should see output relating to how the interceptor get's called.</p>
 
       <div 
         id="prototypeExampleWithScarletObjectEditor" 
@@ -161,6 +159,30 @@ print("Completed creating objects!");
         x-height="93px">
       </div>
 
+
+      <p>
+        Notice how we use the meta data from the <b><i>info</i></b> parameter that <b><i>Scarlet</i></b> provides within the <b><i>formatMember</b></i> function. If the <b><i>isConstructor</b></i> property is <b><i>true</b></i> then we know that we are dealing with a prototype or a first class function. This instance will potentially have both properties and functions(collectively referred to as members from now on). When we allocate a new instance of <b><i>Blog</i></b> using the <b><i>new</i></b> keyword <b><i>Scarlet</b></i> will always interpret this with the <b><i>isConstructor</b></i> parameter set to <b><i>true</b></i> and in this case printed with the label <b><i>ctor</b></i> in the output from the interceptor <b><i>logger</b></i>. Let's explore <b><i>Scarlet</b></i>'s meta data from the perspective of an interceptor by defining the <b><i>info.type</b></i> parameter.
+      </p>
+
+      <p>
+        <ul>
+          <li>
+            <b><i>info.type.isConstructor</b></i> - When a javascript object get's allocated using the 'new' keyword.
+          </li>
+          <li>
+            <b><i>info.type.IsProperty[get]</b></i> - When args.length == 1 and with args=[{oldVal}].
+          </li>
+          <li>
+            <b><i>info.type.isProperty[set]</b></i> - When args.length == 2 and with args=[{oldVal}, {newVal}].
+          </li>
+          <li>
+            <b><i>info.type.isMethod</b></i> - When calling a function on an instance.
+          </li>
+          <li>
+            <b><i>info.type.isFunction</b></i> - When dealing with function proxies.
+          </li>
+        </ul>
+      </p>
 
     </div>
 

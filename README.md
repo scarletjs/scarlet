@@ -35,7 +35,6 @@ Scarlet was written to eliminate the complexities that arise when intercepting c
 
 * Change anything
 * Observe anything
-* Intercept anything
 * Always at runtime
 
 ## Intercepting Basic Functions

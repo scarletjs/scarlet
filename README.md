@@ -33,8 +33,8 @@ This project focuses on the following:
 
 Scarlet was written to eliminate the complexities that arise when intercepting code. The project allows you to seamlessly integrate interception into your application or framework with the following design goals in mind:
 
-* Change anything
 * Observe anything
+* Change anything
 * Always at runtime
 
 ## Intercepting Basic Functions

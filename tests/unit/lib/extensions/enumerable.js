@@ -79,9 +79,10 @@ describe("Given lib/extensions/Enumerable", function(){
 
 	});
 	describe("When #mapSeries() ", function(){
+		var didCallResult = false;
 		var didCallFunction1 = false;
 		var didCallFunction2 = false;
-		var didCallResult = false;
+
 		beforeEach(function(){
 			var f1 = function(callback){ 
 				didCallFunction1 = true; 
@@ -90,15 +91,16 @@ describe("Given lib/extensions/Enumerable", function(){
 
 			var f2 = function(callback){
 				didCallFunction2 =true;
-				callback()
+				callback();
 			};
 
 			ext.enumerable.mapSeries([f1,f2],function(error,func,callback){
-				func(callback)
+				func(callback);
 			},function(){
 				didCallResult = true;
 			});		
-		})
+		});
+		
 		it("Then last function should be undefined",function(){
 			assert(didCallResult === true);
 		});

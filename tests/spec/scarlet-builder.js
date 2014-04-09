@@ -1,8 +1,8 @@
 var sinon = require('sinon');
-var typeBuilder = require("./type-builder");
-var eventBuilder = require("./event-builder");
-var interceptorBuilder = require("./interceptor-builder");
-var enumerable = require("../../../lib/extensions/enumerable");
+var typeBuilder = require("./types/type-builder");
+var eventBuilder = require("./events/event-builder");
+var enumerable = require("../../lib/extensions/enumerable");
+var interceptorBuilder = require("./interceptors/interceptor-builder");
 
 ScarletBuilder.prototype = Object.create(typeBuilder.prototype);
 ScarletBuilder.prototype = Object.create(eventBuilder.prototype);
@@ -91,24 +91,10 @@ function ScarletBuilder(scarlet){
 	};
 
 	self.assert = function(){
-
 		this.typeAssertionBuilder.assert(function(instance){
 			self.eventAssertionBuilder.assert(instance);
 			self.interceptorAssertionBuilder.assert(instance);
 		});
-
-// 		enumerable.forEach(self.instances,function(instance){
-// 			describe("for "+instance.name,function(){
-// 				self.eventAssertionBuilder.assert(instance);
-// 			})
-// //			assertionBuilder.withInstance(instance);
-// 		});
-
-		// enumerable.forEach(self.interceptors,function(interceptor){
-		// 	assertionBuilder.withInterceptor(interceptor);
-		// });
-		
-		// assertionBuilder.assert();
 	};
 };
 

@@ -1,13 +1,10 @@
 var assert = require("assert");
-var enumerable = require("../../../../lib/extensions/enumerable");
 
 module.exports = function (interceptor,instance) {
-	describe("when interceptor called on a property get",function(){
-		var propertyValue;
-
+	describe("when interceptor called on a method with return",function(){
 		before(function(){
 			interceptor.spy.reset();
-			propertyValue = instance.property;
+			instance.methodWithReturn();
 		});
 
 		it("Should call interceptor",function(){
@@ -19,8 +16,7 @@ module.exports = function (interceptor,instance) {
 		});
 
 		it("Callback should return intercepted method return",function(){
-			assert(propertyValue);
-			assert(interceptor.spy.result === propertyValue);
+			assert(interceptor.spy.result === 'any');
 		});
 	});
 };

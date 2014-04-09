@@ -1,14 +1,9 @@
-// var beforeEventAssertion = require('./assertions/beforeEventAssertion');
-// var doneEventAssertion = require('./assertions/doneEventAssertion');
-var errorEventWhenNoErrorAssertion = require('./assertions/errorEventWhenNoErrorAssertion');
-
-var eventMethodWithReturn = require("./assertions/eventMethodWithReturnAssertion");
 var eventPropertyGet = require("./assertions/eventPropertyGetAssertion");
 var eventPropertySet = require("./assertions/eventPropertySetAssertion");
-
-var errorEventMethodWithReturn = require("./assertions/errorEventMethodWithReturnAssertion");
 var errorEventPropertyGet = require("./assertions/errorEventPropertyGetAssertion");
 var errorEventPropertySet = require("./assertions/errorEventPropertySetAssertion");
+var eventMethodWithReturn = require("./assertions/eventMethodWithReturnAssertion");
+var errorEventMethodWithReturn = require("./assertions/errorEventMethodWithReturnAssertion");
 
 module.exports = function(){
 	var self = this;
@@ -86,7 +81,6 @@ module.exports = function(){
 	};
 
 	this.assert = function(instance,next){
-		console.log(self.assertions.length);
 		for (var i = 0; i < self.assertions.length; i++) {
 			self.assertions[i](instance);
 		}

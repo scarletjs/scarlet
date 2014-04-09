@@ -1,5 +1,4 @@
 var assert = require("assert");
-var enumerable = require("../../../../lib/extensions/enumerable");
 
 module.exports = function (instance) {
 	describe("when setting a properties value",function(){

@@ -1,5 +1,4 @@
 var assert = require("assert");
-var enumerable = require("../../../../lib/extensions/enumerable");
 
 module.exports = function (instance) {
 	describe("When method with return called",function(){

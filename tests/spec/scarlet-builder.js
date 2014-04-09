@@ -1,4 +1,5 @@
-var sinon = require('sinon');
+var sinon = require("sinon");
+var assert = require("assert");
 var typeBuilder = require("./types/type-builder");
 var eventBuilder = require("./events/event-builder");
 var enumerable = require("../../lib/extensions/enumerable");
@@ -16,84 +17,107 @@ function ScarletBuilder(scarlet){
 	var self = this;
 	self.scarlet = scarlet;
 
-	self.forMethodWithReturn = function(){
-		this.typeAssertionBuilder.forMethodWithReturn();
-		this.eventAssertionBuilder.forMethodWithReturn();
-		this.interceptorAssertionBuilder.forMethodWithReturn();
-		addMemberProxy('methodWithReturn');
-		return self;
-	};
+	self.forInstance = function(instance){
+		withEachInterceptor(instance,function(interceptor){
+			instance = self.scarlet
+							.intercept(instance)
+							.using(interceptor)
+							.proxy();
+		});
 
-	self.forProperty = function(){
-		this.typeAssertionBuilder.forProperty();
-		this.eventAssertionBuilder.forProperty();
-		this.interceptorAssertionBuilder.forProperty();
-		addMemberNameProxy('property');
-		return self;
+		return {
+			forMethod : methodBuilder,
+			forProperty : propertyBuilder
+		};
 	};
-
-	self.forMethodWithReturnByName = function(){
-		this.typeAssertionBuilder.forMethodWithReturn();
-		this.eventAssertionBuilder.forMethodWithReturn();
-		this.interceptorAssertionBuilder.forMethodWithReturn();
-		addMemberNameProxy('methodWithReturn');
-		return self;	
-	};
-
-	self.forInstance = function(){
-		this.typeAssertionBuilder.forInstance();
-		this.eventAssertionBuilder.forInstance();
-		this.interceptorAssertionBuilder.forInstance();
-		forEachInterceptorAndInstance(function(instance,interceptor){
-			self.scarlet
-				.intercept(instance)
+	
+	self.forProperty = function(instance,propertyName){
+		withEachInterceptor(instance,function(interceptor){
+			 instance = self.scarlet
+				.intercept(instance,propertyName)
 				.using(interceptor)
 				.proxy();
-		});
-		return self;
+			});
+		return propertyBuilder(instance,propertyName);
 	};
 
-	var forEachInterceptorAndInstance = function(onEach){
-		enumerable.forEach(self.instances, function(instance) {
-			var spies = {};
-			enumerable.forEach(instance,function(member,memberName){
-				if(typeof instance[memberName] === 'function')
-					spies[memberName] = sinon.spy(instance,memberName);
-			});
-
-			enumerable.forEach(self.interceptors,function(interceptor){
-				onEach(instance,interceptor);
-			});
-
-			enumerable.forEach(spies,function(member,memberName){
-				instance[memberName].spy = spies[memberName];
-			});
-		});
-	};
-
-	var addMemberNameProxy = function(memberName){
-		forEachInterceptorAndInstance(function(instance,interceptor){
-			self.scarlet
-				.intercept(instance,memberName)
+	self.forMethod = function(method){
+		withEachInterceptor(method,function(interceptor){
+			 method = self.scarlet
+				.intercept(method)
 				.using(interceptor)
 				.proxy();
-		});
+			});
+		return methodBuilder(method);
+	};
+	
+	self.forMethodByName = function(instance,methodName){
+		withEachInterceptor(instance,function(interceptor){
+			 instance = self.scarlet
+				.intercept(instance,methodName)
+				.using(interceptor)
+				.proxy();
+			});
+		return methodBuilder(instance[methodName]);
 	};
 
-	var addMemberProxy = function(member){
-		forEachInterceptorAndInstance(function(instance,interceptor){
-			instance[member] =
-				self.scarlet
-					.intercept(instance[member])
-					.using(interceptor)
-					.proxy();
-		});
+	var propertyBuilder = function(instance,property){
+		self.typeAssertionBuilder.forProperty();
+		self.eventAssertionBuilder.forProperty();
+		self.interceptorAssertionBuilder.forProperty();
+		
+		return {
+			withExpectedResult : function(result){
+				this.result = result;
+				return this;
+			},
+			assert : function(){
+				self.typeAssertionBuilder.assert(instance, this.result, property, function(instance,result,property){
+					self.interceptorAssertionBuilder.assert(instance,result,property);
+					self.eventAssertionBuilder.assert(instance,result,property);
+				});
+			}
+		};
 	};
 
-	self.assert = function(){
-		this.typeAssertionBuilder.assert(function(instance){
-			self.eventAssertionBuilder.assert(instance);
-			self.interceptorAssertionBuilder.assert(instance);
+	var methodBuilder = function(method){
+		self.typeAssertionBuilder.forMethod();
+		self.interceptorAssertionBuilder.forMethod();
+		self.eventAssertionBuilder.forMethod();
+
+		return {
+			withParameters : function(parameters){
+				this.parameters = parameters;
+				return this;
+			},
+			withExpectedResult : function(result){
+				this.result = result;
+				return this;
+			},
+			assert : function(){
+				self.typeAssertionBuilder.assert(method, this.result, this.parameters,function(method,result,parameters){
+					self.interceptorAssertionBuilder.assert(method,result,parameters);
+					self.eventAssertionBuilder.assert(method,result,parameters);
+				});
+			}
+		};
+	};
+
+	var withEachInterceptor = function(instance, onEach){
+		assert(self.interceptors.length > 0,"Interceptors must be defined before specifying type");
+
+		var spies = {};
+		enumerable.forEach(instance,function(member,memberName){
+			if(typeof instance[memberName] === "function")
+				spies[memberName] = sinon.spy(instance,memberName);
+		});
+		
+		enumerable.forEach(self.interceptors,function(interceptor){	
+			onEach(interceptor);
+		});
+		
+		enumerable.forEach(spies,function(member,memberName){
+			instance[memberName].spy = spies[memberName];
 		});
 	};
 };

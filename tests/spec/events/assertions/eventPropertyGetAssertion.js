@@ -1,12 +1,10 @@
 var assert = require("assert");
 
-module.exports = function (instance,eventSpy,eventName) {
+module.exports = function (eventSpy,instance,expectedResult,property,eventName) {
 	describe("when "+eventName+" event fired on a property get",function(){
-		var propertyValue;
-		
 		before(function(){
 			eventSpy.reset();
-			propertyValue = instance.property;
+			var result = instance[property];
 		});
 
 		it("Should call event",function(){

@@ -1,10 +1,10 @@
 var assert = require("assert");
 
-module.exports = function (interceptor,instance) {
-	describe("when interceptor called on a method with return",function(){
+module.exports = function (interceptor,instance,expectedResult,property) {
+	describe("when interceptor called on a property get",function(){
 		before(function(){
 			interceptor.spy.reset();
-			instance.methodWithReturn();
+			var result = instance[property];
 		});
 
 		it("Should call interceptor",function(){
@@ -16,7 +16,7 @@ module.exports = function (interceptor,instance) {
 		});
 
 		it("Callback should return intercepted method return",function(){
-			assert(interceptor.spy.result === 'any');
+			assert(interceptor.spy.result === expectedResult);
 		});
 	});
 };

@@ -15,4 +15,9 @@ module.exports = function InterceptorBuilder(scarlet){
 		return self;
 	};
 
+	self.withInterceptor = function(interceptor){
+		this.interceptorAssertionBuilder.withInterceptor(interceptor);
+		self.interceptors.push(interceptor);
+		return self;
+	}
 };

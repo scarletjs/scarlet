@@ -2,58 +2,58 @@ var eventPropertyGet = require("./assertions/eventPropertyGetAssertion");
 var eventPropertySet = require("./assertions/eventPropertySetAssertion");
 var errorEventPropertyGet = require("./assertions/errorEventPropertyGetAssertion");
 var errorEventPropertySet = require("./assertions/errorEventPropertySetAssertion");
-var eventMethodWithReturn = require("./assertions/eventMethodWithReturnAssertion");
-var errorEventMethodWithReturn = require("./assertions/errorEventMethodWithReturnAssertion");
+var eventMethod = require("./assertions/eventMethodAssertion");
+var errorEventMethod = require("./assertions/errorEventMethodAssertion");
 
 module.exports = function(){
 	var self = this;
 
-	this.doneEvent;
-	this.errorEvent;
-	this.afterEvent;
-	this.beforeEvent;
+	this.doneEvent = null;
+	this.errorEvent = null;
+	this.afterEvent = null;
+	this.beforeEvent = null;
 	this.assertions = [];
 
 	var addAssertion = function(assertion){
 		self.assertions.push(assertion);
 	};
 
-	this.forMethodWithReturn = function(){	
-		addAssertion(function(instance){
+	this.forMethod = function(){	
+		addAssertion(function(method,expectedResult,parameters){
 			if(self.afterEvent)
-				eventMethodWithReturn(instance,self.afterEvent,"after");
+				eventMethod(self.afterEvent,method,expectedResult,parameters,"after");
 			if(self.doneEvent)
-				eventMethodWithReturn(instance,self.doneEvent,"done");
+				eventMethod(self.doneEvent,method,expectedResult,parameters,"done");
 			if(self.beforeEvent)
-				eventMethodWithReturn(instance,self.beforeEvent,"after");
+				eventMethod(self.beforeEvent,method,expectedResult,parameters,"after");
 			if(self.errorEvent)
-				errorEventMethodWithReturn(instance,self.errorEvent);
+				errorEventMethod(self.errorEvent,method,expectedResult,parameters);
 		});
 	};
 	
 	this.forPropertyGet = function(){
-		addAssertion(function(instance){
+		addAssertion(function(instance,expectedResult,property){
 			if(self.afterEvent)
-				eventPropertyGet(instance,self.afterEvent,"after");
+				eventPropertyGet(self.afterEvent,instance,expectedResult,property,"after");
 			if(self.doneEvent)
-				eventPropertyGet(instance,self.doneEvent,"done");
+				eventPropertyGet(self.doneEvent,instance,expectedResult,property,"done");
 			if(self.beforeEvent)
-				eventPropertyGet(instance,self.beforeEvent,"before");
+				eventPropertyGet(self.beforeEvent,instance,expectedResult,property,"before");
 			if(self.errorEvent)
-				errorEventPropertyGet(instance,self.errorEvent);
+				errorEventPropertyGet(self.errorEvent,instance,expectedResult,property);
 		});
 	};
 
 	this.forPropertySet = function(){
-		addAssertion(function(instance){
+		addAssertion(function(instance,expectedResult,property){
 			if(self.afterEvent)
-				eventPropertySet(instance,self.afterEvent,"after");
+				eventPropertySet(self.afterEvent,instance,expectedResult,property,"after");
 			if(self.doneEvent)
-				eventPropertySet(instance,self.doneEvent,"done");
+				eventPropertySet(self.doneEvent,instance,expectedResult,property,"done");
 			if(self.beforeEvent)
-				eventPropertySet(instance,self.beforeEvent,"before");
+				eventPropertySet(self.beforeEvent,instance,expectedResult,property,"before");
 			if(self.errorEvent)
-				errorEventPropertySet(instance,self.errorEvent);
+				errorEventPropertySet(self.errorEvent,instance,expectedResult,property);
 		});
 	};
 	this.forProperty = function(){
@@ -80,12 +80,12 @@ module.exports = function(){
 		this.doneEvent = doneEvent;
 	};
 
-	this.assert = function(instance,next){
+	this.assert = function(instance,expectedResult,parameters,next){
 		for (var i = 0; i < self.assertions.length; i++) {
-			self.assertions[i](instance);
+			self.assertions[i](instance,expectedResult,parameters);
 		}
 		if(next){
-			next(instance);
+			next(instance,expectedResult,parameters);
 		}
 	};
 };

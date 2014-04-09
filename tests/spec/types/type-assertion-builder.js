@@ -1,58 +1,35 @@
-var propertyGet = require('./assertions/propertyGetAssertions');
-var propertySet = require('./assertions/propertySetAssertions');
-var methodWithReturn = require('./assertions/methodWithReturnAssertions');
+var propertyGet = require("./assertions/propertyGetAssertions");
+var propertySet = require("./assertions/propertySetAssertions");
+var methodAssert = require("./assertions/methodAssertions");
 
 module.exports = function TypeAssertionBuilder(){
-	var self = this;
+	"use strict";
 
+	var self = this;
 	this.types = [];
 	this.assertions = [];
 
 	var addAssertion = function(assertion){
 		self.assertions.push(assertion);
 	};
-
-	this.forMethodWithReturn = function(){
-		addAssertion(function(type){
-			methodWithReturn(type);
-		});
-	};
 	this.forPropertyGet = function(){
-		addAssertion(function(type){
-			propertyGet(type);
-		});
+		addAssertion(propertyGet);
 	};
 	this.forPropertySet = function(){
-		addAssertion(function(type){
-			propertySet(type);
-		});
+		addAssertion(propertySet);
 	};
 	this.forProperty = function(){
 		this.forPropertyGet();
 		this.forPropertySet();
 	};
-
-	this.forInstance = function(){
-		this.forProperty();
-		this.forMethodWithReturn();
+	this.forMethod = function(){
+		addAssertion(methodAssert);
 	};
-
-	this.withType = function(type){
-		this.types.push(type);
-	};
-
-	this.assert = function(next){
-		
-		for (var i = 0; i < this.types.length; i++) {
-			var type = this.types[i];
-			describe("When type is:"+type.name,function(){
-				for (var i = 0; i < self.assertions.length; i++) {
-					self.assertions[i](type);
-				};
-
-				if(next)
-					next(type);
-			});
-		};
+	this.assert = function(instance,expectedResult,parameters,next){
+		for (var i = 0; i < self.assertions.length; i++) {
+			self.assertions[i](instance,expectedResult,parameters);
+		}
+		if(next)
+			next(instance,expectedResult,parameters);
 	};
 };

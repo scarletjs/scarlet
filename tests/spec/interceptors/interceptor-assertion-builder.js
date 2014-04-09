@@ -1,6 +1,6 @@
-var callbackInterceptorMethodWithReturnAssertions = require("./assertions/callbackInterceptorMethodWithReturnAssertions");
-var callbackInterceptorPropertyGetAssertions = require("./assertions/callbackInterceptorPropertyGetAssertions");
-var callbackInterceptorPropertySetAssertions = require("./assertions/callbackInterceptorPropertySetAssertions");
+var propertyGetAssertions = require("./assertions/propertyGetAssertions");
+var propertySetAssertions = require("./assertions/propertySetAssertions");
+var methodAssertions = require("./assertions/methodAssertions");
 
 module.exports = function InterceptorAssertionBuilder(){
 	var self = this;
@@ -10,44 +10,33 @@ module.exports = function InterceptorAssertionBuilder(){
 	var addAssertion = function(assertion){
 		self.assertions.push(assertion);
 	};
-
-	this.forMethodWithReturn = function(){
-		addAssertion(function(interceptor,instance){
-			callbackInterceptorMethodWithReturnAssertions(interceptor,instance);				
-		});
-	};
 	this.forPropertyGet = function(){
-		addAssertion(function(interceptor,instance){
-			callbackInterceptorPropertyGetAssertions(interceptor,instance);
-		});
+		addAssertion(propertyGetAssertions);
 	};
 	this.forPropertySet = function(){
-		addAssertion(function(interceptor,instance){
-			callbackInterceptorPropertySetAssertions(interceptor,instance);
-		});
+		addAssertion(propertySetAssertions);
 	};
 	this.forProperty = function(){
 		this.forPropertyGet();
 		this.forPropertySet();
 	};
-	this.forInstance = function(){
-		this.forProperty();
-		this.forMethodWithReturn();
+	this.forMethod = function(){
+		addAssertion(methodAssertions);
 	};
 	this.withInterceptor = function(interceptor){
 		this.interceptors.push(interceptor);
 	};
 
-	this.assert = function(instance,next){
+	this.assert = function(method,result,parameters,next){
 		for (var i = 0; i < this.interceptors.length; i++) {
 			var interceptor = this.interceptors[i];
 			describe("when using:"+interceptor.name,function(){
 				for (var i = 0; i < self.assertions.length; i++) {
-					self.assertions[i](interceptor,instance);
+					self.assertions[i](interceptor,method,result,parameters);
 				};
 
 				if(next)
-					next(instance);
+					next(method,result,parameters);
 			});
 		};
 	};

@@ -49,5 +49,4 @@ module.exports = function TypeBuilder(scarlet){
 
 		return self;
 	};
-
 };

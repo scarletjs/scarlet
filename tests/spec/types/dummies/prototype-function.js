@@ -20,4 +20,8 @@ PrototypeFunction.prototype.methodWithReturn = function(){
 	return "any";
 };
 
+PrototypeFunction.prototype.errorMethod = function(){
+	throw new Error("Any Error");
+};
+
 module.exports = PrototypeFunction;

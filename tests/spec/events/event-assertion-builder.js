@@ -4,6 +4,8 @@ var errorEventPropertyGet = require("./assertions/errorEventPropertyGetAssertion
 var errorEventPropertySet = require("./assertions/errorEventPropertySetAssertion");
 var eventMethod = require("./assertions/eventMethodAssertion");
 var errorEventMethod = require("./assertions/errorEventMethodAssertion");
+var errorEventErrorMethod = require("./assertions/errorEventErrorMethodAssertion");
+var postEventErrorMethodAssertion = require("./assertions/postEventErrorMethodAssertion");
 
 module.exports = function(){
 	var self = this;
@@ -25,7 +27,7 @@ module.exports = function(){
 			if(self.doneEvent)
 				eventMethod(self.doneEvent,method,expectedResult,parameters,"done");
 			if(self.beforeEvent)
-				eventMethod(self.beforeEvent,method,expectedResult,parameters,"after");
+				eventMethod(self.beforeEvent,method,expectedResult,parameters,"before");
 			if(self.errorEvent)
 				errorEventMethod(self.errorEvent,method,expectedResult,parameters);
 		});
@@ -54,6 +56,18 @@ module.exports = function(){
 				eventPropertySet(self.beforeEvent,instance,expectedResult,property,"before");
 			if(self.errorEvent)
 				errorEventPropertySet(self.errorEvent,instance,expectedResult,property);
+		});
+	};
+	this.forErrorMethod = function(){
+		addAssertion(function(method,expectedResult,parameters){
+			if(self.afterEvent)
+				postEventErrorMethodAssertion(self.afterEvent,method,expectedResult,parameters,"after");
+			if(self.doneEvent)
+				postEventErrorMethodAssertion(self.doneEvent,method,expectedResult,parameters,"done");
+			if(self.beforeEvent)
+				eventMethod(self.beforeEvent,method,expectedResult,parameters,"before");
+			if(self.errorEvent)
+				errorEventErrorMethod(self.errorEvent,method,expectedResult,parameters);
 		});
 	};
 	this.forProperty = function(){

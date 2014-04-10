@@ -25,7 +25,8 @@ function ScarletBuilder(scarlet){
 		instance = self.scarlet.proxy();
 		return {
 			forMethod : methodBuilder,
-			forProperty : propertyBuilder
+			forProperty : propertyBuilder,
+			forErrorMethod : errorMethodBuilder
 		};
 	};
 	
@@ -41,20 +42,26 @@ function ScarletBuilder(scarlet){
 	self.forMethod = function(method){
 		self.scarlet.intercept(method);
 		withEachInterceptor(method,function(interceptor){
-
-			 self.scarlet
-				.using(interceptor);
+			 self.scarlet.using(interceptor);
 		});
 		method = self.scarlet.proxy();
 		return methodBuilder(method);
 	};
 	
+	self.forErrorMethod = function(errorMethod){
+		self.scarlet.intercept(errorMethod);
+		withEachInterceptor(errorMethod,function(interceptor){
+			 self.scarlet.using(interceptor);
+		});
+		errorMethod = self.scarlet.proxy();
+		return errorMethodBuilder(errorMethod);	
+	};
+
 	self.forMethodByName = function(instance,methodName){
 		self.scarlet.intercept(instance,methodName);
 		withEachInterceptor(instance,function(interceptor){
-			self.scarlet
-				.using(interceptor);
-			});
+			self.scarlet.using(interceptor);
+		});
 		instance = self.scarlet.proxy();
 		return methodBuilder(instance[methodName]);
 	};
@@ -77,11 +84,34 @@ function ScarletBuilder(scarlet){
 			}
 		};
 	};
+	
+	var errorMethodBuilder = function(errorMethod){
+		self.typeAssertionBuilder.forErrorMethod();
+		self.eventAssertionBuilder.forErrorMethod();
+		self.interceptorAssertionBuilder.forErrorMethod();
+
+		return {
+			withParameters : function(parameters){
+				this.parameters = parameters;
+				return this;
+			},
+			withExpectedResult : function(result){
+				this.result = result;
+				return this;
+			},
+			assert : function(){
+				self.typeAssertionBuilder.assert(errorMethod, this.result, this.parameters,function(errorMethod,result,parameters){
+					self.interceptorAssertionBuilder.assert(errorMethod,result,parameters);
+					self.eventAssertionBuilder.assert(errorMethod,result,parameters);
+				});
+			}
+		};
+	};
 
 	var methodBuilder = function(method){
 		self.typeAssertionBuilder.forMethod();
-		self.interceptorAssertionBuilder.forMethod();
 		self.eventAssertionBuilder.forMethod();
+		self.interceptorAssertionBuilder.forMethod();
 
 		return {
 			withParameters : function(parameters){
@@ -140,6 +170,12 @@ function ScarletBuilder(scarlet){
 							.withExpectedResult("any")
 							.assert();
 					});
+					describe("when calling a method that throws an error",function(){
+						instance = instance.reset();
+						self.forInstance(instance)
+							.forErrorMethod(instance.errorMethod)
+							.assert();
+					});
 					describe("when accessing a property",function(){
 						instance = instance.reset();
 						self.forInstance(instance)
@@ -167,6 +203,12 @@ function ScarletBuilder(scarlet){
 						self.forMethod(instance.methodWithReturn)
 							.withExpectedResult("any")
 							.assert();
+				});
+				describe("when intercepting a method that throws an error",function(){
+					instance = instance.reset();
+					self.forInstance(instance)
+						.forErrorMethod(instance.errorMethod)
+						.assert();
 				});
 			});
 		});

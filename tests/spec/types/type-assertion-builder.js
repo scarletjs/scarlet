@@ -1,6 +1,7 @@
+var methodAssert = require("./assertions/methodAssertions");
 var propertyGet = require("./assertions/propertyGetAssertions");
 var propertySet = require("./assertions/propertySetAssertions");
-var methodAssert = require("./assertions/methodAssertions");
+var errorMethodAssert = require("./assertions/errorMethodAssertions");
 
 module.exports = function TypeAssertionBuilder(){
 	"use strict";
@@ -25,6 +26,10 @@ module.exports = function TypeAssertionBuilder(){
 	this.forMethod = function(){
 		addAssertion(methodAssert);
 	};
+	this.forErrorMethod = function(){
+		addAssertion(errorMethodAssert);
+	};
+
 	this.assert = function(instance,expectedResult,parameters,next){
 		for (var i = 0; i < self.assertions.length; i++) {
 			self.assertions[i](instance,expectedResult,parameters);

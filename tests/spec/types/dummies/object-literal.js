@@ -13,6 +13,10 @@ function createNew() {
 		return "any";
 	};
 
+	instance.errorMethod = function(){
+		throw new Error("Any Error");
+	};
+	
 	return instance;
 }
 

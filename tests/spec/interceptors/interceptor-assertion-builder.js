@@ -1,6 +1,7 @@
 var propertyGetAssertions = require("./assertions/propertyGetAssertions");
 var propertySetAssertions = require("./assertions/propertySetAssertions");
 var methodAssertions = require("./assertions/methodAssertions");
+var errorMethodAssertions = require("./assertions/errorMethodAssertions");
 
 module.exports = function InterceptorAssertionBuilder(){
 	var self = this;
@@ -22,6 +23,9 @@ module.exports = function InterceptorAssertionBuilder(){
 	};
 	this.forMethod = function(){
 		addAssertion(methodAssertions);
+	};
+	this.forErrorMethod = function(){
+		addAssertion(errorMethodAssertions);
 	};
 	this.withInterceptor = function(interceptor){
 		this.interceptors.push(interceptor);

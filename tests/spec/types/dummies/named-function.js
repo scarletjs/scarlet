@@ -10,6 +10,10 @@ function NamedFunction(){
 	self.methodWithReturn = function(){
 		return "any";
 	};
+
+	self.errorMethod = function(){
+		throw new Error("Any Error");
+	};
 }
 
 module.exports = NamedFunction;

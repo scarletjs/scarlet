@@ -4,10 +4,15 @@ module.exports = function (interceptor,method,expectedResult,parameters) {
 	describe("when interceptor("+interceptor.name+") called on a method:"+method.name,function(){
 		if(!interceptor.spy)
 			return;
-			
+
 		before(function(){
 			interceptor.spy.reset();
-			method.apply(method,parameters);
+			interceptor.postSpy.reset();
+			try{
+				method.apply(method,parameters);
+			}catch(exception){
+				
+			}
 		});
 
 		it("Should call interceptor",function(){
@@ -18,10 +23,8 @@ module.exports = function (interceptor,method,expectedResult,parameters) {
 			assert(interceptor.spy.callCount === 1);
 		});
 
-		if(expectedResult){
-			it("Callback should return intercepted method return",function(){
-				assert(interceptor.spy.result === expectedResult);
-			});
-		}
+		it("Should not return back to interceptor after error",function(){
+			assert(!interceptor.postSpy.called);
+		});
 	});
 };

@@ -1,4 +1,5 @@
 var callbackInterceptor = require('./interceptors/callbackInterceptor');
+var callbackErrorInterceptor = require("./interceptors/callBackErrorInterceptor");
 var InterceptorAssertionBuilder = require("./interceptor-assertion-builder");
 
 module.exports = function InterceptorBuilder(scarlet){
@@ -13,7 +14,12 @@ module.exports = function InterceptorBuilder(scarlet){
 		self.interceptors.push(interceptor);
 		return self;
 	};
-
+	self.withCallbackErrorInterceptor = function(){
+		var interceptor = callbackErrorInterceptor();
+		this.interceptorAssertionBuilder.withInterceptor(interceptor);
+		self.interceptors.push(interceptor);
+		return self;
+	};
 	self.withInterceptor = function(interceptor){
 		this.interceptorAssertionBuilder.withInterceptor(interceptor);
 		self.interceptors.push(interceptor);

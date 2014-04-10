@@ -9,8 +9,8 @@ module.exports = function (eventSpy,method,expectedResult,parameters,eventName) 
 			}catch(exception){}
 		});
 
-		it("Should call event",function(){
-			assert(eventSpy.called)
+		it("Should not call event",function(){
+			assert(!eventSpy.called)
 		});
 	});
 };

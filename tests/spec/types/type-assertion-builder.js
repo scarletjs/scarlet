@@ -31,5 +31,6 @@ module.exports = function TypeAssertionBuilder(){
 		}
 		if(next)
 			next(instance,expectedResult,parameters);
+		self.assertions = [];
 	};
 };

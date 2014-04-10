@@ -1,8 +1,8 @@
 var assert = require("assert");
 
 module.exports = function (interceptor,method,expectedResult,parameters) {
-	describe("when interceptor called on a method:"+method.name,function(){
-		beforeEach(function(){
+	describe("when interceptor("+interceptor.name+") called on a method:"+method.name,function(){
+		before(function(){
 			interceptor.spy.reset();
 			method.apply(method,parameters);
 		});

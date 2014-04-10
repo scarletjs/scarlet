@@ -87,5 +87,6 @@ module.exports = function(){
 		if(next){
 			next(instance,expectedResult,parameters);
 		}
+		self.assertions = [];
 	};
 };

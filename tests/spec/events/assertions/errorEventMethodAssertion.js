@@ -7,7 +7,7 @@ module.exports = function (errorEventSpy,method,expectedResult,parameters,eventN
 			method.apply(method,parameters);
 		});
 
-		it("Should not call errpr event",function(){
+		it("Should not call error event",function(){
 			assert(!errorEventSpy.called)
 		});
 	});

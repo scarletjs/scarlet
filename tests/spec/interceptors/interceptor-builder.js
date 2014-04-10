@@ -6,10 +6,9 @@ module.exports = function InterceptorBuilder(scarlet){
 
 	self.interceptors = [];
 	this.interceptorAssertionBuilder = new InterceptorAssertionBuilder();
-	self.callbackInterceptor = callbackInterceptor();
 
 	self.withCallbackInterceptor = function(){
-		var interceptor = self.callbackInterceptor
+		var interceptor = callbackInterceptor();
 		this.interceptorAssertionBuilder.withInterceptor(interceptor);
 		self.interceptors.push(interceptor);
 		return self;

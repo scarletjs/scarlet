@@ -1,10 +1,16 @@
 var assert = require("assert");
 
 module.exports = function (interceptor,instance,expectedResult,property) {
-	describe("when interceptor called on a property set",function(){
+	describe("when interceptor("+interceptor.name+") called on a property set",function(){
+		var originalValue = instance[property];
+
 		before(function(){
 			interceptor.spy.reset();
 			instance[property] = "newValue";
+		});
+
+		after(function(){
+			instance[property] = originalValue;
 		});
 
 		it("Should call interceptor",function(){

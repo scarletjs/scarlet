@@ -7,7 +7,7 @@ module.exports = function (instance,expectedResult,property) {
 		before(function(){
 			instance[property] = "newValue";
 		});
-		
+
 		after(function(){
 			instance[property] = originalValue;
 		});

@@ -24,7 +24,7 @@ describe("When using multiple interceptors that changes results",function(){
 			proceed(null, "any interceptor2 result");
 		})
 		.forMethod(function(){
-			return "any"
+			return "any";
 		})
 		.withExpectedResult("any interceptor2 result")
 		.assert();
@@ -38,7 +38,7 @@ describe("When using an interceptor that changes results",function(){
 			proceed(null, "any interceptor result");
 		})
 		.forMethod(function(){
-			return "any"
+			return "any";
 		})
 		.withExpectedResult("any interceptor result")
 		.assert();

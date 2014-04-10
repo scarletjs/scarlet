@@ -36,7 +36,7 @@ module.exports = function InterceptorAssertionBuilder(){
 			var interceptor = this.interceptors[i];
 			for (var j = 0; j < self.assertions.length; j++) {
 				self.assertions[j](interceptor,method,result,parameters);
-			};
+			}
 		}
 		if(next)
 			next(method,result,parameters);

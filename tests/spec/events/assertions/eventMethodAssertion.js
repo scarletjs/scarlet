@@ -10,7 +10,7 @@ module.exports = function (eventSpy,method,expectedResult,parameters,eventName) 
 		});
 
 		it("Should call event",function(){
-			assert(eventSpy.called)
+			assert(eventSpy.called);
 		});
 	});
 };

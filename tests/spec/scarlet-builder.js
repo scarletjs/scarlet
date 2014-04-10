@@ -42,7 +42,7 @@ function ScarletBuilder(scarlet){
 	self.forMethod = function(method){
 		self.scarlet.intercept(method);
 		withEachInterceptor(method,function(interceptor){
-			 self.scarlet.using(interceptor);
+			self.scarlet.using(interceptor);
 		});
 		method = self.scarlet.proxy();
 		return methodBuilder(method);
@@ -51,7 +51,7 @@ function ScarletBuilder(scarlet){
 	self.forErrorMethod = function(errorMethod){
 		self.scarlet.intercept(errorMethod);
 		withEachInterceptor(errorMethod,function(interceptor){
-			 self.scarlet.using(interceptor);
+			self.scarlet.using(interceptor);
 		});
 		errorMethod = self.scarlet.proxy();
 		return errorMethodBuilder(errorMethod);	
@@ -213,7 +213,7 @@ function ScarletBuilder(scarlet){
 			});
 		});
 	};
-};
+}
 
 ScarletBuilder.for = function(scarlet){
 	return new ScarletBuilder(scarlet);

@@ -13,7 +13,7 @@ module.exports = function (errorEventSpy,instance,expectedResult,property) {
 			instance[property] = originalValue;
 		});
 		it("Should not call event",function(){
-			assert(!errorEventSpy.called)
+			assert(!errorEventSpy.called);
 		});
 	});
 };

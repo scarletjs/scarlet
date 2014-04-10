@@ -8,7 +8,7 @@ module.exports = function (errorEventSpy,instance,expectedResult,property) {
 		});
 
 		it("Should not call event",function(){
-			assert(!errorEventSpy.called)
+			assert(!errorEventSpy.called);
 		});
 	});
 };

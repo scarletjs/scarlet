@@ -11,11 +11,7 @@ module.exports = function TypeBuilder(scarlet){
 
 	self.withNamedFunction = function(){
 		var instance = new dummies.NamedFunc(self);
-		// this.typeAssertionBuilder.withType(instance);
 		logger.info(TypeBuilder, "withNamedFunction", "Creating Named Function", [instance]);
-		// instance.reset = function(){
-		// 	return new dummies.NamedFunc(self);
-		// };
 		var reset = function(){
 			var resetInstance = new dummies.NamedFunc();
 			resetInstance.reset = reset;
@@ -28,7 +24,6 @@ module.exports = function TypeBuilder(scarlet){
 
 	self.withObjectLiteral = function(){
 		var instance = dummies.ObjectLiteral(self);
-		// this.typeAssertionBuilder.withType(instance);
 		logger.info(TypeBuilder, "withObjectLiteral", "Creating Object Literal", [instance]);
 		instance.reset = function(){
 			return dummies.ObjectLiteral(self);
@@ -45,7 +40,6 @@ module.exports = function TypeBuilder(scarlet){
 
 	self.withPrototypeFunction = function(){
 		var instance = new dummies.PrototypeFunc(self);
-		// this.typeAssertionBuilder.withType(instance);
 		logger.info(TypeBuilder, "withPrototypeFunction", "Creating Prototype Function", [instance]);
 
 		var reset = function(){

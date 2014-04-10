@@ -6,13 +6,11 @@ module.exports = function (errorEventSpy,method,expectedResult,parameters,eventN
 			errorEventSpy.reset();
 			try{
 				method.apply(method,parameters);
-			}catch(exception){
-
-			}
+			}catch(exception){}
 		});
 
 		it("Should call error event",function(){
-			assert(errorEventSpy.called)
+			assert(errorEventSpy.called);
 		});
 	});
 };

@@ -1,4 +1,4 @@
-var sinon = require('sinon');
+var sinon = require("sinon");
 
 module.exports = function(){
 	var interceptorCalledSpy = sinon.spy();
@@ -11,4 +11,4 @@ module.exports = function(){
 	interceptor.spy = interceptorCalledSpy;
 	interceptor.postSpy = postSpy;
 	return interceptor;
-}
+};

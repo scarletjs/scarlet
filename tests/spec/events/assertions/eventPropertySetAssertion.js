@@ -14,7 +14,7 @@ module.exports = function (eventSpy,instance,expectedResult,property,eventName) 
 		});
 
 		it("Should call event",function(){
-			assert(eventSpy.called)
+			assert(eventSpy.called);
 		});
 	});
 };

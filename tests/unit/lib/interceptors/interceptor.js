@@ -50,7 +50,7 @@ describe("Given /lib/interceptors/Interceptor", function(){
 			};
 
 			interceptor
-				.intercept(target, replace)
+				.intercept(target, null,replace)
 				.using(interceptor1)
 				.using(interceptor2)
 				.using(interceptor3);

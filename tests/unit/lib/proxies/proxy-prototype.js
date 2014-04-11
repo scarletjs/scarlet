@@ -26,15 +26,16 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 	describe("When #wrap()", function() {
 		var AugmentedClass = null;
 
-		var proxy = new ProxyPrototype(AnyClass, function(proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			return proceed(args);
-		});
+		var proxy = new ProxyPrototype(AnyClass);
 
-		proxy.wrap(function(newClass){
-			AugmentedClass = newClass;
-		});
+		proxy.wrap(function(proceed, args) {
+						proceedThisContext = this;
+						proceedWasCalled = true;
+						return proceed(args);
+					},
+					function(newClass){
+						AugmentedClass = newClass;
+					});
 
 		var instance = new AugmentedClass();
 
@@ -86,13 +87,13 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 	describe("When #unwrap()", function() {
 
-		var proxy = new ProxyPrototype(AnyClass, function(proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			return proceed(args);
-		});
+		var proxy = new ProxyPrototype(AnyClass);
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(proceed, args) {
+					proceedThisContext = this;
+					proceedWasCalled = true;
+					return proceed(args);
+				}).unwrap();
 
 		var instance = new AnyClass();
 

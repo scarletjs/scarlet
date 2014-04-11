@@ -22,13 +22,13 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proceed, args) {
+		var proxy = new ProxyInstance(instance);
+
+		proxy.wrap(function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
-
-		proxy.wrap();
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
@@ -62,14 +62,14 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			console.log("here");
-			return proceed(args);
-		});
+		var proxy = new ProxyInstance(instance);
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(proceed, args) {
+						proceedThisContext = this;
+						proceedWasCalled = true;
+						console.log("here");
+						return proceed(args);
+					}).unwrap();
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;

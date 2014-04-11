@@ -22,13 +22,13 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		var instance = new AnyClass();
 
-		var proxy = new ProxyMethod(instance, "anyMethod", function(proceed, args) {
+		var proxy = new ProxyMethod(instance, "anyMethod");
+
+		proxy.wrap(function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
-
-		proxy.wrap();
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
@@ -47,13 +47,13 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		var instance = new AnyClass();
 
-		var proxy = new ProxyMethod(instance, "anyMethod", function(proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			return proceed.call(this, args);
-		});
+		var proxy = new ProxyMethod(instance, "anyMethod");
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(proceed, args) {
+					proceedThisContext = this;
+					proceedWasCalled = true;
+					return proceed.call(this, args);
+				}).unwrap();
 
 		it("Then should not invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);

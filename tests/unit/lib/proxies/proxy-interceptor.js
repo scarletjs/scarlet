@@ -63,10 +63,10 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 
 		interceptor
 			.intercept(
-				function(proceed,args,info) {
+				function(proceed,args,memberName) {
 					var methodResult = proceed.apply(this, args);
 					var result = {
-						info: info,
+						memberName: memberName,
 						method: proceed,
 						args: args,
 						result: methodResult,
@@ -91,7 +91,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 			assert(result == "anyParameterValue");
 
 			var anyMethodCall = enumerable.first(methodCalls, function(element) {
-				return element.info.memberName == "anyMethod";
+				return element.memberName == "anyMethod";
 			});
 
 			assert(anyMethodCall.args.length > 0);
@@ -112,12 +112,12 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 			var anyPropertySetCall = methodCalls[1];
 
 			assert(anyPropertySetCall.instance == instance);
-			assert(anyPropertySetCall.info.memberName == "anyProperty");
+			assert(anyPropertySetCall.memberName == "anyProperty");
 
 			var anyPropertyGetCall = methodCalls[2];
 
 			assert(anyPropertyGetCall.instance == instance);
-			assert(anyPropertyGetCall.info.memberName == "anyProperty");
+			assert(anyPropertyGetCall.memberName == "anyProperty");
 
 		});
 

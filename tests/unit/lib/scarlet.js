@@ -31,7 +31,7 @@ describe("Given /lib/Scarlet", function() {
 
 		var proxyAnyClass =
 			scarlet
-				.intercept(AnyClass, scarlet.PROTOTYPE)
+				.intercept(AnyClass)
 				.using(function(invocation,proceed) {
 					if (invocation.memberName() == "instanceMethod")
 						instanceMethodCalled = true;
@@ -54,33 +54,6 @@ describe("Given /lib/Scarlet", function() {
 			instancePropertyCalled = false;
 			prototypeMethodCalled = false;
 			prototypePropertyCalled = false;
-		});
-
-		it("Then it should register a constructor call query", function(){
-			var instance = new proxyAnyClass();
-			assert(callQueries.length == 1);
-			assert(callQueries[0].isConstructor);
-		});
-
-		it("Then it should register a property getter call query", function(){
-			var instance = new proxyAnyClass();
-			var ignoreValue = instance.instanceProperty;
-			assert(callQueries.length == 2);
-			assert(callQueries[1].isPropertyGetter);
-		});
-
-		it("Then it should register a property setter call query", function(){
-			var instance = new proxyAnyClass();
-			instance.instanceProperty = "anything";
-			assert(callQueries.length == 2);
-			assert(callQueries[1].isPropertySetter);
-		});
-
-		it("Then it should register a method call query", function(){
-			var instance = new proxyAnyClass();
-			instance.instanceMethod("1", "2", "3");
-			assert(callQueries.length == 2);
-			assert(callQueries[1].isMethod);
 		});
 
 		it("Then should be able to trace call queries", function(){
@@ -119,34 +92,31 @@ describe("Given /lib/Scarlet", function() {
 		});
 
 		it("Then it should emit a 'before' event", function(done) {
-			scarlet.on("before", function(eventArgs) {
-				if (!eventArgs.info.type.isConstructor)
-					done();
-			});
 			var instance = new proxyAnyClass();
+			scarlet.on("before", function(eventArgs) {
+				assert(eventArgs);
+				done();
+			});
 			instance.instanceMethod("apple", "pear", "bananna");
 			scarlet.removeAllListeners();
 		});
 
 		it("Then it should emit a 'after' event", function(done) {
-			scarlet.on("after", function(eventArgs) {
-				if (!eventArgs.info.type.isConstructor) {
-					assert(eventArgs.result == "apple pear bananna");
-					done();
-				}
-			});
 			var instance = new proxyAnyClass();
+			scarlet.on("after", function(eventArgs) {
+				assert(eventArgs.result == "apple pear bananna");
+				done();
+			});
 			instance.instanceMethod("apple", "pear", "bananna");
 			scarlet.removeAllListeners();
 		});
 
 		it("Then it should emit a 'done' event", function(done) {
-			scarlet.on("done", function(eventArgs) {
-				if (!eventArgs.info.type.isConstructor) {
-					done();
-				}
-			});
 			var instance = new proxyAnyClass();
+			scarlet.on("done", function(eventArgs) {
+				assert(eventArgs);
+				done();
+			});
 			instance.instanceMethod("apple", "pear", "bananna");
 			scarlet.removeAllListeners();
 		});

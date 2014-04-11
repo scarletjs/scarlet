@@ -13,9 +13,9 @@ AnyClass.prototype.prototypeMethod = function(val) {
 	return val;
 };
 
-describe("Given /lib/proxies/ProxyInfo", function(){
+describe("Given /lib/proxies/ProxyMetadata", function(){
 
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
+	var proxyMetadata = require("../../../../lib/proxies/proxy-metadata");
 
 	describe("When #ctor()", function(){
 
@@ -25,7 +25,7 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 			var didNotThrowException = true;
 
 			try{
-				new ProxyInfo(instance, "anyMember");
+				proxyMetadata(instance, "anyMember");
 			} catch(err) {
 				didNotThrowException = false;
 			}
@@ -41,32 +41,27 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 		var instance = new AnyClass();
 
 		it("Then should be 'true' for newAnyClass().instanceMethod()", function(){
-			var info = new ProxyInfo(instance, "instanceMethod");
-			var isMethod = info.reflection.isMethod();
+			var isMethod = proxyMetadata(instance, "instanceMethod").reflection.isMethod();
 			assert(isMethod);
 		});
 
 		it("Then should be 'true' for a prototype method", function(){
-			var info = new ProxyInfo(instance, "prototypeMethod");
-			var isMethod = info.reflection.isMethod();
+			var isMethod = proxyMetadata(instance, "prototypeMethod").reflection.isMethod();
 			assert(isMethod);
 		});
 
 		it("Then should be 'false' for AnyClass", function(){
-			var info = new ProxyInfo(AnyClass);
-			var isMethod = info.reflection.isMethod();
+			var isMethod = proxyMetadata(AnyClass).reflection.isMethod();
 			assert(!isMethod);
 		});
 
 		it("Then should be 'true' for AnyClass.prototype.prototypeMethod", function(){
-			var info = new ProxyInfo(AnyClass.prototype, "prototypeMethod");
-			var isMethod = info.reflection.isMethod();
+			var isMethod = proxyMetadata(AnyClass.prototype, "prototypeMethod").reflection.isMethod();
 			assert(isMethod);
 		});
 
 		it("Then should be 'false' for a function", function(){
-			var info = new ProxyInfo(function(){});
-			var isMethod = info.reflection.isMethod();
+			var isMethod = proxyMetadata(function(){}).reflection.isMethod();
 			assert(!isMethod);
 		});
 
@@ -77,26 +72,22 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 		var instance = new AnyClass();
 
 		it("Then should be 'true' for a function(){}", function(){
-			var info = new ProxyInfo(function(){});
-			var isFunction = info.reflection.isFunction();
+			var isFunction = proxyMetadata(function(){}).reflection.isFunction();
 			assert(isFunction);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceMethod()", function(){
-			var info = new ProxyInfo(new AnyClass(), "instanceMethod");
-			var isFunction = info.reflection.isFunction();
+			var isFunction = proxyMetadata(new AnyClass(), "instanceMethod").reflection.isFunction();
 			assert(!isFunction);
 		});
 
 		it("Then should be 'false' for AnyClass.prototype.prototypeMethod()", function(){
-			var info = new ProxyInfo(AnyClass.prototype, "prototypeMethod");
-			var isFunction = info.reflection.isFunction();
+			var isFunction = proxyMetadata(AnyClass.prototype, "prototypeMethod").reflection.isFunction();
 			assert(!isFunction);
 		});
 
 		it("Then should be 'false' for an instance", function(){
-			var info = new ProxyInfo(instance);
-			var isFunction = info.reflection.isFunction();
+			var isFunction = proxyMetadata(instance).reflection.isFunction();
 			assert(!isFunction);
 		});
 
@@ -107,26 +98,22 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 		var instance = new AnyClass();
 
 		it("Then should be 'true' for new AnyClass().instanceProperty", function(){
-			var info = new ProxyInfo(instance, "instanceProperty");
-			var isProperty = info.reflection.isProperty();
+			var isProperty = proxyMetadata(instance, "instanceProperty").reflection.isProperty();
 			assert(isProperty);
 		});
 
 		it("Then should be 'true' for AnyClass.prototype.prototypeProperty", function(){
-			var info = new ProxyInfo(AnyClass.prototype, "prototypeProperty");
-			var isProperty = info.reflection.isProperty();
+			var isProperty = proxyMetadata(AnyClass.prototype, "prototypeProperty").reflection.isProperty();
 			assert(isProperty);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceMethod()", function(){
-			var info = new ProxyInfo(instance, "instanceMethod");
-			var isProperty = info.reflection.isProperty();
+			var isProperty =  proxyMetadata(instance, "instanceMethod").reflection.isProperty();
 			assert(!isProperty);
 		});
 
 		it("Then should be 'false' for new AnyClass().prototypeMethod", function(){
-			var info = new ProxyInfo(instance, "prototypeMethod");
-			var isProperty = info.reflection.isProperty();
+			var isProperty = proxyMetadata(instance, "prototypeMethod").reflection.isProperty();
 			assert(!isProperty);
 		});
 
@@ -137,32 +124,27 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 		var instance = new AnyClass();
 
 		it("Then should be 'true' for new AnyClass()", function(){
-			var info = new ProxyInfo(instance);
-			var isInstance = info.reflection.isInstance();
+			var isInstance = proxyMetadata(instance).reflection.isInstance();
 			assert(isInstance);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceMethod()", function(){
-			var info = new ProxyInfo(instance, "instanceMethod");
-			var isInstance = info.reflection.isInstance();
+			var isInstance = proxyMetadata(instance, "instanceMethod").reflection.isInstance();
 			assert(!isInstance);
 		});
 
 		it("Then should be 'false' for AnyClass.prototype.prototypeMethod()", function(){
-			var info = new ProxyInfo(AnyClass.prototype, "prototypeMethod");
-			var isInstance = info.reflection.isInstance();
+			var isInstance = proxyMetadata(AnyClass.prototype, "prototypeMethod").reflection.isInstance();
 			assert(!isInstance);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceProperty", function(){
-			var info = new ProxyInfo(instance, "instanceProperty");
-			var isInstance = info.reflection.isInstance();
+			var isInstance = proxyMetadata(instance, "instanceProperty").reflection.isInstance();
 			assert(!isInstance);
 		});
 
 		it("Then should be 'false' for new AnyClass().prototypeMethod()", function(){
-			var info = new ProxyInfo(instance, "prototypeProperty");
-			var isInstance = info.reflection.isInstance();
+			var isInstance = proxyMetadata(instance, "prototypeProperty").reflection.isInstance();
 			assert(!isInstance);
 		});
 
@@ -173,26 +155,22 @@ describe("Given /lib/proxies/ProxyInfo", function(){
 		var instance = new AnyClass();
 
 		it("Then should be 'true' for AnyClass", function(){
-			var info = new ProxyInfo(AnyClass);
-			var isPrototype = info.reflection.isPrototype();
+			var isPrototype = proxyMetadata(AnyClass).reflection.isPrototype();
 			assert(isPrototype);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceMethod()", function(){
-			var info = new ProxyInfo(instance, "instanceMethod");
-			var isPrototype = info.reflection.isPrototype();
+			var isPrototype = proxyMetadata(instance, "instanceMethod").reflection.isPrototype();
 			assert(!isPrototype);
 		});
 
 		it("Then should be 'false' for new AnyClass().prototypeMethod()", function(){
-			var info = new ProxyInfo(instance, "prototypeMethod");
-			var isPrototype = info.reflection.isPrototype();
+			var isPrototype = proxyMetadata(instance, "prototypeMethod").reflection.isPrototype();
 			assert(!isPrototype);
 		});
 
 		it("Then should be 'false' for new AnyClass().instanceProperty", function(){
-			var info = new ProxyInfo(instance, "instanceProperty");
-			var isPrototype = info.reflection.isPrototype();
+			var isPrototype = proxyMetadata(instance, "instanceProperty").reflection.isPrototype();
 			assert(!isPrototype);
 		});
 

@@ -7,8 +7,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyInstance", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyInstance = require("../../../../lib/proxies/proxy-instance");
 
 	var proceedWasCalled = false;
@@ -24,7 +22,7 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proceed, args, proxyInfo) {
+		var proxy = new ProxyInstance(instance, function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -64,9 +62,10 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proceed, args, proxyInfo) {
+		var proxy = new ProxyInstance(instance, function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
+			console.log("here");
 			return proceed(args);
 		});
 

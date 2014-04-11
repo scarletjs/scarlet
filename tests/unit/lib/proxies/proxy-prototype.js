@@ -13,8 +13,6 @@ AnyClass.prototype.prototypeMethod = function(val) {
 };
 
 describe("Given /lib/proxies/ProxyPrototype", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyPrototype = require("../../../../lib/proxies/proxy-prototype");
 
 	var proceedWasCalled = false;
@@ -26,11 +24,9 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 	});
 
 	describe("When #wrap()", function() {
-
-		var info = null;
 		var AugmentedClass = null;
 
-		var proxy = new ProxyPrototype(AnyClass, function(proceed, args,proxyInfo) {
+		var proxy = new ProxyPrototype(AnyClass, function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -90,9 +86,7 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 	describe("When #unwrap()", function() {
 
-		var info = null;
-
-		var proxy = new ProxyPrototype(AnyClass, function(proceed, args,proxyInfo) {
+		var proxy = new ProxyPrototype(AnyClass, function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);

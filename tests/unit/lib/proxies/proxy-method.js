@@ -1,4 +1,5 @@
 var assert = require("assert");
+//var proxyMetadata = require('../../../../lib/proxies/proxy-metadata');
 
 function AnyClass() {
 	var self = this;
@@ -7,8 +8,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyMethod", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyMethod = require("../../../../lib/proxies/proxy-method");
 
 	var proceedWasCalled = false;
@@ -22,9 +21,8 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 	describe("When #wrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proceed, args, proxyInfo) {
+		var proxy = new ProxyMethod(instance, "anyMethod", function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -43,22 +41,16 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 			assert(instance == proceedThisContext);
 			assert(result == 7);
 		});
-
-		it("Then should have a '__scarlet' shadow object", function(){
-			assert(instance.__scarlet__);
-		});
-
 	});
 
 	describe("When #unwrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proceed, args, proxyInfo) {
+		var proxy = new ProxyMethod(instance, "anyMethod", function(proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
-			return proceed.call(proxyInfo.instance, args);
+			return proceed.call(this, args);
 		});
 
 		proxy.wrap().unwrap();

@@ -7,8 +7,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyProperty", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyProperty = require("../../../../lib/proxies/proxy-property");
 
 	var proceedWasCalled = false;
@@ -22,9 +20,8 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 	describe("When #wrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proceed,args, proxyInfo) {
+		var proxy = new ProxyProperty(instance, "anyProperty", function(proceed,args, proxyInfo) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed();
@@ -47,19 +44,13 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 			instance.anyProperty = "anyValue";
 			assert(instance == proceedThisContext);
 		});
-
-		it("Then should have a '__scarlet' shadow object", function(){
-			assert(instance.__scarlet__);
-		});
-
 	});
 
 	describe("When #unwrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proceed,args,proxyInfo) {
+		var proxy = new ProxyProperty(instance, "anyProperty", function(proceed,args,proxyInfo) {
 			proceedWasCalled = true;
 			return proceed();
 		});
@@ -75,7 +66,6 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 			instance.anyProperty = "anyValue";
 			assert(!proceedWasCalled);
 		});
-
 	});
 
 });

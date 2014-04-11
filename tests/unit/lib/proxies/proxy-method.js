@@ -24,7 +24,7 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		var proxy = new ProxyMethod(instance, "anyMethod");
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -49,7 +49,7 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 
 		var proxy = new ProxyMethod(instance, "anyMethod");
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name, proceed, args) {
 					proceedThisContext = this;
 					proceedWasCalled = true;
 					return proceed.call(this, args);

@@ -23,7 +23,7 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 
 		var proxy = new ProxyProperty(instance, "anyProperty");
 
-		proxy.wrap(function(proceed,args) {
+		proxy.wrap(function(name,proceed,args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed();
@@ -52,7 +52,7 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 
 		var proxy = new ProxyProperty(instance, "anyProperty");
 
-		proxy.wrap(function(proceed,args,proxyInfo) {
+		proxy.wrap(function(name,proceed,args) {
 					proceedWasCalled = true;
 					return proceed();
 				}).unwrap();

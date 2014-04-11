@@ -15,10 +15,10 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 
 		interceptor
 			.intercept(
-				function(proceed,args,info) {
+				function(name, proceed,args) {
 					var methodResult = proceed.apply(this, args);
 					var result = {
-						info: info,
+						name : name,
 						method: proceed,
 						args: args,
 						result: methodResult,
@@ -63,10 +63,10 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 
 		interceptor
 			.intercept(
-				function(proceed,args,memberName) {
+				function(name,proceed,args) {
 					var methodResult = proceed.apply(this, args);
 					var result = {
-						memberName: memberName,
+						name : name,
 						method: proceed,
 						args: args,
 						result: methodResult,
@@ -91,7 +91,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 			assert(result == "anyParameterValue");
 
 			var anyMethodCall = enumerable.first(methodCalls, function(element) {
-				return element.memberName == "anyMethod";
+				return element.name == "anyMethod";
 			});
 
 			assert(anyMethodCall.args.length > 0);
@@ -112,13 +112,12 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 			var anyPropertySetCall = methodCalls[1];
 
 			assert(anyPropertySetCall.instance == instance);
-			assert(anyPropertySetCall.memberName == "anyProperty");
-
+			assert(anyPropertySetCall.name == "anyProperty");
+			
 			var anyPropertyGetCall = methodCalls[2];
 
 			assert(anyPropertyGetCall.instance == instance);
-			assert(anyPropertyGetCall.memberName == "anyProperty");
-
+			assert(anyPropertyGetCall.name == "anyProperty");
 		});
 
 	});

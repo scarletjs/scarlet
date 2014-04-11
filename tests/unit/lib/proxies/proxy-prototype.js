@@ -28,7 +28,7 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 		var proxy = new ProxyPrototype(AnyClass);
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name,proceed, args) {
 						proceedThisContext = this;
 						proceedWasCalled = true;
 						return proceed(args);
@@ -89,7 +89,7 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 
 		var proxy = new ProxyPrototype(AnyClass);
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name, proceed, args) {
 					proceedThisContext = this;
 					proceedWasCalled = true;
 					return proceed(args);
@@ -130,7 +130,6 @@ describe("Given /lib/proxies/ProxyPrototype", function() {
 			assert(!proceedWasCalled);
 			assert(result == 6);
 		});
-
 	});
 
 });

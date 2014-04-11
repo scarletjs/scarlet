@@ -24,7 +24,7 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 
 		var proxy = new ProxyInstance(instance);
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
@@ -64,7 +64,7 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 
 		var proxy = new ProxyInstance(instance);
 
-		proxy.wrap(function(proceed, args) {
+		proxy.wrap(function(name, proceed, args) {
 						proceedThisContext = this;
 						proceedWasCalled = true;
 						console.log("here");

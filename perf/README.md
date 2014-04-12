@@ -1,4 +1,4 @@
-Scarlet Perfromance Tests
+Scarlet Performance Tests
 =========================
 
 Benchmarking has been performed against [hooks](https://github.com/bnoguchi/hooks-js) using [benchmark](https://github.com/bestiejs/benchmark.js).

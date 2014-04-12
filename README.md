@@ -238,7 +238,7 @@ function myInterceptor1(error, invocation, proceed) {
 
 ## Invocation Properties
 
-**args**
+### Args
 
 A property which can be used to determine the arguments of the proxied method
 
@@ -254,7 +254,7 @@ Math.min = scarlet.intercept(Math.min)
 Math.min(1,2,3);
 ```
 
-**result**
+### Result
 
 A property which can be used to determine or change the result of the proxied method
 
@@ -272,7 +272,7 @@ var result = Math.min(1,2,3);
 console.log(result); //result -> 100
 ```
 
-**memberName**
+### Member Name
 
 A property which can be used to determine the name of the proxied method.
 

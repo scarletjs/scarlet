@@ -143,7 +143,7 @@ myFunction = scarlet
     .using(function(proceed){
         var thisContext = this;
         process.nextTick(function(){ //Asynchronous interceptor method dispatch
-            proceed(); // Continuation, without in asynchronously will break synchronous methods
+            proceed(); // Continuation, without synchronous methods will break
         });
     }).proxy();
 
@@ -172,7 +172,7 @@ myFunction = scarlet
     .proxy();
 ```
 
-It is important to note that interceptors are chained together recursively via the callstack. So each **proceed** is the next interceptor in the call chain until the concrete method is finally passed through. The benefit of this is each interceptor can override the previous interceptors results. The last interceptor has the final say though. 
+It is important to note that interceptors are chained together using a 'Russian Dolls' call pattern. So each **proceed** is the next interceptor in the call chain until the concrete method is finally passed through. The benefit of this is each interceptor can override the previous interceptors results. The last interceptor has the final say though. 
 
 ## Using Events
 
@@ -199,47 +199,44 @@ var min = Math.min(1,2,3);
 
 ## Interceptor Parameters
 
-# Interceptor Single Parameter
+### A Simple Interceptor
 
 ```javascript
 function myInterceptor1(proceed) {
     proceed();
 }
 ```
-It is important to note a few things about this. 
 
  - **this**: Is always the context of the instance of the object.
  - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
 
-# Interceptor Two Parameters
+### Interceptor with Invocation object
 
 ```javascript
-function myInterceptor1(invocation,proceed) {
+function myInterceptor1(invocation, proceed) {
     proceed();
 }
 ```
-It is important to note a few things about this. 
 
  - **this**: Is always the context of the instance of the object.
  - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
  - **invocation**: Is an object which contains meta data about the function being intercepted. 
 
 
-# Interceptor Three Parameters
+### Interceptor with Invocation and Error object
 
 ```javascript
-function myInterceptor1(error, invocation,proceed) {
+function myInterceptor1(error, invocation, proceed) {
     proceed();
 }
 ```
-It is important to note a few things about this. 
 
  - **this**: Is always the context of the instance of the object.
  - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
  - **invocation**: Is an object which contains meta data about the function being intercepted. 
  - **error**: Is the error, if any that has been returned by any previous interceptors.
 
-## Invocation properties
+## Invocation Properties
 
 **args**
 

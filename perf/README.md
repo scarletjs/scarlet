@@ -11,7 +11,7 @@ Benchmarking has been performed against [hooks](https://github.com/bnoguchi/hook
 $: ./run.sh
 ```
 
-##Results of Last Test Run
+##Results of last test run
 
 ```
 Intercepting an Instance of a Named Function:

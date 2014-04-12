@@ -1,24 +1,19 @@
 function NamedFunction(){
-	
 	var self = this;
 	self.property = "any";
-	self.methodCalled = false;
-	self.methodWithReturnCalled = false;
+	self.name = "NamedFunction";
 	self.__type__ = "scarlet.tests.spec.builders.dummies.NamedFunction";
 
 	self.method = function(){
-		self.methodCalled = true;
 	};
 	
 	self.methodWithReturn = function(){
-		self.methodWithReturnCalled = true;
 		return "any";
 	};
 
-	self.reset = function(){
-		self.methodCalled = false;
-		self.methodWithReturnCalled = false;
+	self.errorMethod = function(){
+		throw new Error("Any Error");
 	};
-};
+}
 
 module.exports = NamedFunction;

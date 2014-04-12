@@ -1,22 +1,18 @@
-var g = require("../../../../include");
+var assert = require("assert");
+var inspect = require("util").inspect;
+var ll = function(val) { console.log(inspect(val)); };
 
 describe("Given /lib/interceptors/Interceptor", function(){
 
-	var ProxyType = require("../../../../lib/proxies/proxy-type");
 	var Interceptor = require("../../../../lib/interceptors/interceptor");
 
 	describe("When using multiple interceptors", function(){
 
 		it("Then I should have a fully working call cycle", function(){
 
-			var type = new ProxyType().asPrototype();
-
 			var thisContext = {};
 
 			var target = function(arg1, arg2, arg3) {
-				g.ll(arg1);
-				g.ll(arg2);
-				g.ll(arg3);
 				return arg1 + " " + arg2 + " " + arg3;
 			};
 
@@ -24,32 +20,29 @@ describe("Given /lib/interceptors/Interceptor", function(){
 
 			var interceptor1Args = null;
 			var interceptor1Called = false;
-			var interceptor1 = function(info, method, args){
-				g.ll("Interceptor 1");
-				g.ll(args);
+			var interceptor1 = function(info,proceed){
 				interceptor1Called = true;
-				interceptor1Args = args;
-				return method.call(this, info, method, ["blinky", "pinkey", "dinkey"]);
+				interceptor1Args = info.args;
+				info.args = ["blinky", "pinkey", "dinkey"];
+				return proceed();
 			};
 
 			var interceptor2Args = null;
 			var interceptor2Called = false;
-			var interceptor2 = function(info, method, args){
-				g.ll("Interceptor 2");
-				g.ll(args);
+			var interceptor2 = function(info,proceed){
 				interceptor2Called = true;
-				interceptor2Args = args;
-				return method.call(this, info, method, ["phoebie", "fubu", "fanzie"]);
+				interceptor2Args = info.args;
+				info.args = ["phoebie", "fubu", "fanzie"];
+				return proceed();
 			};
 
-			var interceptor3Args = null
+			var interceptor3Args = null;
 			var interceptor3Called = false;
-			var interceptor3 = function(info, method, args){
-				g.ll("Interceptor 3");
-				g.ll(args);
+			var interceptor3 = function(info,proceed){
 				interceptor3Called = true;
-				interceptor3Args = args;
-				return method.call(this, info, method, ["mickey", "mikey", "joe"]);
+				interceptor3Args = info.args;
+				info.args = ["mickey", "mikey", "joe"];
+				return proceed();
 			};
 
 			var replace = function(observable){
@@ -57,20 +50,20 @@ describe("Given /lib/interceptors/Interceptor", function(){
 			};
 
 			interceptor
-				.intercept(target, replace, type)
+				.intercept(target, null, replace)
 				.using(interceptor1)
 				.using(interceptor2)
 				.using(interceptor3);
 
 			var result = target("apple", "bananna", "pear");
 
-			g.assert(interceptor1Called);
-			g.assert(interceptor2Called);
-			g.assert(interceptor3Called);
-			g.assert(result == "blinky pinkey dinkey");
+			assert(interceptor1Called);
+			assert(interceptor2Called);
+			assert(interceptor3Called);
+			assert(result === "mickey mikey joe");
 
 		});
 
 	});
 
-})
+});

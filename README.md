@@ -13,6 +13,24 @@ The simple fast javascript interceptor.
 
     npm install scarlet
 
+## Quick Start
+
+```javascript
+var Scarlet = require('scarlet');
+var scarlet = Scarlet();
+
+Math.min = scarlet.intercept(Math.min)
+                .using(function(proceed){ 
+                    console.log("In interceptor");
+                    proceed(); 
+                })
+                .proxy();
+
+Math.min(1,2,3);
+//-> 1. interceptor called --> outputs "In interceptor" 
+//-> 2. Math.min will be called as normal and will return 1
+```
+
 ## Project Purpose
 
 Scarlet is designed to to be simple, easy and fast. It allows you to implement behaviours on **methods** and **properties** at runtime without having to change original source code. Why would you want to do this? Well it depends on your point of view. Scarlet can be used for writing all sorts of frameworks including logging, mocking, instrumentation, inversion of control containers and possibly many more. 
@@ -45,10 +63,9 @@ Here is an example where we intercept Math.min using an anonymous function as an
 var Scarlet = require('scarlet');
 var scarlet = new Scarlet();
 
-Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-    .using(function(info, method, args){ 
-        var result = method.call(this, info, method, args);
-        return result;
+Math.min = scarlet.intercept(Math.min)
+    .using(function(proceed){
+        proceed();
     }).proxy();
 
 var result = Math.min(1, 2, 3); //result = 1;
@@ -60,9 +77,9 @@ We could just as easily change the behaviour or Math.min to always return the re
 var Scarlet = require('scarlet');
 var scarlet = new Scarlet();
 
-Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-    .using(function(info, method, args){ 
-        return Math.max(args);
+Math.min = scarlet.intercept(Math.min)
+    .using(function(proceed, invocation){ 
+        proceed(null, Math.max(invocation.args));
     }).proxy();
 
 var result = Math.min(1, 2, 3); //result = 3;
@@ -82,12 +99,11 @@ var assert = require('assert');
 
 var timesCalled = 0;
 
-function myInterceptor(info, method, args) {
+function myInterceptor(proceed) {
     // 'Prelude Code' or 'Before Advice'
-    var result = method.call(this, info, method, args); // 'Target Method' or 'Join Point'
+    var result = proceed(); // 'Target Method' or 'Join Point'
     // 'Postlude Code' or 'After Advice'
     timesCalled += 1;
-    return result;
 }
 
 function MyClass() {
@@ -98,7 +114,7 @@ function MyClass() {
 }
 
 MyProxiedClass = scarlet
-    .intercept(MyClass, scarlet.PROTOTYPE)
+    .intercept(MyClass)
     .using(myInterceptor)
     .proxy();
 
@@ -123,19 +139,17 @@ function myInterceptor(info, method, args){}
 function myFunction(any) {/*do stuff*/}
 
 myFunction = scarlet
-    .intercept(myFunction, scarlet.FUNCTION)
-    .using(function(info, method, args){
+    .intercept(myFunction)
+    .using(function(proceed){
         var thisContext = this;
-        var result = method.call(thisContext, info, method, args); // Continuation, without this results will break!
         process.nextTick(function(){ //Asynchronous interceptor method dispatch
-            myInterceptor.call(thisContext, info, method, args);
+            proceed(); // Continuation, without in asynchronously will break synchronous methods
         });
-        return result; // Actual result
     }).proxy();
 
 ```
 
-The benefits of this approach is that you can delegate your interceptors execution to the event loop and return values wont break. The down side is you cannot change return values from within your interceptor. In this case you might want to consider using a javascript futures framework that implements a promise pattern.
+The benefits of this approach is that you can have interceptors that perform asynchronous behaviour; write to a databse, file, etc. The down side is this could effect synchronous methods.
 
 ## Using Multiple Interceptors
 
@@ -145,9 +159,9 @@ You can also use multiple interceptors on the same function:
 var Scarlet = require("scarlet");
 var scarlet = new Scarlet();
 
-function myInterceptor1(info, method, args) {...}
+function myInterceptor1(proceed) {proceed();};
 
-function myInterceptor2(info, method, args) {...}
+function myInterceptor2(proceed) {proceed();};
 
 function myFunction() {...}
 
@@ -158,7 +172,7 @@ myFunction = scarlet
     .proxy();
 ```
 
-It is important to note that interceptors are chained together recursively via the callstack. So each **method** parameter is the previous interceptor in the call chain until the concrete method is finally passed through. The benefit of this is each interceptor can override the previous interceptors results. The first interceptor has the final say though. 
+It is important to note that interceptors are chained together recursively via the callstack. So each **proceed** is the next interceptor in the call chain until the concrete method is finally passed through. The benefit of this is each interceptor can override the previous interceptors results. The last interceptor has the final say though. 
 
 ## Using Events
 
@@ -170,7 +184,7 @@ Scarlet interceptors emit the following events:
  - **error**: emitted if an error occurs
 
 ```javascript
-Scarlet.intercept(Math, 'min')
+Scarlet.intercept(Math.min)
         .on('before', beforeFunction)
         .on('after', afterFunction)
         .on('done', doneFunction)
@@ -185,75 +199,96 @@ var min = Math.min(1,2,3);
 
 ## Interceptor Parameters
 
-The typical declaration of any interceptor is as follows:
+# Interceptor Single Parameter
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    return method.call(this, info, method, args);
+function myInterceptor1(proceed) {
+    proceed();
 }
 ```
 It is important to note a few things about this. 
 
  - **this**: Is always the context of the instance of the object.
- - **info**: Is an object which contains meta data about the function being intercepted.
- - **method**: A reference to the original method or next interceptor in the call chain.
- - **args**: The arguments passed to the method being intercepted.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
 
-The **info** parameter object has the following properties and functions: 
-
-**isConstructor**
-
-A function which can be used to determine if the current function begin called is used as a constructor function. 
+# Interceptor Two Parameters
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    if(info.isConstructor()) // Only invokes if constructor
-        return method.call(this, info, method, args);
+function myInterceptor1(invocation,proceed) {
+    proceed();
 }
 ```
+It is important to note a few things about this. 
 
-**isFunction**
+ - **this**: Is always the context of the instance of the object.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
+ - **invocation**: Is an object which contains meta data about the function being intercepted. 
 
-A function which determines whether the info object represents an object that is a function.
+
+# Interceptor Three Parameters
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    if(info.isConstructor()) // Only invokes if function
-        return method.call(this, info, method, args);
+function myInterceptor1(error, invocation,proceed) {
+    proceed();
 }
 ```
+It is important to note a few things about this. 
 
-**isProperty**
+ - **this**: Is always the context of the instance of the object.
+ - **proceed**: Is the callback to proceed to the next interceptor or main method.  The result of this funtion is the result of the intercepted method.
+ - **invocation**: Is an object which contains meta data about the function being intercepted. 
+ - **error**: Is the error, if any that has been returned by any previous interceptors.
 
-A function which determines whether the info object represents a property.
+## Invocation properties
+
+**args**
+
+A property which can be used to determine the arguments of the proxied method
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    if(info.isProperty()) // Only invokes if property
-        return method.call(this, info, method, args);
-}
+function myInterceptor1(invocation, proceed) {
+    console.log(invocation.args); //args -> [1,2,3];
+    proceed();
+};
+
+Math.min = scarlet.intercept(Math.min)
+                    .using(myInterceptor1)
+                    .proxy();
+Math.min(1,2,3);
 ```
 
-**isInstance**
+**result**
 
-A function which determines whether the info object represents an instance object.
+A property which can be used to determine or change the result of the proxied method
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    if(info.isInstance()) // Only invokes if instance
-        return method.call(this, info, method, args);
-}
+function myInterceptor1(invocation, proceed) {
+    proceed();
+    console.log(invocation.result); //result -> 1;
+    invocation.result = 100; //Modifies the result to be 100;
+};
+
+Math.min = scarlet.intercept(Math.min)
+                    .using(myInterceptor1)
+                    .proxy();
+var result = Math.min(1,2,3);
+console.log(result); //result -> 100
 ```
 
-**isPrototype**
+**memberName**
 
-A function which determines whether the info object represents a prototype.
+A property which can be used to determine the name of the proxied method.
 
 ```javascript
-function myInterceptor1(info, method, args) {
-    if(info.isPrototype()) // Only invokes if prototype
-        return method.call(this, info, method, args);
-}
+function myInterceptor1(invocation, proceed) {
+    proceed();
+    console.log(invocation.memberName); //result -> min;
+};
+
+Math.min = scarlet.intercept(Math.min)
+                    .using(myInterceptor1)
+                    .proxy();
+var result = Math.min(1,2,3);
 ```
 
 ## Browser Example
@@ -268,15 +303,15 @@ Here is a sample page.
     <head>
         <script type="text/javascript" src="js/scarlet.js"></script> 
         <script type="text/javascript">
-            function interceptor(info, method, args){
+            function interceptor(proceed)
                 console.log("In interceptor");
-                method.call(this, info, method, args);
+                proceed();
             };
             function doStuff () {
                 console.log("In doStuff");
             }
             doStuff = scarlet
-                .intercept(doStuff, scarlet.FUNCTION)
+                .intercept(doStuff)
                 .using(interceptor)
                 .proxy();
 
@@ -297,11 +332,11 @@ Here is a visual breakdown of a pseudo callstack for the Math.min we saw earlier
 ```
 -->Math.min(1,2,3) // proxied method is called
         |
-        -->interceptor<function<anonymous>>(info, method, args) // interceptor is called
+        -->interceptor<function<anonymous>>(proceed,invocation) // interceptor is called
                 |
-                --> var result = method.call(this, info, method, args) // interceptor calls 'actual' method and saves 'result'
+                --> var result = proceed(); // interceptor calls 'actual' method and saves 'result'
                         |
-                        -->interceptor<function<anonymous>>(info, method, args) // interceptor is called
+                        -->interceptor<function<anonymous>>(proceed, invocation) // interceptor is called
                             |
                             --> return result; // result is returned. 
 ``` 

@@ -1,27 +1,24 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 describe("Given /lib/proxies/ProxyInterceptor", function() {
 
-	var ProxyType = require("../../../../lib/proxies/proxy-type");
 	var ProxyInterceptor = require("../../../../lib/proxies/proxy-interceptor");
-
+	var enumerable = require("../../../../lib/extensions/enumerable");
 	describe("When #ctor() with a normal function", function() {
 
-		var type = new ProxyType().asPrototype();
-
-		function AnyFunction(anyParameter) {
+		var AnyFunction = function(anyParameter) {
 			return anyParameter;
-		}
+		};
 
 		var methodCalls = [];
 		var interceptor = new ProxyInterceptor(AnyFunction);
 
 		interceptor
 			.intercept(
-				function(info, proceed, args) {
+				function(name, proceed,args) {
 					var methodResult = proceed.apply(this, args);
 					var result = {
-						info: info,
+						name : name,
 						method: proceed,
 						args: args,
 						result: methodResult,
@@ -32,7 +29,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				},
 				function(observableType) {
 					AnyFunction = observableType;
-				}, type);
+				});
 
 		beforeEach(function() {
 			methodCalls = [];
@@ -41,20 +38,17 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 		it("Then should be able to observe a method call", function(){
 
 			var result = AnyFunction("anyValue");
-
-			g.assert(result == "anyValue");
-			g.assert(methodCalls.length == 1);
-			g.assert(methodCalls[0].args[0] == "anyValue");
+			assert(result == "anyValue");
+			assert(methodCalls.length == 1);
+			assert(methodCalls[0].args[0] == "anyValue");
 
 		});
 
 	});
 
 	describe("When #ctor() with named function", function() {
-
-		var type = new ProxyType().asPrototype();
 		
-		function AnyClass() {
+		var AnyClass = function  () {
 			var self = this;
 			self.methodCalled = false;
 			self.anyProperty = "anyValue";
@@ -62,17 +56,17 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				self.methodCalled = true;
 				return anyParameter;
 			};
-		}
+		};
 
 		var methodCalls = [];
 		var interceptor = new ProxyInterceptor(AnyClass);
 
 		interceptor
 			.intercept(
-				function(info, proceed, args) {
+				function(name,proceed,args) {
 					var methodResult = proceed.apply(this, args);
 					var result = {
-						info: info,
+						name : name,
 						method: proceed,
 						args: args,
 						result: methodResult,
@@ -83,7 +77,7 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 				},
 				function(observableType) {
 					AnyClass = observableType;
-				}, type);
+				});
 
 		beforeEach(function() {
 			methodCalls = [];
@@ -93,18 +87,17 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 
 			var instance = new AnyClass();
 			var result = instance.anyMethod("anyParameterValue");
+			assert(methodCalls.length > 0);
+			assert(result == "anyParameterValue");
 
-			g.assert(methodCalls.length > 0);
-			g.assert(result == "anyParameterValue");
-
-			var anyMethodCall = g.ext.enumerable.first(methodCalls, function(element) {
-				return element.info.memberName == "anyMethod";
+			var anyMethodCall = enumerable.first(methodCalls, function(element) {
+				return element.name == "anyMethod";
 			});
 
-			g.assert(anyMethodCall.args.length > 0);
-			g.assert(anyMethodCall.instance == instance);
-			g.assert(anyMethodCall.result == "anyParameterValue");
-			g.assert(anyMethodCall.args[0] == "anyParameterValue");
+			assert(anyMethodCall.args.length > 0);
+			assert(anyMethodCall.instance == instance);
+			assert(anyMethodCall.result == "anyParameterValue");
+			assert(anyMethodCall.args[0] == "anyParameterValue");
 		});
 
 		it("Then should be able to observe properties", function() {
@@ -113,19 +106,18 @@ describe("Given /lib/proxies/ProxyInterceptor", function() {
 			instance.anyProperty = "foo";
 			var result = instance.anyProperty;
 
-			g.assert(result == "foo");
-			g.assert(methodCalls.length == 3);
+			assert(result == "foo");
+			assert(methodCalls.length == 3);
 
 			var anyPropertySetCall = methodCalls[1];
 
-			g.assert(anyPropertySetCall.instance == instance);
-			g.assert(anyPropertySetCall.info.memberName == "anyProperty");
-
+			assert(anyPropertySetCall.instance == instance);
+			assert(anyPropertySetCall.name == "anyProperty");
+			
 			var anyPropertyGetCall = methodCalls[2];
 
-			g.assert(anyPropertyGetCall.instance == instance);
-			g.assert(anyPropertyGetCall.info.memberName == "anyProperty");
-
+			assert(anyPropertyGetCall.instance == instance);
+			assert(anyPropertyGetCall.name == "anyProperty");
 		});
 
 	});

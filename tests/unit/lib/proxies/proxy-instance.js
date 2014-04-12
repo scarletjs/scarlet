@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 function AnyClass() {
 	var self = this;
@@ -7,8 +7,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyInstance", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyInstance = require("../../../../lib/proxies/proxy-instance");
 
 	var proceedWasCalled = false;
@@ -24,37 +22,37 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyInstance(instance);
+
+		proxy.wrap(function(name, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
 
-		proxy.wrap();
-
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
-			g.assert(proceedWasCalled);
-			g.assert(instance.anyProperty == 6);
+			assert(proceedWasCalled);
+			assert(instance.anyProperty == 6);
 		});
 
 		it("Then should invoke whenCalled delegate for 'property' get", function() {
 			instance.anyProperty = "apple";
 			var result = instance.anyProperty;
-			g.assert(proceedWasCalled);
-			g.assert(result == "apple");
+			assert(proceedWasCalled);
+			assert(result == "apple");
 		});
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(proceedWasCalled);
-			g.assert(result == 6);
+			assert(proceedWasCalled);
+			assert(result == 6);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			var result = instance.anyMethod(7);
-			g.assert(instance == proceedThisContext);
-			g.assert(result == 7);
+			assert(instance == proceedThisContext);
+			assert(result == 7);
 		});
 
 	});
@@ -64,29 +62,30 @@ describe("Given /lib/proxies/ProxyInstance", function() {
 		var info = null;
 		var instance = new AnyClass();
 
-		var proxy = new ProxyInstance(instance, function(proxyInfo, proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			return proceed(args);
-		});
+		var proxy = new ProxyInstance(instance);
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(name, proceed, args) {
+						proceedThisContext = this;
+						proceedWasCalled = true;
+						console.log("here");
+						return proceed(args);
+					}).unwrap();
 
 		it("Then should invoke whenCalled delegate for 'property' set", function() {
 			instance.anyProperty = 6;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should invoke whenCalled delegate for 'property' get", function() {
 			var result = instance.anyProperty;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
-
+		
 	});
 
 });

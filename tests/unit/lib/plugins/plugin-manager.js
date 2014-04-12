@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 module.exports = function($scarlet){
 
@@ -24,7 +24,7 @@ describe("Given /lib/Plugins", function(){
 
 		it("Then should load and call initialize", function(){
 			var plugin = pluginManager.load($scarlet, "plugin-manager");
-			g.assert(plugin.initializeWasCalled);
+			assert(plugin.initializeWasCalled);
 		});
 
 	});

@@ -2,8 +2,8 @@ var l = console.log;
 var Benchmark = require('benchmark');
 var Scarlet = require("../lib/scarlet");
 
-function interceptor(info, method, args) {
-	return method.call(this, info, method, args);
+function interceptor(proceed) {
+	return proceed();
 };
 
 var instance = function() {};

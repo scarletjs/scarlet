@@ -1,4 +1,4 @@
-var g = require("../../../../include");
+var assert = require("assert");
 
 function AnyClass() {
 	var self = this;
@@ -7,8 +7,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyProperty", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyProperty = require("../../../../lib/proxies/proxy-property");
 
 	var proceedWasCalled = false;
@@ -22,60 +20,52 @@ describe("Given /lib/proxies/ProxyProperty", function() {
 	describe("When #wrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proxyInfo, proceed) {
+		var proxy = new ProxyProperty(instance, "anyProperty");
+
+		proxy.wrap(function(name,proceed,args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed();
 		});
 
-		proxy.wrap();
-
 		it("Then should invoke whenCalled delegate for 'get'", function() {
 			var result = instance.anyProperty;
-			g.assert(proceedWasCalled);
-			g.assert(result == "anyValue");
+			assert(proceedWasCalled);
+			assert(result == "anyValue");
 		});
 
 		it("Then should invoke whenCalled delegate for 'get'", function() {
 			instance.anyProperty = "anyValue";
-			g.assert(proceedWasCalled);
+			assert(proceedWasCalled);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			instance.anyProperty = "anyValue";
-			g.assert(instance == proceedThisContext);
+			assert(instance == proceedThisContext);
 		});
-
-		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet__);
-		});
-
 	});
 
 	describe("When #unwrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyProperty");
 
-		var proxy = new ProxyProperty(info, function(proxyInfo, proceed) {
-			proceedWasCalled = true;
-			return proceed();
-		});
+		var proxy = new ProxyProperty(instance, "anyProperty");
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(name,proceed,args) {
+					proceedWasCalled = true;
+					return proceed();
+				}).unwrap();
 
 		it("Then should not invoke whenCalled delegate for 'get'", function() {
 			var result = instance.anyProperty;
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
 
 		it("Then should not invoke whenCalled delegate for 'get'", function() {
 			instance.anyProperty = "anyValue";
-			g.assert(!proceedWasCalled);
+			assert(!proceedWasCalled);
 		});
-
 	});
 
 });

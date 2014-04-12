@@ -1,4 +1,5 @@
-var g = require("../../../../include");
+var assert = require("assert");
+//var proxyMetadata = require('../../../../lib/proxies/proxy-metadata');
 
 function AnyClass() {
 	var self = this;
@@ -7,8 +8,6 @@ function AnyClass() {
 }
 
 describe("Given /lib/proxies/ProxyMethod", function() {
-
-	var ProxyInfo = require("../../../../lib/proxies/proxy-info");
 	var ProxyMethod = require("../../../../lib/proxies/proxy-method");
 
 	var proceedWasCalled = false;
@@ -22,51 +21,44 @@ describe("Given /lib/proxies/ProxyMethod", function() {
 	describe("When #wrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
+		var proxy = new ProxyMethod(instance, "anyMethod");
+
+		proxy.wrap(function(name, proceed, args) {
 			proceedThisContext = this;
 			proceedWasCalled = true;
 			return proceed(args);
 		});
 
-		proxy.wrap();
-
 		it("Then should invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(proceedWasCalled);
-			g.assert(result == 6);
+			assert(proceedWasCalled);
+			assert(result == 6);
 		});
 
 		it("Then should have the correct 'this' context", function(){
 			var result = instance.anyMethod(7);
-			g.assert(instance == proceedThisContext);
-			g.assert(result == 7);
+			assert(instance == proceedThisContext);
+			assert(result == 7);
 		});
-
-		it("Then should have a '__scarlet' shadow object", function(){
-			g.assert(instance.__scarlet__);
-		});
-
 	});
 
 	describe("When #unwrap()", function() {
 
 		var instance = new AnyClass();
-		var info = new ProxyInfo(instance, "anyMethod");
 
-		var proxy = new ProxyMethod(info, function(proxyInfo, proceed, args) {
-			proceedThisContext = this;
-			proceedWasCalled = true;
-			return proceed.call(proxyInfo.instance, args);
-		});
+		var proxy = new ProxyMethod(instance, "anyMethod");
 
-		proxy.wrap().unwrap();
+		proxy.wrap(function(name, proceed, args) {
+					proceedThisContext = this;
+					proceedWasCalled = true;
+					return proceed.call(this, args);
+				}).unwrap();
 
 		it("Then should not invoke whenCalled delegate for 'method'", function() {
 			var result = instance.anyMethod(6);
-			g.assert(!proceedWasCalled);
-			g.assert(result == 6);
+			assert(!proceedWasCalled);
+			assert(result == 6);
 		});
 
 	});

@@ -1,99 +1,89 @@
-var g = require("../../include");
-var builder = require("./builders");
+var assert = require("assert");
+var builder = require("./scarlet-builder");
 var Scarlet = require("../../lib/scarlet");
 
-describe("Given we are using scarlet", function() {
-
+describe("When using math.min",function(){
 	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withCallbackInterceptor()
+		.withAllEventListeners()
+		.forMethod(Math.min)
+		.withParameters([1,2,3])
+		.withExpectedResult(1)
+		.assert();
+});
 
-	describe("When invoking all kinds of instances", function() {
+describe("When using multiple interceptors that changes results",function(){
+	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withAllEventListeners()
+		.withInterceptor(function(proceed){
+			proceed(null, "any interceptor result");
+		})
+		.withInterceptor(function(proceed){
+			proceed(null, "any interceptor2 result");
+		})
+		.forMethod(function(){
+			return "any";
+		})
+		.withExpectedResult("any interceptor2 result")
+		.assert();
+});
 
-		var assertThat =
-			builder.for (scarlet)
-				.withInstances()
-				.withInterceptor()
-				.invokeAll()
-				.assert();
+describe("When using an interceptor that changes results",function(){
+	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withAllEventListeners()
+		.withInterceptor(function(proceed){
+			proceed(null, "any interceptor result");
+		})
+		.forMethod(function(){
+			return "any";
+		})
+		.withExpectedResult("any interceptor result")
+		.assert();
+});
 
-		it("Then we should be able to verify all methods were invoked", function() {
-			assertThat.allInvoked();
-		});
-
+describe("When using an interceptor that produces an error",function(){
+	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withCallbackErrorInterceptor()
+		.withAllEventListeners()
+		.forErrorMethod(function(){
+			//throws error through interceptor
+		})
+		.assert();
+	describe("when interceptor accepts an error",function(){
+		builder.for(scarlet)
+			.withCallbackErrorInterceptor()
+			.withInterceptor(function(error,invocation,proceed){
+				proceed();
+			})
+			.withAllEventListeners()
+			.forMethod(function(){
+				return "any";
+			})
+			.withExpectedResult("any")
+			.assert();
 	});
+});
 
-	describe("When intercepting Math.min", function() {
+describe("When using a callback interceptor",function(){
+	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withCallbackInterceptor()
+		.withAllEventListeners()
+		.withAllInstanceTypes()
+		.assert();
+});
 
-		it("Should call out to the interceptor", function() {
-
-			var interceptorCalled = false;
-
-			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-				.using(function(info, method, args) {
-					var result = method.call(this, info, method, args);
-					interceptorCalled = true;
-					return result;
-				}).proxy();
-
-			var result = Math.min(1, 2, 3);
-
-			g.assert(result === 1, "Function is broken, should return '1'");
-			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
-
-		});
-
-		it("Should be able to override results", function() {
-
-			var interceptorCalled = false;
-
-			Math.min = scarlet.intercept(Math.min, scarlet.FUNCTION)
-				.using(function(info, method, args) {
-					interceptorCalled = true;
-					return 3;
-				}).proxy();
-
-			var result = Math.min(1, 2, 3);
-
-			g.assert(result === 3, "Function is broken, should return '1'");
-			g.assert(interceptorCalled, "The interceptor was not called for Math.min");
-
-		});
-
-	});
-
-	describe("When intercepting an entire object", function() {
-
-		it("Should call out to an interceptor for all methods and properties", function() {
-
-			var interceptorTimesCalled = 0;
-
-			function someInterceptor(info, method, args) {
-				// 'Prelude Code' or 'Before Advice'
-				var result = method.call(this, info, method, args); // 'Target Method' or 'Join Point'
-				interceptorTimesCalled += 1;
-				// 'Postlude Code' or 'After Advice'
-				return result;
-			}
-
-			function someFunction() {
-				var self = this;
-				self.memberProperty1 = "any";
-				self.memberFunction1 = function() {};
-				self.memberFunction2 = function() {};
-			}
-
-			someFunction = scarlet.intercept(someFunction, scarlet.PROTOTYPE) //-> memberFunction1 and 2 will now be intercepted
-				.using(someInterceptor)
-				.proxy();
-
-			var instance = new someFunction();
-			instance.memberProperty1 = "other";
-			instance.memberFunction1();
-			instance.memberFunction2();
-
-			g.assert(interceptorTimesCalled === 4);
-
-		});
-
-	});
-
+describe("When using multiple callback interceptor",function(){
+	var scarlet = new Scarlet();
+	builder.for(scarlet)
+		.withCallbackInterceptor()
+		.withCallbackInterceptor()
+		.withCallbackInterceptor()
+		.withAllEventListeners()
+		.withAllInstanceTypes()
+		.assert();
 });

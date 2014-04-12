@@ -8,7 +8,7 @@ module.exports.namedFunctionInstance = new Benchmark('hooks', function() {
 	instance.method();
 }, {
 	'onStart': function() {
-		var NamedFunction = require("../tests/spec/builders/dummies/named-function");
+		var NamedFunction = require("../tests/spec/types/dummies/named-function");
 		instance = new NamedFunction();
 		for (var k in hooks) {
 			instance[k] = hooks[k];
@@ -26,7 +26,7 @@ module.exports.unnamedFunctionInstance = new Benchmark('hooks', function() {
 	instance.method();
 }, {
 	'onStart': function() {
-		var UnNamedFunction = require("../tests/spec/builders/dummies/unnamed-function");
+		var UnNamedFunction = require("../tests/spec/types/dummies/unnamed-function");
 		instance = new UnNamedFunction();
 		for (var k in hooks) {
 			instance[k] = hooks[k];
@@ -44,7 +44,7 @@ module.exports.prototypeFunction = new Benchmark('hooks', function() {
 	instance.m2();
 }, {
 	'onStart': function() {
-		var BasePrototypeFunction = require("../tests/spec/builders/dummies/prototype-function");
+		var BasePrototypeFunction = require("../tests/spec/types/dummies/prototype-function");
 		var PrototypeFunction = function() {};
 		PrototypeFunction.prototype = Object.create(BasePrototypeFunction.prototype);
 		for (var k in hooks) {
@@ -65,7 +65,7 @@ module.exports.objectLiteral = new Benchmark('hooks', function() {
 	instance.method();
 }, {
 	'onStart': function() {
-		var baseObjectLiteral = require("../tests/spec/builders/dummies/object-literal");
+		var baseObjectLiteral = require("../tests/spec/types/dummies/object-literal");
 		instance = baseObjectLiteral();
 		for (var k in hooks) {
 			instance[k] = hooks[k];
@@ -83,7 +83,7 @@ module.exports.multipleInterceptorNamedFunctionInstance = new Benchmark('hooks',
 	instance.method();
 }, {
 	'onStart': function() {
-		var NamedFunction = require("../tests/spec/builders/dummies/named-function");
+		var NamedFunction = require("../tests/spec/types/dummies/named-function");
 		instance = new NamedFunction();
 		for (var k in hooks) {
 			instance[k] = hooks[k];
@@ -107,7 +107,7 @@ module.exports.multipleInterceptorObjectLiteral = new Benchmark('hooks', functio
 	instance.method();
 }, {
 	'onStart': function() {
-		var baseObjectLiteral = require("../tests/spec/builders/dummies/object-literal");
+		var baseObjectLiteral = require("../tests/spec/types/dummies/object-literal");
 		instance = baseObjectLiteral();
 
 		for (var k in hooks) {
@@ -132,7 +132,7 @@ module.exports.multipleInterceptorPrototypeFunction = new Benchmark('hooks', fun
 	instance.m2();
 }, {
 	'onStart': function() {
-		var BasePrototypeFunction = require("../tests/spec/builders/dummies/prototype-function");
+		var BasePrototypeFunction = require("../tests/spec/types/dummies/prototype-function");
 		var PrototypeFunction = function() {};
 		PrototypeFunction.prototype = Object.create(BasePrototypeFunction.prototype);
 		for (var k in hooks) {
@@ -160,7 +160,7 @@ module.exports.multipleInterceptorUnnamedFunctionInstance = new Benchmark('hooks
 	instance.method();
 }, {
 	'onStart': function() {
-		var UnNamedFunction = require("../tests/spec/builders/dummies/unnamed-function");
+		var UnNamedFunction = require("../tests/spec/types/dummies/unnamed-function");
 		instance = new UnNamedFunction();
 		for (var k in hooks) {
 			instance[k] = hooks[k];

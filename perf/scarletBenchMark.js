@@ -13,7 +13,7 @@ module.exports.namedFunctionInstance = new Benchmark('scarlet', function() {
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var NamedFunction = require("../tests/spec/builders/dummies/named-function");
+		var NamedFunction = require("../tests/spec/types/dummies/named-function");
 		instance = new NamedFunction();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)
@@ -26,7 +26,7 @@ module.exports.unnamedFunctionInstance = new Benchmark('scarlet', function() {
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var UnNamedFunction = require("../tests/spec/builders/dummies/unnamed-function");
+		var UnNamedFunction = require("../tests/spec/types/dummies/unnamed-function");
 		instance = new UnNamedFunction();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)
@@ -39,7 +39,7 @@ module.exports.prototypeFunction = new Benchmark('scarlet', function() {
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var BasePrototypeFunction = require("../tests/spec/builders/dummies/prototype-function");
+		var BasePrototypeFunction = require("../tests/spec/types/dummies/prototype-function");
 		var PrototypeFunction = function() {};
 		PrototypeFunction.prototype = Object.create(BasePrototypeFunction.prototype);
 		PrototypeFunction = scarlet
@@ -55,7 +55,7 @@ module.exports.objectLiteral = new Benchmark('scarlet', function() {
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var baseObjectLiteral = require("../tests/spec/builders/dummies/object-literal");
+		var baseObjectLiteral = require("../tests/spec/types/dummies/object-literal");
 		instance = baseObjectLiteral();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)
@@ -68,7 +68,7 @@ module.exports.multipleInterceptorNamedFunctionInstance = new Benchmark('scarlet
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var NamedFunction = require("../tests/spec/builders/dummies/named-function");
+		var NamedFunction = require("../tests/spec/types/dummies/named-function");
 		instance = new NamedFunction();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)
@@ -82,7 +82,7 @@ module.exports.multipleInterceptorObjectLiteral = new Benchmark('scarlet', funct
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var baseObjectLiteral = require("../tests/spec/builders/dummies/object-literal");
+		var baseObjectLiteral = require("../tests/spec/types/dummies/object-literal");
 		instance = baseObjectLiteral();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)
@@ -96,7 +96,7 @@ module.exports.multipleInterceptorPrototypeFunction = new Benchmark('scarlet', f
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var BasePrototypeFunction = require("../tests/spec/builders/dummies/prototype-function");
+		var BasePrototypeFunction = require("../tests/spec/types/dummies/prototype-function");
 		var PrototypeFunction = function() {};
 		PrototypeFunction.prototype = Object.create(BasePrototypeFunction.prototype);
 		PrototypeFunction = scarlet
@@ -113,7 +113,7 @@ module.exports.multipleInterceptorUnnamedFunctionInstance = new Benchmark('scarl
 }, {
 	'onStart': function() {
 		var scarlet = new Scarlet();
-		var UnNamedFunction = require("../tests/spec/builders/dummies/unnamed-function");
+		var UnNamedFunction = require("../tests/spec/types/dummies/unnamed-function");
 		instance = new UnNamedFunction();
 		scarlet
 			.intercept(instance, scarlet.INSTANCE)

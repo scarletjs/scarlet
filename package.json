@@ -8,7 +8,14 @@
     "url": "https://github.com/scarletjs/scarlet.git"
   },
   "homepage": "https://github.com/scarletjs/scarlet.git",
-  "dependencies": {},
+  "dependencies": {
+    "grunt-release": "^0.3.5",
+    "grunt-contrib-watch": "^0.4.4",
+    "grunt-browserify": "^1.3.2",
+    "grunt-mox": "0.0.9",
+    "browserify": "^3.12.0",
+    "grunt-contrib-jshint": "^0.4.3"
+  },
   "devDependencies": {
     "mocha": "*",
     "hooks": "~0.3.0",

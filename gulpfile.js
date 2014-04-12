@@ -15,8 +15,7 @@ gulp.task("browserify", function() {
         .pipe(browserify({
             standalone: "scarlet"
         }))
-        .pipe(rename('scarlet.js'))
-        .pipe(gulp.dest("./pub"))
+        .pipe(gulp.dest("./pub/scarlet.js/"))
 });
 
 gulp.task("bump", function(){

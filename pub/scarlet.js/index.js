@@ -1097,7 +1097,7 @@ function Scarlet(pluginArr) {
 		if (pluginArr) {
 			if (pluginArr.length) {
 				pluginArr.forEach(function(plugin) {
-					self.loadPlugin(plugin);
+					self.load(plugin);
 				});
 			}
 		}

@@ -10,64 +10,61 @@ var postEventErrorMethodAssertion = require("./assertions/postEventErrorMethodAs
 module.exports = function(){
 	var self = this;
 
-	this.doneEvent = null;
-	this.errorEvent = null;
-	this.afterEvent = null;
-	this.beforeEvent = null;
+	this.events = {};
 	this.assertions = [];
 
 	var addAssertion = function(assertion){
 		self.assertions.push(assertion);
 	};
 
-	this.forMethod = function(){	
+	this.forMethod = function(){
 		addAssertion(function(method,expectedResult,parameters){
-			if(self.afterEvent)
-				eventMethod(self.afterEvent,method,expectedResult,parameters,"after");
-			if(self.doneEvent)
-				eventMethod(self.doneEvent,method,expectedResult,parameters,"done");
-			if(self.beforeEvent)
-				eventMethod(self.beforeEvent,method,expectedResult,parameters,"before");
-			if(self.errorEvent)
-				errorEventMethod(self.errorEvent,method,expectedResult,parameters);
+			if(self.events.afterEventSpy)
+				eventMethod(self.events.afterEventSpy,method,expectedResult,parameters,"after");
+			if(self.events.doneEventSpy)
+				eventMethod(self.events.doneEventSpy,method,expectedResult,parameters,"done");
+			if(self.events.beforeEventSpy)
+				eventMethod(self.events.beforeEventSpy,method,expectedResult,parameters,"before");
+			if(self.events.errorEventSpy)
+				errorEventMethod(self.events.errorEventSpy,method,expectedResult,parameters);
 		});
 	};
 	
 	this.forPropertyGet = function(){
 		addAssertion(function(instance,expectedResult,property){
-			if(self.afterEvent)
-				eventPropertyGet(self.afterEvent,instance,expectedResult,property,"after");
-			if(self.doneEvent)
-				eventPropertyGet(self.doneEvent,instance,expectedResult,property,"done");
-			if(self.beforeEvent)
-				eventPropertyGet(self.beforeEvent,instance,expectedResult,property,"before");
-			if(self.errorEvent)
-				errorEventPropertyGet(self.errorEvent,instance,expectedResult,property);
+			if(self.events.afterEventSpy)
+				eventPropertyGet(self.events.afterEventSpy,instance,expectedResult,property,"after");
+			if(self.events.doneEventSpy)
+				eventPropertyGet(self.events.doneEventSpy,instance,expectedResult,property,"done");
+			if(self.events.beforeEventSpy)
+				eventPropertyGet(self.events.beforeEventSpy,instance,expectedResult,property,"before");
+			if(self.events.errorEventSpy)
+				errorEventPropertyGet(self.events.errorEventSpy,instance,expectedResult,property);
 		});
 	};
 
 	this.forPropertySet = function(){
 		addAssertion(function(instance,expectedResult,property){
-			if(self.afterEvent)
-				eventPropertySet(self.afterEvent,instance,expectedResult,property,"after");
-			if(self.doneEvent)
-				eventPropertySet(self.doneEvent,instance,expectedResult,property,"done");
-			if(self.beforeEvent)
-				eventPropertySet(self.beforeEvent,instance,expectedResult,property,"before");
-			if(self.errorEvent)
-				errorEventPropertySet(self.errorEvent,instance,expectedResult,property);
+			if(self.events.afterEventSpy)
+				eventPropertySet(self.events.afterEventSpy,instance,expectedResult,property,"after");
+			if(self.events.doneEventSpy)
+				eventPropertySet(self.events.doneEventSpy,instance,expectedResult,property,"done");
+			if(self.events.beforeEventSpy)
+				eventPropertySet(self.events.beforeEventSpy,instance,expectedResult,property,"before");
+			if(self.events.errorEventSpy)
+				errorEventPropertySet(self.events.errorEventSpy,instance,expectedResult,property);
 		});
 	};
 	this.forErrorMethod = function(){
 		addAssertion(function(method,expectedResult,parameters){
-			if(self.afterEvent)
-				postEventErrorMethodAssertion(self.afterEvent,method,expectedResult,parameters,"after");
-			if(self.doneEvent)
-				postEventErrorMethodAssertion(self.doneEvent,method,expectedResult,parameters,"done");
-			if(self.beforeEvent)
-				eventMethod(self.beforeEvent,method,expectedResult,parameters,"before");
-			if(self.errorEvent)
-				errorEventErrorMethod(self.errorEvent,method,expectedResult,parameters);
+			if(self.events.afterEventSpy)
+				postEventErrorMethodAssertion(self.events.afterEventSpy,method,expectedResult,parameters,"after");
+			if(self.events.doneEventSpy)
+				postEventErrorMethodAssertion(self.events.doneEventSpy,method,expectedResult,parameters,"done");
+			if(self.events.beforeEventSpy)
+				eventMethod(self.events.beforeEventSpy,method,expectedResult,parameters,"before");
+			if(self.events.errorEventSpy)
+				errorEventErrorMethod(self.events.errorEventSpy,method,expectedResult,parameters);
 		});
 	};
 	this.forProperty = function(){
@@ -78,20 +75,8 @@ module.exports = function(){
 		this.forProperty();
 		this.forMethodWithReturn();
 	};
-	this.usingErrorEventListener = function(errorEvent){
-		this.errorEvent = errorEvent;
-	};
-
-	this.usingBeforeEventListener = function(beforeEvent){
-		this.beforeEvent = beforeEvent;
-	};
-
-	this.usingAfterEventListener = function(afterEvent){
-		this.afterEvent = afterEvent;
-	};
-
-	this.usingDoneEventListener = function(doneEvent){
-		this.doneEvent = doneEvent;
+	this.withEvents = function(events){
+		this.events = events;
 	};
 
 	this.assert = function(instance,expectedResult,parameters,next){

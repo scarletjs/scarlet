@@ -7,7 +7,6 @@ module.exports = function TypeAssertionBuilder(){
 	"use strict";
 
 	var self = this;
-	this.types = [];
 	this.assertions = [];
 
 	var addAssertion = function(assertion){

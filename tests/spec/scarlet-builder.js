@@ -5,6 +5,10 @@ var eventBuilder = require("./events/event-builder");
 var enumerable = require("../../lib/extensions/enumerable");
 var interceptorBuilder = require("./interceptors/interceptor-builder");
 
+var MethodAssertionBuilder = require("./method-assertion-builder");
+var PropertyAssertionBuilder = require("./property-assertion-builder");
+var ErrorMethodAssertionBuilder = require("./error-method-assertion-builder");
+
 ScarletBuilder.prototype = Object.create(typeBuilder.prototype);
 ScarletBuilder.prototype = Object.create(eventBuilder.prototype);
 ScarletBuilder.prototype = Object.create(interceptorBuilder.prototype);
@@ -24,9 +28,21 @@ function ScarletBuilder(scarlet){
 		});
 		instance = self.scarlet.proxy();
 		return {
-			forMethod : methodBuilder,
-			forProperty : propertyBuilder,
-			forErrorMethod : errorMethodBuilder
+			forMethod : function(method){
+				return new MethodAssertionBuilder(method)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
+			},
+			forProperty : function(instance,propertyName){
+				return new PropertyAssertionBuilder(instance,propertyName)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
+			},
+			forErrorMethod : function(errorMethod){
+				return new ErrorMethodAssertionBuilder(errorMethod)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
+			}
 		};
 	};
 	
@@ -36,7 +52,9 @@ function ScarletBuilder(scarlet){
 				self.scarlet.using(interceptor);
 			});
 		instance = self.scarlet.proxy();
-		return propertyBuilder(instance,propertyName);
+		return new PropertyAssertionBuilder(instance,propertyName)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
 	};
 
 	self.forMethod = function(method){
@@ -45,7 +63,9 @@ function ScarletBuilder(scarlet){
 			self.scarlet.using(interceptor);
 		});
 		method = self.scarlet.proxy();
-		return methodBuilder(method);
+		return new MethodAssertionBuilder(method)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
 	};
 	
 	self.forErrorMethod = function(errorMethod){
@@ -54,7 +74,9 @@ function ScarletBuilder(scarlet){
 			self.scarlet.using(interceptor);
 		});
 		errorMethod = self.scarlet.proxy();
-		return errorMethodBuilder(errorMethod);	
+		return new ErrorMethodAssertionBuilder(errorMethod)
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
 	};
 
 	self.forMethodByName = function(instance,methodName){
@@ -63,72 +85,9 @@ function ScarletBuilder(scarlet){
 			self.scarlet.using(interceptor);
 		});
 		instance = self.scarlet.proxy();
-		return methodBuilder(instance[methodName]);
-	};
-
-	var propertyBuilder = function(instance,property){
-		self.typeAssertionBuilder.forProperty();
-		self.eventAssertionBuilder.forProperty();
-		self.interceptorAssertionBuilder.forProperty();
-
-		return {
-			withExpectedResult : function(result){
-				this.result = result;
-				return this;
-			},
-			assert : function(){
-				self.typeAssertionBuilder.assert(instance, this.result, property, function(instance,result,property){
-					self.interceptorAssertionBuilder.assert(instance,result,property);
-					self.eventAssertionBuilder.assert(instance,result,property);
-				});
-			}
-		};
-	};
-	
-	var errorMethodBuilder = function(errorMethod){
-		self.typeAssertionBuilder.forErrorMethod();
-		self.eventAssertionBuilder.forErrorMethod();
-		self.interceptorAssertionBuilder.forErrorMethod();
-
-		return {
-			withParameters : function(parameters){
-				this.parameters = parameters;
-				return this;
-			},
-			withExpectedResult : function(result){
-				this.result = result;
-				return this;
-			},
-			assert : function(){
-				self.typeAssertionBuilder.assert(errorMethod, this.result, this.parameters,function(errorMethod,result,parameters){
-					self.interceptorAssertionBuilder.assert(errorMethod,result,parameters);
-					self.eventAssertionBuilder.assert(errorMethod,result,parameters);
-				});
-			}
-		};
-	};
-
-	var methodBuilder = function(method){
-		self.typeAssertionBuilder.forMethod();
-		self.eventAssertionBuilder.forMethod();
-		self.interceptorAssertionBuilder.forMethod();
-
-		return {
-			withParameters : function(parameters){
-				this.parameters = parameters;
-				return this;
-			},
-			withExpectedResult : function(result){
-				this.result = result;
-				return this;
-			},
-			assert : function(){
-				self.typeAssertionBuilder.assert(method, this.result, this.parameters,function(method,result,parameters){
-					self.interceptorAssertionBuilder.assert(method,result,parameters);
-					self.eventAssertionBuilder.assert(method,result,parameters);
-				});
-			}
-		};
+		return new MethodAssertionBuilder(instance[methodName])
+											.withInterceptors(self.interceptors)
+											.withEvents(self.events);
 	};
 
 	var withEachInterceptor = function(instance, onEach){

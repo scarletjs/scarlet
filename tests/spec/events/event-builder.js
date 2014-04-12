@@ -1,39 +1,32 @@
 var sinon = require("sinon");
-var EventAssertionBuilder = require("./event-assertion-builder");
 
 module.exports = function eventBuilder(scarlet){
 	"use strict";
 	
 	var self = this;
-	this.eventAssertionBuilder = new EventAssertionBuilder();
 
-	self.events ={
-		doneEventSpy : sinon.spy(),
-		errorEventSpy : sinon.spy(),
-		afterEventSpy : sinon.spy(),
-		beforeEventSpy : sinon.spy()
-	};
+	self.events ={};
 
 	self.withAfterEvent = function(){
-		this.eventAssertionBuilder.usingAfterEventListener(self.events.afterEventSpy);
+		self.events.afterEventSpy = sinon.spy();
 		scarlet.on("after",self.events.afterEventSpy);
 		return self;
 	};
 
 	self.withBeforeEvent = function(){
-		this.eventAssertionBuilder.usingBeforeEventListener(self.events.beforeEventSpy);
+		self.events.beforeEventSpy = sinon.spy();
 		scarlet.on("before",self.events.beforeEventSpy);
 		return self;
 	};
 
 	self.withDoneEvent = function(){
-		this.eventAssertionBuilder.usingDoneEventListener(self.events.doneEventSpy);
+		self.events.doneEventSpy = sinon.spy();
 		scarlet.on("done",self.events.doneEventSpy);
 		return self;
 	};
 
 	self.withErrorEvent = function(){
-		this.eventAssertionBuilder.usingErrorEventListener(self.events.errorEventSpy);
+		self.events.errorEventSpy = sinon.spy();
 		scarlet.on("error",self.events.errorEventSpy);
 		return self;
 	};

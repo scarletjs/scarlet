@@ -27,8 +27,10 @@ module.exports = function InterceptorAssertionBuilder(){
 	this.forErrorMethod = function(){
 		addAssertion(errorMethodAssertions);
 	};
-	this.withInterceptor = function(interceptor){
-		this.interceptors.push(interceptor);
+	this.withInterceptors = function(interceptors){
+		if(!interceptors)
+			return;
+		this.interceptors = interceptors;
 	};
 
 	this.assert = function(method,result,parameters,next){

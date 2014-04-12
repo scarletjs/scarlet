@@ -18,7 +18,10 @@ define("library/x-links", ["lodash", "jquery", "string", "library/x-get"], funct
 				var name = $element.attr("name");
 				if (typeof(name) != "undefined") {
 					console.log("XLinks::render found " + name + " with text " + text);
-					result.append("<li><a href=#" + name + ">" + S(text).left(14).s + "...</a></li>");
+					if (S(text).length > 14)
+						result.append("<li><a title='"+text+"' href=#" + name + ">" + S(text).left(14).s + "...</a></li>");
+					else
+						result.append("<li><a title='"+text+"' href=#" + name + ">" + text + "</a></li>");
 				}
 				$(targetSelector).html(result);
 			});

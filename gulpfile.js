@@ -3,6 +3,7 @@ var bump = require("gulp-bump");
 var gutil = require("gulp-util");
 var mocha = require("gulp-mocha");
 var jshint = require("gulp-jshint");
+var rename = require('gulp-rename');
 var browserify = require("gulp-browserify");
 
 gulp.task("default", ["lint","test"]);
@@ -10,11 +11,11 @@ gulp.task("default", ["lint","test"]);
 gulp.task("release",["lint","test","browserify","bump"]);
 
 gulp.task("browserify", function() {
-    gulp.src("./index.js")
+    gulp.src("./index.js", { read: false} )
         .pipe(browserify({
             standalone: "scarlet"
         }))
-        .pipe(gulp.dest("./pub/scarlet.js"))
+        .pipe(gulp.dest("./pub/scarlet.js/"))
 });
 
 gulp.task("bump", function(){

@@ -524,7 +524,7 @@ function PluginManager() {
 }
 
 module.exports = PluginManager;
-}).call(this,"/lib/plugins")
+}).call(this,"/lib\\plugins")
 },{"assert":17,"path":23}],9:[function(_dereq_,module,exports){
 var assert = _dereq_("assert");
 
@@ -2074,8 +2074,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("/usr/local/src/nodejs/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":18,"/usr/local/src/nodejs/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22,"inherits":21}],20:[function(_dereq_,module,exports){
+}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":18,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}],20:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2447,13 +2447,6 @@ process.browser = true;
 process.env = {};
 process.argv = [];
 
-function noop() {}
-
-process.on = noop;
-process.once = noop;
-process.off = noop;
-process.emit = noop;
-
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
 }
@@ -2691,11 +2684,11 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,_dereq_("/usr/local/src/nodejs/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
-},{"/usr/local/src/nodejs/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22}],24:[function(_dereq_,module,exports){
+}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"))
+},{"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22}],24:[function(_dereq_,module,exports){
 module.exports=_dereq_(18)
 },{}],25:[function(_dereq_,module,exports){
 module.exports=_dereq_(19)
-},{"./support/isBuffer":24,"/usr/local/src/nodejs/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22,"inherits":21}]},{},[1])
+},{"./support/isBuffer":24,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}]},{},[1])
 (1)
 });

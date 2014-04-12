@@ -9,11 +9,11 @@ Benchmarking has been performed against [hooks](https://github.com/bnoguchi/hook
 
 ```
 $: ./run.sh
-
 ```
 
 ##Results of Last Test Run
 
+```
 Intercepting an Instance of a Named Function:
 scarlet x 153,162 ops/sec ±6.59% (71 runs sampled)
 hooks x 62,861 ops/sec ±2.03% (90 runs sampled)
@@ -53,7 +53,6 @@ Multiple Interception using a Un-Named Function:
 scarlet x 143,705 ops/sec ±4.62% (70 runs sampled)
 hooks x 61,645 ops/sec ±1.71% (90 runs sampled)
 scarlet is 127% faster.
-143689.4672024598,113601.71118093889,137246.76872598458,164878.8343793929,129102.72661810226,130466.40832015725,103668.36439240159,137359.88022901394
-61612.94996579221,62884.7105050723,55492.60858074349,61176.56303531015,45159.154999195365,43964.61644317327,40593.2543762308,60607.544168073844
 
 scarlet is 147% (2.47x) faster than hooks.
+```

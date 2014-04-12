@@ -161,7 +161,7 @@ print("Completed creating objects!");
 
 
       <p>
-        See how easy it is to determine whether you are intercepting <b><i>constructors</b></i>, <b><i>properties</b></i> or <b><i>methods</b></i> using the <b><i>info</b></i> parameter? Here we have effectively implemented a logger as a cross cutting concern. The reason is because <b><i>Blog</b></i> prototype's code does not actually know anything about logger. 
+        See how easy it is to determine whether you are intercepting <b><i>constructors</b></i>, <b><i>properties</b></i> or <b><i>methods</b></i> using the <b><i>info</b></i> parameter? Here we have effectively implemented a logger as a cross cutting concern. The reason is because <b><i>Blog</b></i> prototype does not actually implement logging code. This is weaved into the Blog object and replaced using a <b><i>proxy</b></i>.
       </p>
 
     </div>

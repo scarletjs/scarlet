@@ -291,64 +291,6 @@ Math.min = scarlet.intercept(Math.min)
                     .proxy();
 var result = Math.min(1,2,3);
 ```
-## Invocation.type properties
-
-The **invocation.type** parameter object has the following properties and functions: 
-
-**isConstructor**
-
-A property which can be used to determine if the current function begin called is used as a constructor function. 
-
-```javascript
-function myInterceptor1(invocation, proceed) {
-    if(invocation.type.isConstructor) // Only invokes if constructor
-        return proceed();
-}
-```
-
-**isFunction**
-
-A property which determines whether the info object represents an object that is a function.
-
-```javascript
-function myInterceptor1(invocation, proceed) {
-    if(invocation.type.isConstructor) // Only invokes if function
-        return proceed();
-}
-```
-
-**isProperty**
-
-A property which determines whether the info object represents a property.
-
-```javascript
-function myInterceptor1(invocation, proceed) {
-    if(info.isProperty) // Only invokes if property
-        return proceed();
-}
-```
-
-**isInstance**
-
-A property which determines whether the info object represents an instance object.
-
-```javascript
-function myInterceptor1(invocation, proceed) {
-    if(info.isInstance) // Only invokes if instance
-        return proceed();
-}
-```
-
-**isPrototype**
-
-A property which determines whether the info object represents a prototype.
-
-```javascript
-function myInterceptor1(invocation, proceed) {
-    if(info.isPrototype // Only invokes if prototype
-        return proceed();
-}
-```
 
 ## Browser Example
 

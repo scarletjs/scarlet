@@ -1,4 +1,4 @@
-define("library/x-links", ["lodash", "jquery", "library/x-get"], function(_, $, XGet) {
+define("library/x-links", ["lodash", "jquery", "string", "library/x-get"], function(_, $, S, XGet) {
 	function XLinks(selector) {
 
 		var self = this;
@@ -18,7 +18,7 @@ define("library/x-links", ["lodash", "jquery", "library/x-get"], function(_, $, 
 				var name = $element.attr("name");
 				if (typeof(name) != "undefined") {
 					console.log("XLinks::render found " + name + " with text " + text);
-					result.append("<li><a href=#" + name + ">" + text + "</a></li>");
+					result.append("<li><a href=#" + name + ">" + S(text).left(14).s + "...</a></li>");
 				}
 				$(targetSelector).html(result);
 			});

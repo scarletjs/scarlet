@@ -49,7 +49,7 @@ function Blog(title, content, author) {
 
       <h1><a name="prototypesLink">Prototypes</a></h1>
       
-      <p>Here we take a look at using <b><i>Scarlet</b></i> with JavaScript prototypes(or javascript objects). Scarlet is really good at discovering constructors, properties and methods of instances and prototype definitions using the same API.</p>
+      <p>Here we take a look at using <b><i>Scarlet</b></i> with JavaScript prototypes(or javascript objects). Scarlet is really good at discovering constructors, properties and methods of instances and prototype definitions using the same API. Remember that you click on the code sample and run it by either pressing <i><b>Ctrl-X</i></b> for Windows or <i><b>Cmd-X</i></b> for Macs.</p>
       
       <div class="x-spacer-alt x-clear"></div>
 
@@ -161,8 +161,49 @@ print("Completed creating objects!");
 
 
       <p>
-        See how easy it is to determine whether you are intercepting <b><i>constructors</b></i>, <b><i>properties</b></i> or <b><i>methods</b></i> using the <b><i>info</b></i> parameter? Here we have effectively implemented a logger as a cross cutting concern. The reason is because <b><i>Blog</b></i> prototype does not actually implement logging code. This is weaved into the Blog object and replaced using a <b><i>proxy</b></i>.
+        See how easy it is to determine whether you are intercepting <b><i>constructors</b></i>, <b><i>properties</b></i> or <b><i>methods</b></i> using the <b><i>info</b></i> parameter? We have effectively implemented a logger as a cross cutting concern. The reason is because <b><i>Blog</b></i> prototype does not actually implement logging code. This is weaved into the <i><b>Blog</i></b> object and replaced using a <b><i>proxy</b></i>.
       </p>
+
+      <h4><a name="multiPrototypesWithScarletLink">Multiple Interceptors</a></h4>
+
+      <p>So now that we have implemented a logger what if we would like to implement yet another cross cutting concern? This is easy! You merely supply another interceptor to <b><i>Scarlet</i></b> using the fluent interface. <b><i>Scarlet</b></i> manages calls to interceptors using the <b><i>Russian Doll</i></b> pattern. Each interceptor calls the next and so on until the actual method gets called thus forming a chain of function calls. It is important to note that if one of the interceptor's breaks the call chain subsequent interceptors and ultimately the actual target call site wont be executed. Also notice how we have traded named functions for anonymous functions when declaring interceptors.</p>
+
+      <div 
+        id="multiPrototypeExampleWithScarletObjectEditor" 
+        class="x-border"
+        x-type="x-editor" 
+        x-width="100%"
+        x-height="290px" 
+        x-margin="10px"
+        x-run-onload="true"
+        x-output="#multiPrototypeExampleWithScarletObjectOutput">
+var scarlet = new Scarlet();
+
+var Blog = scarlet
+  .intercept(Blog, scarlet.PROTOTYPE)
+  .using(function(info, method, args){
+    print("First interceptor called");
+    return method.call(this, info, method, args);
+  })
+  .using(function(info, method, args){
+    print("Second interceptor called");
+    return method.call(this, info, method, args);
+  }).proxy();
+
+var anyBlog = new Blog("Example", "Hello World!", "anonymous");
+anyBlog.addComment(new Comment("buuuurrrrrrp!", "beer@ticktockdevelopment.com"));
+print("Completed creating objects!");
+</div>
+
+      <!-- THIS INDENT FOR NEXT -->
+      <div 
+        id="multiPrototypeExampleWithScarletObjectOutput" 
+        class="x-border x-output"
+        x-type="x-output"
+        x-margin="10px"
+        x-width="100%"
+        x-height="110px">
+      </div>
 
     </div>
 

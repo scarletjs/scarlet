@@ -42,7 +42,7 @@ define("library/x-editor", ["lodash", "jquery", "ace/ace", "library/x-get"], fun
 			//self.editor.getSession().setUseWrapMode(false);
 			var code = self.editor.getValue();
 			self.editor.setValue("");
-			setTimeout(function(){ self.editor.setValue(code); /*setTimeout(function(){self.fireEvents();}, 1500);*/ }, 1500);
+			setTimeout(function(){ self.editor.setValue(code); setTimeout(function(){self.fireEvents();}, 500); }, 1500);
 			console.log("XEditorElement::createEditor for " + self.id);
 		};
 

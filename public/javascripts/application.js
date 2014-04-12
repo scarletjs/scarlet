@@ -1,9 +1,10 @@
 require.config({
 	baseUrl: "javascripts",
 	paths: {
-		"ace": "vendor/ace/lib/ace",
 		"lodash": "vendor/lodash",
+		"string": "vendor/string",
 		"jquery": "vendor/jquery",
+		"ace": "vendor/ace/lib/ace",
 		"dateformat": "vendor/date-format",
 		"jquery.gridify": "vendor/gridify",
 		"jquery.jqgrid": "vendor/jqgrid/js/jquery.jqGrid.min",
@@ -24,7 +25,6 @@ require.config({
 
 require([
 		"jquery",
-		"jquery.gridify",
 		"jquery.jqgrid",
 		"stringformat",
 		"views/index",
@@ -33,7 +33,7 @@ require([
 		"scarlet",
 		"dateformat"
 	],
-	function($, gf, jqg, sf, Views, Interpreter, Library, Scarlet, DateFormat) {
+	function($, jqg, sf, Views, Interpreter, Library, Scarlet, DateFormat) {
 
 		var style = new Library.XStyle();
 

@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "express": "3.4.8",
-    "jade": "*"
+    "jade": "*",
+    "scarlet": "^1.0.13"
   }
 }

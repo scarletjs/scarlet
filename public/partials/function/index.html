@@ -33,7 +33,7 @@
       
       <div class="x-spacer-alt x-clear"></div>
 
-      <h4>Vanilla Math.min</h4>
+      <h4><a name="mathMinLink">Vanilla Math.min</a></h4>
 
       <p>This function is part of the base library for any javascript interpreter. Here we invoke it with a set of numbers [1,2,3] and we can see from the output that the result is 1.</p>
 
@@ -59,7 +59,7 @@ print(result);</div>
 
       <div class="x-spacer-alt x-clear"></div>
 
-      <h4>Intercepting Math.min</h4>
+      <h4><a name="interceptingMathMinLink">Intercepting Math.min</a></h4>
 
       <p>Now let's take a look at how we use Scarlet to intercept this function. First we have to instantiate Scarlet. Then we tell Scarlet that we would like to know when <i><b>Math.min</i></b> is called. We do this by passing <i><b>Math.min</i></b> to the <i><b>intercept</b></i> function. Finally, we define a callback or interceptor function which listens to <i><b>Math.min</i></b> through Scarlet's <i><b>using</b></i> function. Proxy is discussed in detail in the <i><b>Proxies</b></i> section. So for now let's assume it always has to be called. If you can't wait click on <i><b>Proxies</b></i>.</p>
 
@@ -94,7 +94,7 @@ var result = Math.min(1,2,3);</div>
 
       <div class="x-spacer-alt x-clear"></div>
 
-      <h4>Mutating Math.min</h4>
+      <h4><a name="mutatingMathMinLink">Mutating Math.min</a></h4>
 
       <p>Now that we have a handle on intercepting. Lets look at mutating the results of what <i><b>Math.min</i></b> does by forward <i><b>Math.min</i></b> function calls on to the <i><b>Math.max</i></b> function instead. We achieve this by replacing the function call to <i><b>method</b></i> with <i><b>Math.max</b></i> in the interceptor. 
 

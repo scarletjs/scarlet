@@ -78,7 +78,7 @@ function Enumerable() {
 	self.first = function(object, predicateCallback) {
 		if (typeof(predicateCallback) == "undefined" && typeof(object) != "undefined" && object.length > 0){
 			return object[0];
-		};
+		}
 		var results = self.where(object, predicateCallback);
 		if (results.length > 0)
 			return results[0];
@@ -111,7 +111,7 @@ function Logger() {
 
 	g.l = g.log;
 	g.i = g.inspect;
-	g.ll = function(val) { g.l(g.i(val)); } 
+	g.ll = function(val) { g.l(g.i(val)); };
 
 	var self = this;
 	self.DEBUG = 4;
@@ -129,7 +129,7 @@ function Logger() {
 		ret = ret.substr('function '.length);
 		ret = ret.substr(0, ret.indexOf('('));
 		
-		if (ret === "" || ret == null || typeof(ret) == "undefined")
+		if (ret === "" || ret === null || typeof(ret) == "undefined")
 			ret = "function<anonymous>";
 		
 		return ret;
@@ -137,7 +137,7 @@ function Logger() {
 
 	var getParamNames = function(func) {
 
-		var ret = ""
+		var ret = "";
 
 		if (typeof(func) == "string") {
 			ret += func;
@@ -156,11 +156,11 @@ function Logger() {
 
 		ret = ret.slice(ret.indexOf("(") + 1, ret.indexOf(")"));
 		return ret.split(",");
-	}
+	};
 
 	self.print = function(type, obj, func, msg, args) {
 
-		if (args == null)
+		if (args === null)
 			args = "";
 		else
 			args = "\n" + g.i(args).replace(/\n/g, "\n");
@@ -242,7 +242,7 @@ function ObjectExtended() {
 		if (typeof(obj) === "object")
 			return obj === null;
 		return typeof(obj) === "undefined";
-	}
+	};
 
 	self.inherit = function(child, parent) {
 		child.__super__ = parent;
@@ -285,7 +285,7 @@ function Interceptor() {
 	};
 
 	var createCallback = function(interceptor, callback, thisContext, concreteMethod) {
-		if (callback == null && interceptor == null) {
+		if (callback === null && interceptor === null) {
 			return getConcreteMethod(thisContext, concreteMethod);
 		} else {
 			return getInterceptorMethod(callback, interceptor, thisContext);
@@ -498,7 +498,7 @@ function ProxyInstance(instance, whenCalled) {
 		g.ext.enumerable.forEach(self.instance, function(member, memberName) {
 			count += 1;
 		});
-		return count != 0;
+		return count !== 0;
 	};
 
 	var eachMember = function(callback) {
@@ -741,7 +741,7 @@ function ProxyPrototype(type, whenCalled) {
 		var result = Array.prototype.slice.call(args);
 		if (typeof(result) == "undefined")
 			return null;
-		if (typeof(result) != "undefined" && typeof(result.length) != "undefined" && result.length == 0)
+		if (typeof(result) != "undefined" && typeof(result.length) != "undefined" && result.length === 0)
 			return null;
 		return result;
 	};
@@ -889,38 +889,15 @@ var ScarletTrace = function(info, method, args, result){
 	self.isFunction = info.type.isFunction;
 	self.hasResult = typeof(result) != "undefined";
 	self.hasArgs = typeof(args) != "undefined";
-	self.argsEmpty = args != null && typeof(args) != "undefined" && args.length === 0;
+	self.argsEmpty = args !== null && typeof(args) != "undefined" && args.length === 0;
 
 	self.traceTo = function(io) {
-		var formattedResult =
-			(self.isConstructor)
-				? typeof(this)
-				: (self.isPropertySetter)
-					? args[1]
-					: (!self.hasResult)
-						? "void"
-						: result;
-		var formattedName =
-			(self.isConstructor)
-				? "ctor"
-				: (self.isPropertySetter)
-					? "set " + info.memberName
-					: (self.isPropertyGetter)
-						? "get " + info.memberName
-						: info.memberName;
-		var formattedArgs =
-			(self.isPropertySetter)
-				? args[0]
-				: (self.isPropertyGetter)
-					? ""
-					: (!self.hasArgs)
-						? ""
-						: (self.argsEmpty)
-							? ""
-							: JSON.stringify(args);
+		var formattedResult = ((self.isConstructor) ? typeof(this) : (self.isPropertySetter) ? args[1] : (!self.hasResult) ? "void" : result);
+		var formattedName = ((self.isConstructor) ? "ctor" : (self.isPropertySetter) ? "set " + info.memberName	: (self.isPropertyGetter) ? "get " + info.memberName : info.memberName);
+		var formattedArgs = ((self.isPropertySetter) ? args[0] : (self.isPropertyGetter)	? "" : (!self.hasArgs) ? "" : (self.argsEmpty) ? "" : JSON.stringify(args));
 		io(formattedName+"("+formattedArgs+"):"+formattedResult);
 	};
-}
+};
 
 /**
 For creating a new instance of Scarlet
@@ -1097,9 +1074,9 @@ function Scarlet(pluginArr) {
 	*/
 	self.intercept = function(typeOrInstance, proxyType) {
 		g.assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
-		g.assert(proxyType, "Please make sure you supply a type. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());")
+		g.assert(proxyType, "Please make sure you supply a type. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
 		g.ext.logger.info(Scarlet, "intercept", "For Type Or Instance", [typeOrInstance]);
-		interceptor = new Interceptor()
+		interceptor = new Interceptor();
 		interceptor.observable = typeOrInstance;
 		interceptor.intercept(typeOrInstance, function(observable) {
 			interceptor.observable = observable;

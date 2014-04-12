@@ -1,26 +1,9 @@
-!function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.scarlet=e():"undefined"!=typeof global?global.scarlet=e():"undefined"!=typeof self&&(self.scarlet=e())}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var log = console.log;
-var util = require("util");
-var print = util.print;
-var inspect = util.inspect;
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.scarlet=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+module.exports = _dereq_("./lib/scarlet.js");
 
-module.exports = {
-	l: log,
-	p: print,
-	i: inspect,
-	util: require("util"),
-	path: require("path"),
-	assert: require("assert"),
-	events: require("events"),
-	ext: require("./lib/extensions"),
-	ll: function(val) { log(inspect(val)); }
-};
+},{"./lib/scarlet.js":16}],2:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
 
-
-},{"./lib/extensions":4,"assert":18,"events":21,"path":24,"util":26}],2:[function(require,module,exports){
-module.exports = require("./lib/scarlet.js");
-
-},{"./lib/scarlet.js":17}],3:[function(require,module,exports){
 function Enumerable() {
 
 	"use strict";
@@ -65,7 +48,16 @@ function Enumerable() {
 			resolve(object, callback);
 		}
 	};
-
+	self.any = function(object,predicateCallback){
+		var isTrue = false;
+		self.forEach(object,function(element, index){
+			if(!predicateCallback(element,index))
+				return;
+			isTrue = true;
+			return;
+		});
+		return isTrue;
+	};
 	self.where = function(object, predicateCallback) {
 		var results = [];
 		self.forEach(object, function(element){
@@ -85,40 +77,58 @@ function Enumerable() {
 		return null;
 	};
 
+	self.mapSeries = function (functions,onEach,onComplete){
+		assert(typeof functions.length === "number", "Object to map must be an array");
+
+		if(!this)
+			return new self.mapSeries(functions,onEach, onComplete);
+
+		var results = [];		
+		var thisContext = this;
+		var functionNumber = 0;
+
+		var next = function(){
+			var nextfunction= functions[functionNumber];
+			functionNumber++;
+			return nextfunction;
+		};
+		var finalResult = null;
+		thisContext._proceed = function(error, result){
+			if(result !== undefined)
+				results.push(result);
+
+			var nextfunction = next();
+			if(nextfunction)
+				onEach(error,nextfunction, thisContext._proceed);
+			else if(onComplete)
+				finalResult =  onComplete(error,results);
+			return finalResult;
+		};
+		thisContext._proceed();
+	};
 }
 
 module.exports = new Enumerable();
-},{}],4:[function(require,module,exports){
-module.exports = {
-	object: require("./object"),
-	enumerable: require("./enumerable"), 
-	logger: require("./logger")
-};
-},{"./enumerable":3,"./logger":5,"./object":6}],5:[function(require,module,exports){
+},{"assert":17}],3:[function(_dereq_,module,exports){
+var util = _dereq_("util");
+var inspect = util.inspect;
+var assert = _dereq_("assert");
+var object = _dereq_("./object");
+var ll = function(val) { self.log(inspect(val)); };
+
 function Logger() {
 
 	"use strict";
-
-	var g = {};
-
-	g.util = require("util");
-	g.assert = require("assert");
-	g.object = require("./object");
-
-	g.log = console.log;
-	g.print = g.util.print;
-	g.inspect = g.util.inspect;
-
-	g.l = g.log;
-	g.i = g.inspect;
-	g.ll = function(val) { g.l(g.i(val)); };
 
 	var self = this;
 	self.DEBUG = 4;
 	self.INFO = 3;
 	self.WARN = 2;
 	self.ERROR = 1;
-	self.logLevel = self.WARN;
+	self.NONE = 0;
+	self.logLevel = self.NONE;
+	
+	self.log = console.log;
 
 	var getFunctionName = function(func) {
 		
@@ -126,10 +136,10 @@ function Logger() {
 			return func;
 		
 		var ret = func.toString();
-		ret = ret.substr('function '.length);
-		ret = ret.substr(0, ret.indexOf('('));
+		ret = ret.substr("function ".length);
+		ret = ret.substr(0, ret.indexOf("("));
 		
-		if (ret === "" || ret === null || typeof(ret) == "undefined")
+		if (ret === "" || ret === null || typeof(ret) === "undefined")
 			ret = "function<anonymous>";
 		
 		return ret;
@@ -139,9 +149,9 @@ function Logger() {
 
 		var ret = "";
 
-		if (typeof(func) == "string") {
+		if (typeof(func) === "string") {
 			ret += func;
-		} else if (typeof(func) != "string") {
+		} else if (typeof(func) !== "string") {
 			ret = func.toString();
 		}
 
@@ -163,33 +173,33 @@ function Logger() {
 		if (args === null)
 			args = "";
 		else
-			args = "\n" + g.i(args).replace(/\n/g, "\n");
+			args = "\n" + inspect(args).replace(/\n/g, "\n");
 
 		if (typeof(msg) == "object" || typeof(msg) == "function")
-			msg = g.i(msg, {
+			msg = inspect(msg, {
 				depth: 10,
 				showHidden: true
 			});
 
-		if (typeof(func) == "string" && !g.object.isNull(obj) && !g.object.isNull(obj[func])) {
+		if (typeof(func) == "string" && !object.isNull(obj) && !object.isNull(obj[func])) {
 			var funcName = func;
 			var actualFunc = obj[func];
-			g.l(type + getFunctionName(obj) + "::" + funcName + "(" + getParamNames(actualFunc).join(",") + ") - " + msg + args + "\n");
+			self.log(type + getFunctionName(obj) + "::" + funcName + "(" + getParamNames(actualFunc).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (!g.object.isNull(obj) && g.object.isNull(func)) {
-			g.l(type + getFunctionName(func) + "(" + getParamNames(obj).join(",") + ") - " + msg + args + "\n");
+		if (!object.isNull(obj) && object.isNull(func)) {
+			self.log(type + getFunctionName(func) + "(" + getParamNames(obj).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (g.object.isNull(obj) && !g.object.isNull(func)) {
-			g.l(type + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
+		if (object.isNull(obj) && !object.isNull(func)) {
+			self.log(type + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 
-		if (!g.object.isNull(obj) && !g.object.isNull(func)) {
-			g.l(type + getFunctionName(obj) + "::" + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
+		if (!object.isNull(obj) && !object.isNull(func)) {
+			self.log(type + getFunctionName(obj) + "::" + getFunctionName(func) + "(" + getParamNames(func).join(",") + ") - " + msg + args + "\n");
 			return;
 		}
 	};
@@ -217,13 +227,13 @@ function Logger() {
 }
 
 module.exports = new Logger();
-},{"./object":6,"assert":18,"util":26}],6:[function(require,module,exports){
+},{"./object":4,"assert":17,"util":25}],4:[function(_dereq_,module,exports){
 function ObjectExtended() {
 
 	"use strict";
 
 	var self = this;
-	var enumerable = require("./enumerable");
+	var enumerable = _dereq_("./enumerable");
 	self.__typename__ = "scarlet.lib.extensions.Object";
 
 	self.has = function(obj, key){
@@ -255,78 +265,241 @@ function ObjectExtended() {
 			}
 		});
 	};
+
+	self.name = function(obj){
+		if(!obj)
+			return "undefined";
+
+		if(obj.name)
+			return obj.name;
+
+		if(obj.constructor){
+			if(obj.constructor.name)
+				return obj.constructor.name;
+		}
+
+		var funcNameRegex = /function\s([^(]{1,})\(/;
+		var results = (funcNameRegex).exec((obj).toString());
+		if((results && results.length > 1))
+			return results[1].trim();
+
+		if(obj instanceof Function)
+			return "Function";
+
+		return "Object";
+	};
+	self.objectHasFunction = function(object, objectFunction){
+		for(var property in object){
+			if(object[property] == objectFunction)
+				return true;
+		}
+		return false;
+	};
+	self.extend = function(fromObject, toObject){
+		for(var property in fromObject){
+			toObject[property] = fromObject[property];
+		}
+	};
+
 }
 
 module.exports = new ObjectExtended();
-},{"./enumerable":3}],7:[function(require,module,exports){
-var g = require("../../include");
+},{"./enumerable":2}],5:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
 
-function Interceptor() {
-
+var ScarletTrace = function(proceed, info){
 	"use strict";
 
-	var ProxyInterceptor = require("../proxies/proxy-interceptor");
+	assert(info, "info=null");
+	assert(proceed, "proceed=null");
+
+	var self = this;
+	self.args = info.args;
+	self.result = info.result;
+	self.memberName = info.memberName;
+	self.hasResult = typeof(info.result) !== "undefined";
+	self.hasArgs = typeof(info.args) !== "undefined";
+	self.argsEmpty = info.args !== null && typeof(info.args) !== "undefined" && info.args.length === 0;
+
+	self.traceTo = function(io) {
+		var formattedResult = (!self.hasResult) ? "void" : info.result;
+		var formattedName = (!info.memberName) ? "" : info.memberName;
+		var formattedArgs = ((!self.hasArgs) || (self.argsEmpty)) ? "" : JSON.stringify(info.args);
+		io(formattedName+"("+formattedArgs+"):"+formattedResult);
+	};
+};
+
+module.exports = ScarletTrace;
+},{"assert":17}],6:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
+var Invocation = _dereq_("./invocation");
+var enumerable = _dereq_("../extensions/enumerable");
+var ProxyInterceptor = _dereq_("../proxies/proxy-interceptor");
+
+module.exports = function Interceptor() {
+	"use strict";
 
 	var self = this;
 	self.proxy = null;
 	self.interceptors = [];
 	self.__typename__ = "scarlet.lib.interceptors.Interceptor";
 
-	var getConcreteMethod = function(thisContext, concreteMethod) {
-		return function(info, ignoreThisMethod, args) {
-			return concreteMethod.apply(thisContext, args);
-		};
+	self.intercept = function(typeOrInstance, memberName,replaceTypeCallback) {
+		assert(typeOrInstance);
+		assert(replaceTypeCallback);
+		self.proxy = new ProxyInterceptor(typeOrInstance,memberName);
+		self.proxy.intercept(whenProxyCalled, replaceTypeCallback);
+		return self;
 	};
 
-	var getInterceptorMethod = function(callback, interceptor, thisContext) {
-		return function(info, ignoreThisMethod, args) {
-			return interceptor.call(thisContext, info, callback, args);
-		};
+	self.using = function(interceptor) {
+		assert(self.proxy, "Please make sure you are intercepting something first");
+		self.interceptors.push(interceptor);
+		return self;
 	};
 
-	var createCallback = function(interceptor, callback, thisContext, concreteMethod) {
-		if (callback === null && interceptor === null) {
-			return getConcreteMethod(thisContext, concreteMethod);
-		} else {
-			return getInterceptorMethod(callback, interceptor, thisContext);
-		}
-	};
-
-	var whenProxyCalled = function(info, method, args) {
-		g.assert(self.interceptors.length > 0, "Please make sure you add an interceptor");
+	var whenProxyCalled = function(invocationName,invocationMethod, args) {
+		assert(self.interceptors.length > 0, "Please make sure you add an interceptor");
 		var thisContext = this;
-		var previousCallback = null;
-		var previousInterceptor = null;
-		// TODO: Which interceptor gets bias here? First or Last? Might want to surface this via API.
-		// TODO: self.interceptors.reverse() || self.interceptors
-		g.ext.enumerable.forEach(self.interceptors, function(interceptor, index) {
-			previousCallback = createCallback(previousInterceptor, previousCallback, thisContext, method);
-			previousInterceptor = interceptor;
-		});
-		return previousInterceptor.call(thisContext, info, previousCallback, args);
+		var invocation = new Invocation(thisContext,invocationName,invocationMethod,args);
+		callEachInterceptor(thisContext, 
+							invocation, 
+							function(error, interceptorResults){
+								if(error) throw error;
+
+								invocation.result = invocation.proceed();
+								if(interceptorResults.length > 0)
+									invocation.result = interceptorResults[interceptorResults.length-1];
+								return invocation.result;
+							});
+		return invocation.result;
 	};
 
-	self.intercept = function(typeOrInstance, replaceTypeCallback, proxyType) {
-		g.assert(proxyType);
-		g.assert(typeOrInstance);
-		g.assert(replaceTypeCallback);
-		self.proxy = new ProxyInterceptor(typeOrInstance);
-		self.proxy.intercept(whenProxyCalled, replaceTypeCallback, proxyType);
-		g.ext.logger.info(Interceptor, "intercept", "For Type or Instance", [typeOrInstance]);
-		return self;
+	var callEachInterceptor = function(thisContext, invocation, onAllCalled){
+		enumerable.mapSeries(self.interceptors, 
+								function(error, nextInterceptor, callback){
+									if (error && numberOfParameters(nextInterceptor) < 3)
+										return callback(error);
+
+									if(numberOfParameters(nextInterceptor) === 1)
+										return nextInterceptor.call(thisContext,callback);
+									if(numberOfParameters(nextInterceptor) === 2)
+										return nextInterceptor.call(thisContext,invocation,callback);
+									
+									return nextInterceptor.call(thisContext,error,invocation,callback);
+								}, 
+								onAllCalled);
+	};
+};
+
+var numberOfParameters = function(functionWithParameters){
+	if(typeof functionWithParameters !== "function")
+		return 0;
+
+	return functionWithParameters.length;
+};
+},{"../extensions/enumerable":2,"../proxies/proxy-interceptor":11,"./invocation":7,"assert":17}],7:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
+var objectExt = _dereq_("../extensions/object");
+
+module.exports = function Invocation(context,invocationName,invocationMethod,args) {
+	"use strict";
+
+	assert(invocationMethod, "Scarlet::Invocation::invocationMethod == null");
+
+	var self = this;
+	if(!args)
+		args = [];
+
+	/**
+	 * The original arguments passed into the function being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object} - the argument object based into objects
+	 */
+	self.args = args;
+
+	/**
+	 * The reference to self for the original/called methd
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Object}
+	 */
+	self.context = context;
+
+	/**
+	 * The result of the method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Any}
+	 */
+	self.result = null;
+
+	/**
+	 * The method being intercepted
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Function}
+	 */
+	self.method = invocationMethod;
+
+	/**
+	 * Gets the name of the intercepted context
+	 *
+	 * @category Invocation Attributes
+     * @type {String}
+     */
+	self.contextName = function(){
+		return objectExt.name(self.context);
 	};
 
-	self.using = function(whenCalled) {
-		g.assert(self.proxy, "Please make sure you are intercepting something first");
-		self.interceptors.push(whenCalled);
-		g.ext.logger.info(Interceptor, "using", "Using Interceptor", [whenCalled]);
-		return self;
+	/**
+	 * Gets the name of the intercepted member
+	 * 
+	 * @category Invocation Attributes
+     * @type {String}
+     */
+	self.memberName = function(){
+		if(invocationName)
+			return invocationName;
+		return objectExt.name(self.method);
 	};
-}
 
-module.exports = Interceptor;
-},{"../../include":1,"../proxies/proxy-interceptor":12}],8:[function(require,module,exports){
-var __dirname="/lib/plugins";var g = require("../../include");
+	/**
+	 * The start date time when the method was invoked
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Date}
+	 */
+	self.executionStartDate = null;
+
+	/**
+	 * The end date time when the method was invoked
+	 * 
+	 * @category Invocation Attributes
+	 * @type {Date}
+	 */
+	self.executionEndDate = null;
+
+	/**
+	 * Calls the intercepted method
+	 * 
+	 * @category Invocation Attributes
+     * @method proceed
+     * @return Function|Object of the result of the original method call
+     */
+	self.proceed = function() {
+		var parameters = Array.prototype.slice.call(self.args);
+		self.executionStartDate = new Date();
+		self.result = self.method.apply(self.context, parameters);
+		self.executionEndDate = new Date();
+		return self.result;
+	};
+};
+},{"../extensions/object":4,"assert":17}],8:[function(_dereq_,module,exports){
+(function (__dirname){
+var path = _dereq_("path");
+var assert = _dereq_("assert");
 
 function PluginManager() {
 	
@@ -340,9 +513,9 @@ function PluginManager() {
 	};
 	
 	self.load = function($scarlet, pluginDirectoryPath) {
-		g.assert($scarlet);
-		var fullPath = g.path.normalize(self.directoryPath + pluginDirectoryPath);
-		var ScarletPlugin = require(fullPath);
+		assert($scarlet);
+		var fullPath = path.normalize(self.directoryPath + pluginDirectoryPath);
+		var ScarletPlugin = _dereq_(fullPath);
 		var pluginObject = new ScarletPlugin($scarlet);
 		pluginObject.initialize();
 		return pluginObject;
@@ -351,553 +524,349 @@ function PluginManager() {
 }
 
 module.exports = PluginManager;
-},{"../../include":1}],9:[function(require,module,exports){
-var g = require("../../include");
+}).call(this,"/lib\\plugins")
+},{"assert":17,"path":23}],9:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
 
-function ProxyFunction(proxyInfo, whenCalled) {
-
+module.exports = function ProxyFunction(actualFunction) {
 	"use strict";
 
-	g.assert(proxyInfo);
-	g.assert(whenCalled);
+	assert(actualFunction);
+	this.__typename__ = "scarlet.lib.proxies.ProxyFunction";
 
-	var self = this;
-	self.proxyInfo = proxyInfo;
-	self.whenCalled = whenCalled;
-	self.__typename__ = "scarlet.lib.proxies.ProxyFunction";
-
-	self.wrap = function(replaceFunctionCallback) {
-		g.ext.logger.info(ProxyFunction, "wrap", "Wrapping Proxy Function", [self.proxyInfo]);
-		var actualFunction = self.proxyInfo.instanceOrType;
+	this.wrap = function(whenCalled,replaceFunctionCallback) {
+		assert(whenCalled);
+		
 		var proxiedFunction = function() {
 			var args = Array.prototype.slice.call(arguments);
-			self.proxyInfo.type.isFunction = true;
-			return self.whenCalled.call(
-				self.proxyInfo.instanceOrType,
-				self.proxyInfo,
-				actualFunction,
-				args);
+			return whenCalled.call(this,
+									actualFunction.name,
+									actualFunction,
+									args);
 		};
-
-		proxiedFunction.__scarlet__ = {};
-		proxiedFunction.__scarlet__.__function__ = actualFunction;
-		self.proxyInfo.instanceOrType = proxiedFunction;
 
 		if (replaceFunctionCallback)
 			replaceFunctionCallback(proxiedFunction);
 
-		return self;
+		return this;
 	};
 
-	self.unwrap = function() {
-		return self;
+	this.unwrap = function() {
+		return actualFunction;
 	};
 
-}
+};
+},{"assert":17}],10:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
+var ProxyMethod = _dereq_("./proxy-method");
+var ProxyMetadata = _dereq_("./proxy-metadata");
+var ProxyProperty = _dereq_("./proxy-property");
+var enumerable = _dereq_("../extensions/enumerable");
 
-module.exports = ProxyFunction;
+module.exports = function ProxyInstance(instance) {
+	"use strict";
+	
+	if (!(this instanceof ProxyInstance))
+        return new ProxyInstance(instance);
 
-},{"../../include":1}],10:[function(require,module,exports){
-var g = require("../../include");
+	assert(instance);
+	
+	var proxies = [];
+	this.__typename__ = "scarlet.lib.proxies.ProxyInstance";
 
-function ProxyInfo(instanceOrType, memberName) {
+	this.wrap = function(whenCalled) {
+		assert(whenCalled);
+		proxyEachInstanceMember(instance,function(proxy){
+			proxy.wrap(whenCalled);
+			proxies.push(proxy);
+		});
+		return this;
+	};
 
+	this.unwrap = function() {
+		enumerable.forEach(proxies,function(proxy){
+			proxy.unwrap();
+		});
+		return this;
+	};
+
+	var proxyEachInstanceMember = function(instanceToProxy,onEach){
+		if(!onEach) return;
+		enumerable.forEach(instanceToProxy, function(member, memberName) {
+			assert(memberName);
+
+			var proxyMetadata = new ProxyMetadata(instanceToProxy, memberName).ensureShadow();
+			if(!proxyMetadata.reflection.isAllowed()) return;
+
+			if(proxyMetadata.reflection.isMethod())
+				return onEach(new ProxyMethod(instanceToProxy, memberName));
+
+			if(proxyMetadata.reflection.isProperty())
+				return onEach(new ProxyProperty(instanceToProxy, memberName));
+		});
+	};
+};
+},{"../extensions/enumerable":2,"./proxy-metadata":12,"./proxy-method":13,"./proxy-property":14,"assert":17}],11:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
+var ProxyMethod = _dereq_("./proxy-method");
+var proxyMetadata = _dereq_("./proxy-metadata");
+var ProxyProperty = _dereq_("./proxy-property");
+var ProxyInstance = _dereq_("./proxy-instance");
+var ProxyFunction = _dereq_("./proxy-function");
+var ProxyPrototype = _dereq_("./proxy-prototype");
+
+module.exports = function ProxyInterceptor(typeOrInstance, memberName) {
 	"use strict";
 
-	g.assert(instanceOrType);
+	assert(typeOrInstance);
 
-	var self = this;
+	this.proxy = null;
+	this.__typename__ = "scarlet.lib.proxies.ProxyInterceptor";
 
-	self.type = {
-		isMethod: false,
-		isFunction: false,
-		isProperty: false,
-		isPrototype: false,
-		isConstructor: false
+	this.intercept = function(whenCalledCallback, replaceClassCallback) {
+		assert(whenCalledCallback);
+		assert(replaceClassCallback);
+
+		proxyMetadata(typeOrInstance,memberName).ensureShadow();
+		this.proxy = proxyForTypeOrInstance().wrap(whenCalledCallback,replaceClassCallback);
 	};
 
-	self.memberName = memberName;
-	self.instanceOrType = instanceOrType;
-	self.__typename__ = "scarlet.lib.proxies.ProxyInfo";
+	this.release = function() {
+		if (this.proxy)
+			this.proxy.unwrap();
+	};
+	
+	var proxyForTypeOrInstance = function(){
+		if(memberName)
+			return proxyForMember();
+		if(typeOrInstance.prototype)
+			return new ProxyPrototype(typeOrInstance);
+		if(typeof typeOrInstance === "function")
+			return new ProxyFunction(typeOrInstance);
+		return new ProxyInstance(typeOrInstance);
+	};
 
-	self.reflection = {};
+	var proxyForMember = function(){
+		if(!memberName) return;
 
-	self.reflection.isAllowed = function() {
-		var result = self.memberName != "__scarlet__";
-		g.ext.logger.debug(ProxyInfo, "isAllowed", "Is Allowed For Proxy?", [result]);
+		if(typeof typeOrInstance[memberName] === "function")
+			return new ProxyMethod(typeOrInstance,memberName);
+
+		return new ProxyProperty(typeOrInstance, memberName);
+	};
+};
+},{"./proxy-function":9,"./proxy-instance":10,"./proxy-metadata":12,"./proxy-method":13,"./proxy-property":14,"./proxy-prototype":15,"assert":17}],12:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
+var object = _dereq_("../extensions/object");
+var logger = _dereq_("../extensions/logger");
+
+module.exports = function ProxyMetadata(instanceOrType, memberName) {
+	"use strict";
+
+	if (!(this instanceof ProxyMetadata))
+        return new ProxyMetadata(instanceOrType,memberName);
+
+	assert(instanceOrType);
+
+	this.__typename__ = "scarlet.lib.proxies.ProxyMetadata";
+	this.reflection ={};
+
+	this.hasShadow = function(){
+		return object.has(instanceOrType, "__scarlet__");
+	};
+	this.ensureShadow = function() {
+		if (!this.hasShadow())
+			instanceOrType.__scarlet__ = {};
+
+		logger.debug(ProxyMetadata, "ensureShadow", "Shadow Object Created", [instanceOrType]);
+		return this;
+	};
+	
+	this.reflection.isAllowed = function() {
+		var result = memberName != "__scarlet__";
+		logger.debug(ProxyMetadata, "isAllowed", "Is Allowed For Proxy?", [result]);
 		return result;
 	};
 
-	self.reflection.ensureShadow = function() {
-		if (!self.reflection.isPrototype() && !g.ext.object.has(self.instanceOrType, "__scarlet__"))
-			self.instanceOrType.__scarlet__ = {};
-		g.ext.logger.debug(ProxyInfo, "ensureShadow", "Shadow Object Created", [self.instanceOrType]);
-		return self;
-	};
-
-	self.reflection.isMethod = function() {
-		var result = !g.ext.object.isNull(self.instanceOrType) && !g.ext.object.isNull(self.memberName) && !g.ext.object.isNull(self.instanceOrType[memberName]) && g.ext.object.isFunction(self.instanceOrType[self.memberName]);
-		g.ext.logger.info(ProxyInfo, "isMethod", "Is Method?", [result]);
+	this.reflection.isMethod = function() {
+		var result = !object.isNull(instanceOrType) && !object.isNull(memberName) && !object.isNull(instanceOrType[memberName]) && object.isFunction(instanceOrType[memberName]);
+		logger.info(ProxyMetadata, "isMethod", "Is Method?", [result]);
 		return result;
 	};
 
-	self.reflection.isFunction = function() {
-		var result = g.ext.object.isNull(memberName) && g.ext.object.isFunction(self.instanceOrType);
-		g.ext.logger.info(ProxyInfo, "isFunction", "Is Function?", [result]);
+	this.reflection.isFunction = function() {
+		var result = object.isNull(memberName) && object.isFunction(instanceOrType);
+		logger.info(ProxyMetadata, "isFunction", "Is Function?", [result]);
 		return result;
 	};
 
-	self.reflection.isProperty = function() {
-		var result = !g.ext.object.isFunction(self.instanceOrType[self.memberName]);
-		g.ext.logger.info(ProxyInfo, "isProperty", "Is Property?", [result]);
+	this.reflection.isProperty = function() {
+		var result = !object.isFunction(instanceOrType[memberName]);
+		logger.info(ProxyMetadata, "isProperty", "Is Property?", [result]);
 		return result;
 	};
 
-	self.reflection.isInstance = function() {
+	this.reflection.isInstance = function() {
 		this.isFunction();
-		var result = g.ext.object.isNull(memberName) && g.ext.object.isObject(self.instanceOrType);
-		g.ext.logger.info(ProxyInfo, "isInstance", "Is Instance?", [result]);
+		var result = object.isNull(memberName) && object.isObject(instanceOrType);
+		logger.info(ProxyMetadata, "isInstance", "Is Instance?", [result]);
 		return result;
 	};
 
-	self.reflection.isPrototype = function() {
-		var result = g.ext.object.isNull(memberName) && g.ext.object.isFunction(self.instanceOrType) && !g.ext.object.isNull(self.instanceOrType.prototype);
-		g.ext.logger.info(ProxyInfo, "isPrototype", "Is Prototype?", [result]);
+	this.reflection.isPrototype = function() {
+		var result = object.isNull(memberName) && object.isFunction(instanceOrType) && !object.isNull(instanceOrType.prototype);
+		logger.info(ProxyMetadata, "isPrototype", "Is Prototype?", [result]);
 		return result;
 	};
 
-	self.reflection.hasMember = function() {
-		return !g.ext.object.isNull(self.memberName);
+	this.reflection.hasMember = function() {
+		return !object.isNull(memberName);
 	};
 
-	self.reflection.ensureShadow();
-}
+	return this;
+};
 
-module.exports = ProxyInfo;
+},{"../extensions/logger":3,"../extensions/object":4,"assert":17}],13:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
 
-},{"../../include":1}],11:[function(require,module,exports){
-var g = require("../../include");
-
-function ProxyInstance(instance, whenCalled) {
-
+module.exports =  function ProxyMethod(methodThisContext,methodName) {
 	"use strict";
 
-	g.assert(instance);
-	g.assert(whenCalled);
+	assert(methodName);
+	assert(methodThisContext);
 
-	var ProxyInfo = require("./proxy-info");
-	var ProxyMethod = require("./proxy-method");
-	var ProxyProperty = require("./proxy-property");
+	var actualMethod = methodThisContext[methodName];
+	this.__typename__ = "scarlet.lib.proxies.ProxyMethod";
 
-	var self = this;
-	self.instance = instance;
-	self.__typename__ = "scarlet.lib.proxies.ProxyInstance";
-
-	var anyMembers = function() {
-		var count = 0;
-		g.ext.enumerable.forEach(self.instance, function(member, memberName) {
-			count += 1;
-		});
-		return count !== 0;
-	};
-
-	var eachMember = function(callback) {
-		g.ext.logger.info(eachMember, eachMember, "For Each Member", [self.instance]);
-		g.ext.enumerable.forEach(self.instance, function(member, memberName) {
-			g.assert(memberName);
-			g.ext.logger.info(eachMember, eachMember, "For Each Member::Current=" + g.i(member) + " -> " + memberName + "", [self.instance]);
-			if (!g.ext.object.isNull(callback))
-				callback(self.instance, memberName);
-		});
-	};
-
-	self.wrap = function() {
-		g.ext.logger.info(ProxyInstance, "wrap", "Wrapping Instance", [self.instance]);
-		eachMember(function(instance, memberName) {
-			var proxyInfo = new ProxyInfo(self.instance, memberName);
-			if (proxyInfo.reflection.isAllowed()) {
-				if (proxyInfo.reflection.isMethod()) {
-					new ProxyMethod(proxyInfo, whenCalled).wrap();
-				} else if (proxyInfo.reflection.isProperty()) {
-					new ProxyProperty(proxyInfo, whenCalled).wrap();
-				}
-			}
-		});
-		return self;
-	};
-
-	self.unwrap = function() {
-		g.ext.logger.info(ProxyInstance, "unwrap", "Unwrapping Instance", [self.instance]);
-		eachMember(function(instance, memberName) {
-			var proxyInfo = new ProxyInfo(self.instance, memberName);
-			if (proxyInfo.reflection.isAllowed()) {
-				if (proxyInfo.reflection.isMethod()) {
-					new ProxyMethod(proxyInfo, whenCalled).unwrap();
-				} else if (proxyInfo.reflection.isProperty()) {
-					new ProxyProperty(proxyInfo, whenCalled).unwrap();
-				}
-			}
-		});
-		return self;
-	};
-}
-
-module.exports = ProxyInstance;
-
-},{"../../include":1,"./proxy-info":10,"./proxy-method":13,"./proxy-property":14}],12:[function(require,module,exports){
-var g = require("../../include");
-
-function ProxyInterceptor(typeOrInstance, memberName) {
-
-	"use strict";
-
-	g.assert(typeOrInstance);
-
-	g.events.EventEmitter.call(self);
-
-	var ProxyType = require("./proxy-type");
-	var ProxyInfo = require("./proxy-info");
-	var ProxyMethod = require("./proxy-method");
-	var ProxyProperty = require("./proxy-property");
-	var ProxyInstance = require("./proxy-instance");
-	var ProxyFunction = require("./proxy-function");
-	var ProxyPrototype = require("./proxy-prototype");
-
-	var self = this;
-	self.info = null;
-	self.interceptor = null;
-	self.memberName = memberName;
-	self.typeOrInstance = typeOrInstance;
-	self.__typename__ = "scarlet.lib.proxies.ProxyInterceptor";
-
-	var interceptInstance = function(whenCalledCallback, replaceClassCallback) {
-		self.interceptor = new ProxyInstance(self.typeOrInstance, whenCalledCallback);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "Using a Proxy Instance", [self.interceptor]);
-	};
-
-	var interceptMethod = function(whenCalledCallback, replaceClassCallback) {
-		self.interceptor = new ProxyMethod(self.info, whenCalledCallback);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "Using a Proxy Method", [self.interceptor]);
-	};
-
-	var interceptProperty = function(whenCalledCallback, replaceClassCallback) {
-		self.interceptor = new ProxyProperty(self.info, whenCalledCallback);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "Using a Proxy Property", [self.interceptor]);
-	};
-
-	var interceptPrototype = function(whenCalledCallback, replaceClassCallback) {
-		self.interceptor = new ProxyPrototype(self.typeOrInstance, whenCalledCallback);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "Using a Proxy Prototype", [self.interceptor]);
-	};
-
-	var interceptFunction = function(whenCalledCallback, replaceClassCallback) {
-		self.interceptor = new ProxyFunction(self.info, whenCalledCallback);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "Using a Proxy Function", [self.interceptor]);
-	};
-
-	self.intercept = function(whenCalledCallback, replaceClassCallback, proxyType) {
-		g.assert(proxyType);
-		g.assert(whenCalledCallback);
-		g.assert(replaceClassCallback);
-
-		self.info = new ProxyInfo(self.typeOrInstance, self.memberName);
-		g.ext.logger.info(ProxyInterceptor, "intercept", "For Type Or Instance", [typeOrInstance, whenCalledCallback, proxyType]);
-
-		if (proxyType.is(proxyType.asPrototype())) {
-			interceptPrototype(whenCalledCallback, replaceClassCallback);
-		} else if (proxyType.is(proxyType.asInstance())) {
-			interceptInstance(whenCalledCallback, replaceClassCallback);
-		} else if (proxyType.is(proxyType.asMethod())) {
-			interceptMethod(whenCalledCallback, replaceClassCallback);
-		} else if (proxyType.is(proxyType.asProperty())) {
-			interceptProperty(whenCalledCallback, replaceClassCallback);
-		} else if (proxyType.is(proxyType.asFunction())) {
-			interceptFunction(whenCalledCallback, replaceClassCallback);
-		}
-
-		self.interceptor.wrap(replaceClassCallback);
-	};
-
-	self.release = function() {
-		if (!g.ext.object.isNull(self.interceptor))
-			self.interceptor.unwrap();
-	};
-}
-
-g.util.inherits(ProxyInterceptor, g.events.EventEmitter);
-
-module.exports = ProxyInterceptor;
-
-},{"../../include":1,"./proxy-function":9,"./proxy-info":10,"./proxy-instance":11,"./proxy-method":13,"./proxy-property":14,"./proxy-prototype":15,"./proxy-type":16}],13:[function(require,module,exports){
-var g = require("../../include");
-
-function ProxyMethod(proxyInfo, whenCalled) {
-
-	"use strict";
-
-	g.assert(proxyInfo);
-	g.assert(whenCalled);
-
-	var self = this;
-	self.proxyInfo = proxyInfo;
-	self.whenCalled = whenCalled;
-	self.__typename__ = "scarlet.lib.proxies.ProxyMethod";
-
-	self.wrap = function() {
-		self.proxyInfo.instanceOrType.__scarlet__[self.proxyInfo.memberName] = self.proxyInfo.instanceOrType[self.proxyInfo.memberName];
-		self.proxyInfo.instanceOrType[self.proxyInfo.memberName] = function() {
+	this.wrap = function(whenCalled) {
+		assert(whenCalled);
+		methodThisContext[methodName] = function() {
 			var args = Array.prototype.slice.call(arguments);
-			self.proxyInfo.type.isMethod = true;
-			return self.whenCalled.call(
-				self.proxyInfo.instanceOrType,
-				self.proxyInfo,
-				self.proxyInfo.instanceOrType.__scarlet__[self.proxyInfo.memberName],
-				args);
+			return whenCalled.call(methodThisContext,
+									methodName,
+									actualMethod,
+									args);
 		};
-		return self;
+		return this;
 	};
 
-	self.unwrap = function() {
-		delete proxyInfo.instanceOrType[proxyInfo.memberName];
-		proxyInfo.instanceOrType[proxyInfo.memberName] = proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName];
-		return self;
+	this.unwrap = function() {
+		methodThisContext[methodName] = actualMethod;
+		return this;
 	};
+};
+},{"assert":17}],14:[function(_dereq_,module,exports){
+var assert = _dereq_("assert");
 
-}
-
-module.exports = ProxyMethod;
-
-},{"../../include":1}],14:[function(require,module,exports){
-var g = require("../../include");
-
-function ProxyProperty(proxyInfo, whenCalled) {
-
+module.exports = function ProxyProperty(properyThisContext,propertyName) {
 	"use strict";
 
-	g.assert(proxyInfo);
-	g.assert(whenCalled);
+	assert(propertyName);
+	assert(properyThisContext);
 
-	var self = this;
-	self.proxyInfo = proxyInfo;
-	self.__typename__ = "scarlet.lib.proxies.ProxyProperty";
+	var actualValue = properyThisContext[propertyName];
+	this.__typename__ = "scarlet.lib.proxies.ProxyProperty";
 
-	var invokeWhenCalledForGet = function() {
-		self.proxyInfo.type.isProperty = true;
-		return whenCalled.call(self.proxyInfo.instanceOrType, self.proxyInfo, function() {
-			return proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName];
-		}, [proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName]]);
-	};
-
-	var invokeWhenCalledForSet = function(value) {
-		self.proxyInfo.type.isProperty = true;
-		return whenCalled.call(self.proxyInfo.instanceOrType, self.proxyInfo, function() {
-			proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName] = value;
-		}, [proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName], value]);
-	};
-
-	self.wrap = function() {
-		proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName] = proxyInfo.instanceOrType[proxyInfo.memberName];
+	this.wrap = function(whenCalled) {
+		assert(whenCalled);
 		Object.defineProperty(
-			proxyInfo.instanceOrType, proxyInfo.memberName, {
-				get: function() {
-					return invokeWhenCalledForGet();
-				},
-				set: function(value) {
-					invokeWhenCalledForSet(value);
-				}
+			properyThisContext, 
+			propertyName, 
+			{
+				get: function() {return invokeWhenCalledForGet(whenCalled);},
+				set: function(value) {invokeWhenCalledForSet(whenCalled,value);}
 			});
-		return self;
+		return this;
 	};
 
-	self.unwrap = function() {
-		delete proxyInfo.instanceOrType[proxyInfo.memberName];
-		proxyInfo.instanceOrType[proxyInfo.memberName] = proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName];
-		delete proxyInfo.instanceOrType.__scarlet__[proxyInfo.memberName];
-		return self;
+	var invokeWhenCalledForGet = function(whenCalled) {
+		return whenCalled.call(properyThisContext,
+								propertyName,
+								function() { return actualValue;});
 	};
-}
 
-module.exports = ProxyProperty;
+	var invokeWhenCalledForSet = function(whenCalled,value) {	
+		return whenCalled.call(
+					properyThisContext,
+					propertyName,
+					function() { actualValue = value;});
+	};
 
-},{"../../include":1}],15:[function(require,module,exports){
-var g = require("../../include");
+	this.unwrap = function() {
+		delete properyThisContext[propertyName];
+		properyThisContext[propertyName] = actualValue;
+		return this;
+	};
+};
+},{"assert":17}],15:[function(_dereq_,module,exports){
+var util = _dereq_("util");
+var assert = _dereq_("assert");
+var object = _dereq_("../extensions/object");
+var proxyMetadata = _dereq_("./proxy-metadata");
+var proxyInstance = _dereq_("./proxy-instance");
+var enumerable = _dereq_("../extensions/enumerable");
 
-function ProxyPrototype(type, whenCalled) {
-
+module.exports = function ProxyPrototype(type) {
 	"use strict";
 
-	g.assert(type);
-	g.assert(whenCalled);
-	g.assert(type.prototype, "Object prototype may only be an Object or null");
-
-	var ProxyInfo = require("./proxy-info");
-	var ProxyInstance = require("./proxy-instance");
+	assert(type);
+	assert(type.prototype);
 
 	var self = this;
-	self.whenCalled = whenCalled;
+	self.whenCalled = null;
 	self.__typename__ = "scarlet.lib.proxies.ProxyPrototype";
 
-	var getArguments = function(args) {
-		var result = Array.prototype.slice.call(args);
-		if (typeof(result) == "undefined")
-			return null;
-		if (typeof(result) != "undefined" && typeof(result.length) != "undefined" && result.length === 0)
-			return null;
-		return result;
-	};
-
-	var initializeShadow = function(thisContext) {
-		thisContext.__scarlet__ = {};
-		thisContext.__scarlet__.__proxy__ = new ProxyInstance(thisContext, whenCalled);
-		thisContext.__scarlet__.__proxy__.wrap();
-	};
-
-	var buildProceed = function(thisContext, callArguments, resultCallback) {
-		return function() {
-			var callArguments = getArguments(arguments);
-			var result = type.apply(thisContext, callArguments);
-			if (typeof(result) != "undefined")
-				resultCallback(result);
-			initializeShadow(thisContext);
-			return result;
-		};
-	};
-
-	var invokeWhenCalled = function(thisContext, proxyInfo, callArguments, resultCallback) {
-		var args = callArguments;
-		var proceed = buildProceed(thisContext, callArguments, resultCallback);
-		proxyInfo.type.isPrototype = true;
-		whenCalled.call(
-			thisContext,
-			proxyInfo,
-			proceed,
-			args);
-	};
-
-	var inheritor = function() {
-		var methodResult = null;
-		var thisContext = this || {};
-		var proxyInfo = new ProxyInfo(type);
-		proxyInfo.type.isConstructor = true;
-		var callArguments = getArguments(arguments);
-		invokeWhenCalled(
-			thisContext,
-			proxyInfo,
-			callArguments,
-			function(result) {
-				methodResult = result;
-			});
-		return methodResult;
-	};
-
-	self.wrap = function(replaceClassCallback) {
-		g.ext.logger.info(ProxyPrototype, "wrap", "Wrapping Prototype", [self]);
-		g.util.inherits(inheritor, type);
+	self.wrap = function(whenCalled,replaceClassCallback) {
+		assert(whenCalled);
+		self.whenCalled = whenCalled;
+		util.inherits(inheritor, type);
+		
 		if (replaceClassCallback)
 			replaceClassCallback(inheritor);
 		return self;
 	};
 
 	self.unwrap = function() {
-		return self;
-	};
-}
-
-module.exports = ProxyPrototype;
-
-},{"../../include":1,"./proxy-info":10,"./proxy-instance":11}],16:[function(require,module,exports){
-var g = require("../../include");
-
-function ProxyType() {
-
-	"use strict";
-
-	var self = this;
-
-	self.UNDEFINED = -1;
-	self.INSTANCE = 0;
-	self.METHOD = 1;
-	self.PROPERTY = 2;
-	self.PROTOTYPE = 3;
-	self.FUNCTION = 4;
-
-	self.value = self.UNDEFINED;
-	self.__typename__ = "scarlet.lib.proxies.ProxyType";
-
-	self.is = function(otherProxyType) {
-		return self.value === otherProxyType.value;
+		return type;
 	};
 
-	self.asUndefined = function() {
-		var newType = new ProxyType();
-		newType.value = self.UNDEFINED;
-		return newType;
+	var inheritor = function() {
+		var thisContext = this || {};
+		var callArguments = Array.prototype.slice.call(arguments);
+		var proceed = buildProceed(thisContext);
+		return self.whenCalled.call(
+							type.name,
+							thisContext,
+							proceed,
+							callArguments);
 	};
 
-	self.asInstance = function() {
-		var newType = new ProxyType();
-		newType.value = self.INSTANCE;
-		return newType;
+	var buildProceed = function(thisContext) {
+		return function() {
+			var callArguments = Array.prototype.slice.call(arguments);
+			var result = type.apply(thisContext, callArguments);
+			initializeShadow(thisContext);
+			return result;
+		};
 	};
 
-	self.asMethod = function() {
-		var newType = new ProxyType();
-		newType.value = self.METHOD;
-		return newType;
-	};
+	var initializeShadow = function(thisContext) {
+		if(proxyMetadata(thisContext).hasShadow())
+			return;
 
-	self.asFunction = function() {
-		var newType = new ProxyType();
-		newType.value = self.FUNCTION;
-		return newType;
-	};
-
-	self.asProperty = function() {
-		var newType = new ProxyType();
-		newType.value = self.PROPERTY;
-		return newType;
-	};
-
-	self.asPrototype = function() {
-		var newType = new ProxyType();
-		newType.value = self.PROTOTYPE;
-		return newType;
-	};
-
-	//g.ext.logger.info(ProxyType, ProxyType, "For Proxy Type", [self]);
-}
-
-module.exports = ProxyType;
-
-},{"../../include":1}],17:[function(require,module,exports){
-var g = require("../include");
-
-var ScarletTrace = function(info, method, args, result){
-
-	g.assert(info, "info=null");
-	g.assert(method, "method=null");
-
-	var self = this;
-
-	self.args = args;
-	self.result = result;
-	self.memberName = info.memberName;
-	self.isConstructor = info.type.isConstructor;
-	self.isPropertyGetter = info.type.isProperty && args.length === 1;
-	self.isPropertySetter = info.type.isProperty && args.length === 2;
-	self.isMethod = info.type.isMethod;
-	self.isFunction = info.type.isFunction;
-	self.hasResult = typeof(result) != "undefined";
-	self.hasArgs = typeof(args) != "undefined";
-	self.argsEmpty = args !== null && typeof(args) != "undefined" && args.length === 0;
-
-	self.traceTo = function(io) {
-		var formattedResult = ((self.isConstructor) ? typeof(this) : (self.isPropertySetter) ? args[1] : (!self.hasResult) ? "void" : result);
-		var formattedName = ((self.isConstructor) ? "ctor" : (self.isPropertySetter) ? "set " + info.memberName	: (self.isPropertyGetter) ? "get " + info.memberName : info.memberName);
-		var formattedArgs = ((self.isPropertySetter) ? args[0] : (self.isPropertyGetter)	? "" : (!self.hasArgs) ? "" : (self.argsEmpty) ? "" : JSON.stringify(args));
-		io(formattedName+"("+formattedArgs+"):"+formattedResult);
+		proxyMetadata(thisContext).ensureShadow();
+		if(!object.objectHasFunction(thisContext,inheritor))
+			proxyInstance(thisContext).wrap(self.whenCalled);
 	};
 };
+},{"../extensions/enumerable":2,"../extensions/object":4,"./proxy-instance":10,"./proxy-metadata":12,"assert":17,"util":25}],16:[function(_dereq_,module,exports){
+var util = _dereq_("util");
+var events = _dereq_("events");
+var assert = _dereq_("assert");
+var logger = _dereq_("./extensions/logger");
+var Interceptor = _dereq_("./interceptors/interceptor");
+var PluginManager = _dereq_("./plugins/plugin-manager");
+var ScarletTrace = _dereq_("./extensions/scarletTrace");
 
 /**
 For creating a new instance of Scarlet
@@ -906,7 +875,7 @@ For creating a new instance of Scarlet
 @param {array|string} pluginArr
 @return scarlet.lib.Scarlet
 @example
-
+	
 	var Scarlet = require("scarlet");
 	var scarlet = new Scarlet();
 
@@ -917,7 +886,7 @@ For creating a new instance of Scarlet
 
 	// Log arguments and result of add
 	add = scarlet
-		.intercept(add, scarlet.FUNCTION)
+		.intercept(add)
 		.using(function(info, method, args){
 			console.log("Adding '" + args[0] + "'' and '" + args[1] + "'");
 			var result = method.call(this, info, method, args);
@@ -931,119 +900,21 @@ For creating a new instance of Scarlet
 function Scarlet(pluginArr) {
 
 	"use strict";
-
-	var ProxyType = require("./proxies/proxy-type");
-	var Interceptor = require("./interceptors/interceptor");
-	var PluginManager = require("./plugins/plugin-manager");
+	
+	if (!(this instanceof Scarlet))
+        return new Scarlet(pluginArr);
 
 	var interceptor = null;
 	var pluginManager = new PluginManager();
 
 	var self = this;
 	self.plugins = {};
-	self.type = new ProxyType().asUndefined();
 	self.__typename__ = "scarlet.lib.Scarlet";
-
-	self.UNDEFINED = self.type.asUndefined();
-
-	/**
-		Constant used to coerce proxy for type only
-		@property INSTANCE
-		@type scarlet.lib.proxies.ProxyType
-		@example
-
-			var Scarlet = require("scarlet");
-			var scarlet = new Scarlet();
-
-			// Type for that we would like to intercept
-			function MyClass(){
-				var self = this;
-				self.myMethod = function(arg1, arg2){
-					return arg1 + arg2;
-				};
-			}
-
-			// First instantiate the type
-			var instance = new MyClass();
-
-			// Scarlet will only intercept the instance
-			instance = scarlet
-				.intercept(instance, scarlet.INSTANCE)
-				.using(function(info, method, args){
-					return method.call(this, info, method, args);
-				}).proxy();
-
-			// Invoke
-			var result = instance.myMethod(1,2);
-	*/
-	self.INSTANCE = self.type.asInstance();
-
-	/**
-		Constant used to coerce proxy for a normal function
-		@property FUNCTION
-		@type scarlet.lib.proxies.ProxyType
-		@example
-
-			var Scarlet = require("scarlet");
-			var scarlet = new Scarlet();
-
-			// Function that we would like to intercept
-			function any(arg1, arg2) {
-				return arg1 + arg2;
-			}
-
-			// Create a proxy of the function using scarlet
-			var anyProxy = scarlet
-				.intercept(any, scarlet.FUNCTION)
-				.using(function(info, method, args){
-					// ...
-				}).proxy();
-
-			anyProxy(1,2) // -> will invoke interceptor
-			any(1,2) // -> wont invoke interceptor
-	*/
-	self.FUNCTION = self.type.asFunction();
-
-	/**
-		Constant used to coerce proxy for prototype functions, includes constructor interception
-		@property PROTOTYPE
-		@type scarlet.lib.proxies.ProxyType
-		@example
-
-			var Scarlet = require("scarlet");
-			var scarlet = new Scarlet();
-
-			// Function or prototypical object that we would like to intercept
-			function MyClass(){
-				var self = this;
-				self.anyProperty = 5;
-				self.anyMethod = function(){
-				};
-			}
-
-			MyClass.prototype.anyOtherMethod = function(){
-			};
-
-			// Intercept type
-			MyClass = scarlet
-				.intercept(MyClass)
-				.using(function(info, method, args){
-					return method.call(this, info, method, args);
-				}).proxy();
-
-			var instance = new MyClass(); // -> Calls interceptor for constructor
-			instance.anyMethod(); // -> Calls interceptor again for method
-			instance.anyOtherMethod(); -> Calls interceptor again for prototype function
-			instance.anyProperty = 6; // -> Calls interceptor for the property setter
-			var result = instance.anyProperty; // -> Calls the interceptor again for property getter
-	*/
-	self.PROTOTYPE = self.type.asPrototype();
 
 	/**
 		Method for proxying types, functions and instances
 		@method intercept
 		@param {object} typeOrInstance
-		@param {scarlet.lib.proxies.ProxyType} proxyType
 		@return {scarlet.lib.Scarlet}
 		@chainable
 		@example
@@ -1064,7 +935,7 @@ function Scarlet(pluginArr) {
 
 			// Scarlet will only intercept the instance
 			instance = scarlet
-				.intercept(instance, scarlet.INSTANCE)
+				.intercept(instance)
 				.using(function(info, method, args){
 					return method.call(this, info, method, args);
 				}).proxy();
@@ -1072,15 +943,18 @@ function Scarlet(pluginArr) {
 			// Invoke
 			var result = instance.myMethod(1,2);
 	*/
-	self.intercept = function(typeOrInstance, proxyType) {
-		g.assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
-		g.assert(proxyType, "Please make sure you supply a type. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
-		g.ext.logger.info(Scarlet, "intercept", "For Type Or Instance", [typeOrInstance]);
+	self.intercept = function(typeOrInstance,memberName) {
+		assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
+
+		logger.info(Scarlet, "intercept", "For Type Or Instance", [typeOrInstance]);
 		interceptor = new Interceptor();
 		interceptor.observable = typeOrInstance;
-		interceptor.intercept(typeOrInstance, function(observable) {
-			interceptor.observable = observable;
-		}, proxyType);
+		interceptor.intercept(typeOrInstance, 
+								memberName,
+								function(observable) {
+									interceptor.observable = observable;
+								});
+		interceptor.using(self.beforeEventEmitterInterceptor);
 		return self;
 	};
 
@@ -1108,7 +982,7 @@ function Scarlet(pluginArr) {
 
 			// Scarlet will only intercept the instance
 			instance = scarlet
-				.intercept(instance, scarlet.INSTANCE)
+				.intercept(instance)
 				.using(function(info, method, args){ // Interceptor 1
 					return method.call(this, info, method, args);
 				})
@@ -1123,50 +997,69 @@ function Scarlet(pluginArr) {
 			var result = instance.myMethod(1,2);
 	*/
 	self.using = function(callback) {
-		g.assert(callback);
-		g.assert(interceptor);
-		g.ext.logger.info(Scarlet, "using", "Using Interceptor", [callback]);
-		interceptor.using(function(info, method, args){
-			var thisContext = this;
-			self.emit("before", {
-				info: info,
-				args: args,
-				result: null,
-				method: method,
-				self: thisContext
-			});
-			var result = null;
-			try {
-				result = callback.call(this, info, method, args);
-				self.emit("after", {
-					info: info,
-					args: args,
-					result: result,
-					method: method,
-					self: thisContext
-				});
-			} catch(err){
-				console.log(err);
-				self.emit("error", {
-					info: info,
-					args: args,
-					result: result,
-					method: method,
-					self: thisContext,
-					error: err
-				});
-			}
-			self.emit("done", {
-				info: info,
-				args: args,
-				result: result,
-				method: method,
-				self: thisContext
-			});
-			return result;
-
-		});
+		assert(callback);
+		assert(interceptor);
+		logger.info(Scarlet, "using", "Using Interceptor", [callback]);
+		interceptor.using(callback);
 		return self;
+	};
+
+	self.beforeEventEmitterInterceptor = function(info, proceed) {
+		assert(interceptor);
+		self.emit("before", {
+			info: info,
+			args: info.args,
+			result: info.result,
+			method: info.method,
+			self: info.context
+		});
+		proceed();
+	};
+
+
+	self.afterEventEmitterInterceptor = function(error, info, proceed) {
+		assert(interceptor);
+		if(error !== undefined && error !== null){
+			self.emit("error", {
+				info: info,
+				args: info.args,
+				result: info.result,
+				method: info.method,
+				self: info.context,
+				error: error
+			});
+			throw error;
+		}
+
+		var result = null;
+		try {
+			result = proceed();
+			self.emit("after", {
+				info: info,
+				args: info.args,
+				result: info.result,
+				method: info.method,
+				self: info.context
+			});
+		} catch(err){
+			self.emit("error", {
+				info: info,
+				args: info.args,
+				result: info.result,
+				method: info.method,
+				self: info.context,
+				error: err
+			});
+			throw err;
+		}
+		self.emit("done", {
+			info: info,
+			args: info.args,
+			result: info.result,
+			method: info.method,
+			self: info.context
+		});
+		return result;
 	};
 
 	/**
@@ -1175,9 +1068,10 @@ function Scarlet(pluginArr) {
 		@return {Object}
 	*/
 	self.proxy = function() {
-		g.assert(interceptor);
-		g.assert(interceptor.observable);
-		g.ext.logger.info(Scarlet, "proxy", "As Proxied Type Or Instance", [interceptor.observable]);
+		assert(interceptor);
+		assert(interceptor.observable);
+		logger.info(Scarlet, "proxy", "As Proxied Type Or Instance", [interceptor.observable]);
+		interceptor.using(self.afterEventEmitterInterceptor);
 		return interceptor.observable;
 	};
 
@@ -1188,17 +1082,17 @@ function Scarlet(pluginArr) {
 		@return {scarlet.lib.Scarlet}
 	*/
 	self.load = function(pluginPath) {
-		g.assert(pluginPath);
+		assert(pluginPath);
 		pluginManager.load(self, pluginPath);
 		return self;
 	};
 
-	self.interceptQuery = function(info, method, args, result){
-		return new ScarletTrace(info, method, args, result);
+	self.interceptQuery = function(proceed, info){
+		return new ScarletTrace(proceed, info);
 	};
 
 	var initializePlugins = function() {
-		if (typeof(pluginArr) === 'string')
+		if (typeof(pluginArr) === "string")
 			pluginArr = [pluginArr];
 		if (pluginArr) {
 			if (pluginArr.length) {
@@ -1208,17 +1102,21 @@ function Scarlet(pluginArr) {
 			}
 		}
 	};
-
+	
+	self.on("error",function(error){
+		logger.error(Scarlet, "Event", "error event", [error]);
+	});
+		
 	initializePlugins();
 
-	g.events.EventEmitter.call(self);
+	events.EventEmitter.call(self);
 }
 
-g.util.inherits(Scarlet, g.events.EventEmitter);
+util.inherits(Scarlet,events.EventEmitter);
 
 module.exports = Scarlet;
 
-},{"../include":1,"./interceptors/interceptor":7,"./plugins/plugin-manager":8,"./proxies/proxy-type":16}],18:[function(require,module,exports){
+},{"./extensions/logger":3,"./extensions/scarletTrace":5,"./interceptors/interceptor":6,"./plugins/plugin-manager":8,"assert":17,"events":20,"util":25}],17:[function(_dereq_,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -1246,7 +1144,7 @@ module.exports = Scarlet;
 // when used in node, this will actually load the util module we depend on
 // versus loading the builtin util module as happens otherwise
 // this is a bug in node module loading as far as I am concerned
-var util = require('util/');
+var util = _dereq_('util/');
 
 var pSlice = Array.prototype.slice;
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -1278,6 +1176,25 @@ assert.AssertionError = function AssertionError(options) {
 
   if (Error.captureStackTrace) {
     Error.captureStackTrace(this, stackStartFunction);
+  }
+  else {
+    // non v8 browsers so we can have a stacktrace
+    var err = new Error();
+    if (err.stack) {
+      var out = err.stack;
+
+      // try to strip useless frames
+      var fn_name = stackStartFunction.name;
+      var idx = out.indexOf('\n' + fn_name);
+      if (idx >= 0) {
+        // once we have located the function frame
+        // we need to strip out everything before it (and its line)
+        var next_line = out.indexOf('\n', idx + 1);
+        out = out.substring(next_line + 1);
+      }
+
+      this.stack = out;
+    }
   }
 };
 
@@ -1561,15 +1478,16 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":20}],19:[function(require,module,exports){
+},{"util/":19}],18:[function(_dereq_,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],20:[function(require,module,exports){
-var process=require("__browserify_process"),global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};// Copyright Joyent, Inc. and other Node contributors.
+},{}],19:[function(_dereq_,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -2094,7 +2012,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = require('./support/isBuffer');
+exports.isBuffer = _dereq_('./support/isBuffer');
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -2138,7 +2056,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = require('inherits');
+exports.inherits = _dereq_('inherits');
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -2156,7 +2074,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"./support/isBuffer":19,"__browserify_process":23,"inherits":22}],21:[function(require,module,exports){
+}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":18,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}],20:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2458,7 +2377,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -2483,7 +2402,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2538,8 +2457,9 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],24:[function(require,module,exports){
-var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
+},{}],23:[function(_dereq_,module,exports){
+(function (process){
+// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -2764,10 +2684,11 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-},{"__browserify_process":23}],25:[function(require,module,exports){
-module.exports=require(19)
-},{}],26:[function(require,module,exports){
-module.exports=require(20)
-},{"./support/isBuffer":25,"__browserify_process":23,"inherits":22}]},{},[2])
-(2)
+}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"))
+},{"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22}],24:[function(_dereq_,module,exports){
+module.exports=_dereq_(18)
+},{}],25:[function(_dereq_,module,exports){
+module.exports=_dereq_(19)
+},{"./support/isBuffer":24,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}]},{},[1])
+(1)
 });

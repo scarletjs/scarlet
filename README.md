@@ -3,7 +3,7 @@ Scarlet
 
 The simple fast javascript interceptor.
 
-[![Build Status](https://travis-ci.org/scarletjs/scarlet.png?branch=0.0.24)](https://travis-ci.org/scarletjs/scarlet)
+[![Build Status](https://travis-ci.org/scarletjs/scarlet.svg?branch=master)](https://travis-ci.org/scarletjs/scarlet)
 
 [![NPM](https://nodei.co/npm/scarlet.png?downloads=true)](https://nodei.co/npm/scarlet/)
 

@@ -1,7 +1,7 @@
 {
   "name": "scarlet",
   "description": "The simple fast javascript interceptor for methods and properties.",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "author": "Tim Chaplin <tim.chaplin@ticktockdevelopment.com>, Gavin van der Merwe <fir3pho3nixx@gmail.com>",
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
     "gulp-browserify": "~0.5.0",
     "gulp-bump": "~0.1.6",
     "sinon": "~1.9.0",
-    "gulp-rename": "~1.2.0"
+    "gulp-rename": "~1.2.0",
+    "gulp-mox": "0.0.3"
   },
   "browserDependencies": {},
   "keywords": [

@@ -3,7 +3,7 @@ Scarlet
 
 The simple fast javascript interceptor.
 
-[![Build Status](https://travis-ci.org/scarletjs/scarlet.png?branch=0.0.24)](https://travis-ci.org/scarletjs/scarlet)
+[![Build Status](https://travis-ci.org/scarletjs/scarlet.svg?branch=master)](https://travis-ci.org/scarletjs/scarlet)
 
 [![NPM](https://nodei.co/npm/scarlet.png?downloads=true)](https://nodei.co/npm/scarlet/)
 
@@ -344,7 +344,7 @@ Benchmarking has been performed against a [hooks](https://github.com/bnoguchi/ho
 
 ## Api Reference
 
-For all api information see the [docs](http://htmlpreview.github.com/?https://github.com/scarletjs/scarlet/blob/master/docs/index.html).
+For all api information see the [docs](https://github.com/scarletjs/scarlet/tree/master/docs).
 
 ## Plugins
 

@@ -1,4 +1,5 @@
 var gulp = require("gulp");
+var mox = require("gulp-mox");
 var bump = require("gulp-bump");
 var gutil = require("gulp-util");
 var mocha = require("gulp-mocha");
@@ -8,7 +9,13 @@ var browserify = require("gulp-browserify");
 
 gulp.task("default", ["lint","test"]);
 
-gulp.task("release",["lint","test","browserify","bump"]);
+gulp.task("release",["lint","test","browserify","documentation","bump"]);
+
+gulp.task("documentation",function(){
+    gulp.src(["lib/scarlet.js","lib/interceptors/**/*.js"])
+        .pipe(mox())
+        .pipe(gulp.dest("./docs/markdown/"));
+});
 
 gulp.task("browserify", function() {
     gulp.src("./index.js", { read: false} )

@@ -68,7 +68,7 @@ gulp.task("tag",["bump"] ,function () {
   
   return gulp.src('./')
             .pipe(git.commit(version))
-            .pipe(git.tag(version, version))
+            .pipe(git.tag(version, version+''))
             .pipe(gulp.dest("./"));
 });
 

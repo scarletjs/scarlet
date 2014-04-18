@@ -10,7 +10,7 @@ var browserify = require("gulp-browserify");
 
 gulp.task("default", ["lint","test"]);
 
-gulp.task("release",["lint","test","browserify","documentation","tag"]);
+gulp.task("release",["lint","test","browserify","documentation","push"]);
 
 gulp.task("watch", function() {
     gulp.watch(["lib/**/*.js","tests/**/*.js"], ["catchErrorTest"]);
@@ -68,6 +68,9 @@ gulp.task("tag",["bump"] ,function () {
   
   return gulp.src('./')
             .pipe(git.commit(version))
-            .pipe(git.tag(version, version))
-            .pipe(git.push('origin', 'master', {args:'--tags'}));
+            .pipe(git.tag(version, version));
+});
+
+gulp.task("push",["tag"] ,function () {
+    return git.push('origin', 'master', {args:'--tags'});
 });

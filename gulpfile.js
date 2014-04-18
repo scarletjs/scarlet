@@ -17,14 +17,14 @@ gulp.task("watch", function() {
 });
 
 gulp.task("lint", function() {
-  return gulp.src(["./lib/**/*.js",
+  gulp.src(["./lib/**/*.js",
             "./tests/**/*.js"])
             .pipe(jshint())
             .pipe(jshint.reporter("default"));
 });
 
 gulp.task("catchErrorTest",function(){
-    return gulp.src(["tests/**/*.js","!/tests/spec/builders/**/*.js"])
+    gulp.src(["tests/**/*.js","!/tests/spec/builders/**/*.js"])
                 .pipe(mocha({ reporter: "list" }))
                 .on("error", gutil.log);
 });
@@ -32,23 +32,23 @@ gulp.task("catchErrorTest",function(){
 gulp.task("test",["unitTest","bddTest"]);
 
 gulp.task("unitTest",function(){
-    return gulp.src(["tests/unit/**/*.js"])
+    gulp.src(["tests/unit/**/*.js"])
                 .pipe(mocha({ reporter: "spec" }));
 });
 
 gulp.task("bddTest",function(){
-    return gulp.src(["tests/spec/**/*.js","!/tests/spec/builders/**/*.js"])
+    gulp.src(["tests/spec/**/*.js","!/tests/spec/builders/**/*.js"])
                 .pipe(mocha({ reporter: "spec" }));
 });
 
 gulp.task("documentation",function(){
-    return gulp.src(["lib/scarlet.js","lib/interceptors/**/*.js"])
+    gulp.src(["lib/scarlet.js","lib/interceptors/**/*.js"])
                 .pipe(mox())
                 .pipe(gulp.dest("./docs/markdown/"));
 });
 
 gulp.task("browserify", function() {
-    return gulp.src("./index.js", { read: false} )
+    gulp.src("./index.js", { read: false} )
                 .pipe(browserify({
                     standalone: "scarlet"
                 }))

@@ -66,7 +66,7 @@ gulp.task("tag",["bump"] ,function () {
   var version = require("./package.json").version;
   gutil.log('Tagging:'+version);
   
-  gulp.src('./')
+  gulp.src('./package.json')
             .pipe(git.commit(version))
             .pipe(git.tag(version, version))
             //.pipe(git.push('origin', 'master', {args:'--tags'}));

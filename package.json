@@ -22,7 +22,8 @@
     "gulp-bump": "~0.1.6",
     "sinon": "~1.9.0",
     "gulp-rename": "~1.2.0",
-    "gulp-mox": "0.0.3"
+    "gulp-mox": "0.0.3",
+    "gulp-git": "~0.3.6"
   },
   "browserDependencies": {},
   "keywords": [

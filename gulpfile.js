@@ -10,7 +10,7 @@ var browserify = require("gulp-browserify");
 
 gulp.task("default", ["lint","test"]);
 
-gulp.task("release",["lint","test","browserify","documentation","tag"]);
+gulp.task("release",["lint","test","browserify","documentation"]);
 
 gulp.task("watch", function() {
     gulp.watch(["lib/**/*.js","tests/**/*.js"], ["catchErrorTest"]);
@@ -67,7 +67,7 @@ gulp.task("tag",["bump"] ,function () {
     var version = require("./package.json").version;
     gutil.log('Tagging:'+version);
 
-    gulp.src("./package.json")
+    gulp.src("./")
         .pipe(git.commit(version));
 
     git.tag(version, version);

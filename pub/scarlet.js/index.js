@@ -48,10 +48,10 @@ function Enumerable() {
 			resolve(object, callback);
 		}
 	};
-	self.any = function(object,predicateCallback){
+	self.any = function(object, predicateCallback) {
 		var isTrue = false;
-		self.forEach(object,function(element, index){
-			if(!predicateCallback(element,index))
+		self.forEach(object, function(element, index) {
+			if (!predicateCallback(element, index))
 				return;
 			isTrue = true;
 			return;
@@ -60,15 +60,15 @@ function Enumerable() {
 	};
 	self.where = function(object, predicateCallback) {
 		var results = [];
-		self.forEach(object, function(element){
+		self.forEach(object, function(element) {
 			if (predicateCallback(element))
-				results.push(element);			
+				results.push(element);
 		});
 		return results;
 	};
 
 	self.first = function(object, predicateCallback) {
-		if (typeof(predicateCallback) == "undefined" && typeof(object) != "undefined" && object.length > 0){
+		if (typeof(predicateCallback) == "undefined" && typeof(object) != "undefined" && object.length > 0) {
 			return object[0];
 		}
 		var results = self.where(object, predicateCallback);
@@ -77,33 +77,35 @@ function Enumerable() {
 		return null;
 	};
 
-	self.mapSeries = function (functions,onEach,onComplete){
+	self.mapSeries = function(functions, onEach, onComplete) {
 		assert(typeof functions.length === "number", "Object to map must be an array");
 
-		if(!this)
-			return new self.mapSeries(functions,onEach, onComplete);
+		if (!this)
+			return new self.mapSeries(functions, onEach, onComplete);
 
-		var results = [];		
+		var results = [];
 		var thisContext = this;
 		var functionNumber = 0;
 
-		var next = function(){
-			var nextfunction= functions[functionNumber];
+		var next = function() {
+			var nextfunction = functions[functionNumber];
 			functionNumber++;
 			return nextfunction;
 		};
-		var finalResult = null;
-		thisContext._proceed = function(error, result){
-			if(result !== undefined)
-				results.push(result);
 
+		var finalResult = null;
+
+		thisContext._proceed = function(error, result) {
+			if (result !== undefined)
+				results.push(result);
 			var nextfunction = next();
-			if(nextfunction)
-				onEach(error,nextfunction, thisContext._proceed);
-			else if(onComplete)
-				finalResult =  onComplete(error,results);
+			if (nextfunction)
+				onEach(error, nextfunction, thisContext._proceed);
+			else if (onComplete)
+				finalResult = onComplete(error, results);
 			return finalResult;
 		};
+
 		thisContext._proceed();
 	};
 }
@@ -114,7 +116,9 @@ var util = _dereq_("util");
 var inspect = util.inspect;
 var assert = _dereq_("assert");
 var object = _dereq_("./object");
-var ll = function(val) { self.log(inspect(val)); };
+var ll = function(val) {
+	self.log(inspect(val));
+};
 
 function Logger() {
 
@@ -127,21 +131,21 @@ function Logger() {
 	self.ERROR = 1;
 	self.NONE = 0;
 	self.logLevel = self.NONE;
-	
+
 	self.log = console.log;
 
 	var getFunctionName = function(func) {
-		
+
 		if (typeof(func) == "string")
 			return func;
-		
+
 		var ret = func.toString();
 		ret = ret.substr("function ".length);
 		ret = ret.substr(0, ret.indexOf("("));
-		
+
 		if (ret === "" || ret === null || typeof(ret) === "undefined")
 			ret = "function<anonymous>";
-		
+
 		return ret;
 	};
 
@@ -236,11 +240,11 @@ function ObjectExtended() {
 	var enumerable = _dereq_("./enumerable");
 	self.__typename__ = "scarlet.lib.extensions.Object";
 
-	self.has = function(obj, key){
+	self.has = function(obj, key) {
 		return hasOwnProperty.call(obj, key);
 	};
 
-	self.isObject = function(obj){
+	self.isObject = function(obj) {
 		return obj instanceof Object;
 	};
 
@@ -266,37 +270,39 @@ function ObjectExtended() {
 		});
 	};
 
-	self.name = function(obj){
-		if(!obj)
+	self.name = function(obj) {
+		if (!obj)
 			return "undefined";
 
-		if(obj.name)
+		if (obj.name)
 			return obj.name;
 
-		if(obj.constructor){
-			if(obj.constructor.name)
+		if (obj.constructor) {
+			if (obj.constructor.name)
 				return obj.constructor.name;
 		}
 
 		var funcNameRegex = /function\s([^(]{1,})\(/;
 		var results = (funcNameRegex).exec((obj).toString());
-		if((results && results.length > 1))
+		if ((results && results.length > 1))
 			return results[1].trim();
 
-		if(obj instanceof Function)
+		if (obj instanceof Function)
 			return "Function";
 
 		return "Object";
 	};
-	self.objectHasFunction = function(object, objectFunction){
-		for(var property in object){
-			if(object[property] == objectFunction)
+	
+	self.objectHasFunction = function(object, objectFunction) {
+		for (var property in object) {
+			if (object[property] == objectFunction)
 				return true;
 		}
 		return false;
 	};
-	self.extend = function(fromObject, toObject){
-		for(var property in fromObject){
+	
+	self.extend = function(fromObject, toObject) {
+		for (var property in fromObject) {
 			toObject[property] = fromObject[property];
 		}
 	};
@@ -307,7 +313,7 @@ module.exports = new ObjectExtended();
 },{"./enumerable":2}],5:[function(_dereq_,module,exports){
 var assert = _dereq_("assert");
 
-var ScarletTrace = function(proceed, info){
+var ScarletTrace = function(proceed, info) {
 	"use strict";
 
 	assert(info, "info=null");
@@ -325,7 +331,7 @@ var ScarletTrace = function(proceed, info){
 		var formattedResult = (!self.hasResult) ? "void" : info.result;
 		var formattedName = (!info.memberName) ? "" : info.memberName;
 		var formattedArgs = ((!self.hasArgs) || (self.argsEmpty)) ? "" : JSON.stringify(info.args);
-		io(formattedName+"("+formattedArgs+"):"+formattedResult);
+		io(formattedName + "(" + formattedArgs + "):" + formattedResult);
 	};
 };
 
@@ -344,10 +350,10 @@ module.exports = function Interceptor() {
 	self.interceptors = [];
 	self.__typename__ = "scarlet.lib.interceptors.Interceptor";
 
-	self.intercept = function(typeOrInstance, memberName,replaceTypeCallback) {
+	self.intercept = function(typeOrInstance, memberName, replaceTypeCallback) {
 		assert(typeOrInstance);
 		assert(replaceTypeCallback);
-		self.proxy = new ProxyInterceptor(typeOrInstance,memberName);
+		self.proxy = new ProxyInterceptor(typeOrInstance, memberName);
 		self.proxy.intercept(whenProxyCalled, replaceTypeCallback);
 		return self;
 	};
@@ -358,42 +364,39 @@ module.exports = function Interceptor() {
 		return self;
 	};
 
-	var whenProxyCalled = function(invocationName,invocationMethod, args) {
+	var whenProxyCalled = function(invocationName, invocationMethod, args) {
 		assert(self.interceptors.length > 0, "Please make sure you add an interceptor");
 		var thisContext = this;
-		var invocation = new Invocation(thisContext,invocationName,invocationMethod,args);
-		callEachInterceptor(thisContext, 
-							invocation, 
-							function(error, interceptorResults){
-								if(error) throw error;
-
-								invocation.result = invocation.proceed();
-								if(interceptorResults.length > 0)
-									invocation.result = interceptorResults[interceptorResults.length-1];
-								return invocation.result;
-							});
+		var invocation = new Invocation(thisContext, invocationName, invocationMethod, args);
+		callEachInterceptor(thisContext,
+			invocation,
+			function(error, interceptorResults) {
+				if (error) throw error;
+				invocation.result = invocation.proceed();
+				if (interceptorResults.length > 0)
+					invocation.result = interceptorResults[interceptorResults.length - 1];
+				return invocation.result;
+			});
 		return invocation.result;
 	};
 
-	var callEachInterceptor = function(thisContext, invocation, onAllCalled){
-		enumerable.mapSeries(self.interceptors, 
-								function(error, nextInterceptor, callback){
-									if (error && numberOfParameters(nextInterceptor) < 3)
-										return callback(error);
-
-									if(numberOfParameters(nextInterceptor) === 1)
-										return nextInterceptor.call(thisContext,callback);
-									if(numberOfParameters(nextInterceptor) === 2)
-										return nextInterceptor.call(thisContext,invocation,callback);
-									
-									return nextInterceptor.call(thisContext,error,invocation,callback);
-								}, 
-								onAllCalled);
+	var callEachInterceptor = function(thisContext, invocation, onAllCalled) {
+		enumerable.mapSeries(self.interceptors,
+			function(error, nextInterceptor, callback) {
+				if (error && numberOfParameters(nextInterceptor) < 3)
+					return callback(error);
+				if (numberOfParameters(nextInterceptor) === 1)
+					return nextInterceptor.call(thisContext, callback);
+				if (numberOfParameters(nextInterceptor) === 2)
+					return nextInterceptor.call(thisContext, invocation, callback);
+				return nextInterceptor.call(thisContext, error, invocation, callback);
+			},
+			onAllCalled);
 	};
 };
 
-var numberOfParameters = function(functionWithParameters){
-	if(typeof functionWithParameters !== "function")
+var numberOfParameters = function(functionWithParameters) {
+	if (typeof functionWithParameters !== "function")
 		return 0;
 
 	return functionWithParameters.length;
@@ -402,18 +405,19 @@ var numberOfParameters = function(functionWithParameters){
 var assert = _dereq_("assert");
 var objectExt = _dereq_("../extensions/object");
 
-module.exports = function Invocation(context,invocationName,invocationMethod,args) {
+module.exports = function Invocation(context, invocationName, invocationMethod, args) {
 	"use strict";
 
-	assert(invocationMethod, "Scarlet::Invocation::invocationMethod == null");
+	assert(invocationMethod, "invocationMethod == null");
 
 	var self = this;
-	if(!args)
+	
+	if (!args)
 		args = [];
 
 	/**
 	 * The original arguments passed into the function being intercepted
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Object} - the argument object based into objects
 	 */
@@ -421,7 +425,7 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 
 	/**
 	 * The reference to self for the original/called methd
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Object}
 	 */
@@ -429,7 +433,7 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 
 	/**
 	 * The result of the method being intercepted
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Any}
 	 */
@@ -437,7 +441,7 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 
 	/**
 	 * The method being intercepted
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Function}
 	 */
@@ -447,27 +451,27 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 	 * Gets the name of the intercepted context
 	 *
 	 * @category Invocation Attributes
-     * @type {String}
-     */
-	self.contextName = function(){
+	 * @type {String}
+	 */
+	self.contextName = function() {
 		return objectExt.name(self.context);
 	};
 
 	/**
 	 * Gets the name of the intercepted member
-	 * 
+	 *
 	 * @category Invocation Attributes
-     * @type {String}
-     */
-	self.memberName = function(){
-		if(invocationName)
+	 * @type {String}
+	 */
+	self.memberName = function() {
+		if (invocationName)
 			return invocationName;
 		return objectExt.name(self.method);
 	};
 
 	/**
 	 * The start date time when the method was invoked
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Date}
 	 */
@@ -475,7 +479,7 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 
 	/**
 	 * The end date time when the method was invoked
-	 * 
+	 *
 	 * @category Invocation Attributes
 	 * @type {Date}
 	 */
@@ -483,11 +487,11 @@ module.exports = function Invocation(context,invocationName,invocationMethod,arg
 
 	/**
 	 * Calls the intercepted method
-	 * 
+	 *
 	 * @category Invocation Attributes
-     * @method proceed
-     * @return Function|Object of the result of the original method call
-     */
+	 * @method proceed
+	 * @return Function|Object of the result of the original method call
+	 */
 	self.proceed = function() {
 		var parameters = Array.prototype.slice.call(self.args);
 		self.executionStartDate = new Date();
@@ -502,21 +506,21 @@ var path = _dereq_("path");
 var assert = _dereq_("assert");
 
 function PluginManager() {
-	
+
 	"use strict";
 
 	var self = this;
-	self.directoryPath = __dirname + "/../../";
+	self.directoryPath = __dirname + "/../../../";
 
-	self.setDirectory = function(directoryPath){
+	self.setDirectory = function(directoryPath) {
 		self.directoryPath = directoryPath;
 	};
-	
-	self.load = function($scarlet, pluginDirectoryPath) {
-		assert($scarlet);
+
+	self.load = function(scarlet, pluginDirectoryPath) {
+		assert(scarlet);
 		var fullPath = path.normalize(self.directoryPath + pluginDirectoryPath);
 		var ScarletPlugin = _dereq_(fullPath);
-		var pluginObject = new ScarletPlugin($scarlet);
+		var pluginObject = new ScarletPlugin(scarlet);
 		pluginObject.initialize();
 		return pluginObject;
 	};
@@ -524,7 +528,7 @@ function PluginManager() {
 }
 
 module.exports = PluginManager;
-}).call(this,"/lib\\plugins")
+}).call(this,"/lib/plugins")
 },{"assert":17,"path":23}],9:[function(_dereq_,module,exports){
 var assert = _dereq_("assert");
 
@@ -534,15 +538,15 @@ module.exports = function ProxyFunction(actualFunction) {
 	assert(actualFunction);
 	this.__typename__ = "scarlet.lib.proxies.ProxyFunction";
 
-	this.wrap = function(whenCalled,replaceFunctionCallback) {
+	this.wrap = function(whenCalled, replaceFunctionCallback) {
 		assert(whenCalled);
-		
+
 		var proxiedFunction = function() {
 			var args = Array.prototype.slice.call(arguments);
 			return whenCalled.call(this,
-									actualFunction.name,
-									actualFunction,
-									args);
+				actualFunction.name,
+				actualFunction,
+				args);
 		};
 
 		if (replaceFunctionCallback)
@@ -565,18 +569,18 @@ var enumerable = _dereq_("../extensions/enumerable");
 
 module.exports = function ProxyInstance(instance) {
 	"use strict";
-	
+
 	if (!(this instanceof ProxyInstance))
-        return new ProxyInstance(instance);
+		return new ProxyInstance(instance);
 
 	assert(instance);
-	
+
 	var proxies = [];
 	this.__typename__ = "scarlet.lib.proxies.ProxyInstance";
 
 	this.wrap = function(whenCalled) {
 		assert(whenCalled);
-		proxyEachInstanceMember(instance,function(proxy){
+		proxyEachInstanceMember(instance, function(proxy) {
 			proxy.wrap(whenCalled);
 			proxies.push(proxy);
 		});
@@ -584,24 +588,24 @@ module.exports = function ProxyInstance(instance) {
 	};
 
 	this.unwrap = function() {
-		enumerable.forEach(proxies,function(proxy){
+		enumerable.forEach(proxies, function(proxy) {
 			proxy.unwrap();
 		});
 		return this;
 	};
 
-	var proxyEachInstanceMember = function(instanceToProxy,onEach){
-		if(!onEach) return;
+	var proxyEachInstanceMember = function(instanceToProxy, onEach) {
+		if (!onEach) return;
 		enumerable.forEach(instanceToProxy, function(member, memberName) {
 			assert(memberName);
 
 			var proxyMetadata = new ProxyMetadata(instanceToProxy, memberName).ensureShadow();
-			if(!proxyMetadata.reflection.isAllowed()) return;
+			if (!proxyMetadata.reflection.isAllowed()) return;
 
-			if(proxyMetadata.reflection.isMethod())
+			if (proxyMetadata.reflection.isMethod())
 				return onEach(new ProxyMethod(instanceToProxy, memberName));
 
-			if(proxyMetadata.reflection.isProperty())
+			if (proxyMetadata.reflection.isProperty())
 				return onEach(new ProxyProperty(instanceToProxy, memberName));
 		});
 	};
@@ -627,30 +631,30 @@ module.exports = function ProxyInterceptor(typeOrInstance, memberName) {
 		assert(whenCalledCallback);
 		assert(replaceClassCallback);
 
-		proxyMetadata(typeOrInstance,memberName).ensureShadow();
-		this.proxy = proxyForTypeOrInstance().wrap(whenCalledCallback,replaceClassCallback);
+		proxyMetadata(typeOrInstance, memberName).ensureShadow();
+		this.proxy = proxyForTypeOrInstance().wrap(whenCalledCallback, replaceClassCallback);
 	};
 
 	this.release = function() {
 		if (this.proxy)
 			this.proxy.unwrap();
 	};
-	
-	var proxyForTypeOrInstance = function(){
-		if(memberName)
+
+	var proxyForTypeOrInstance = function() {
+		if (memberName)
 			return proxyForMember();
-		if(typeOrInstance.prototype)
+		if (typeOrInstance.prototype)
 			return new ProxyPrototype(typeOrInstance);
-		if(typeof typeOrInstance === "function")
+		if (typeof typeOrInstance === "function")
 			return new ProxyFunction(typeOrInstance);
 		return new ProxyInstance(typeOrInstance);
 	};
 
-	var proxyForMember = function(){
-		if(!memberName) return;
+	var proxyForMember = function() {
+		if (!memberName) return;
 
-		if(typeof typeOrInstance[memberName] === "function")
-			return new ProxyMethod(typeOrInstance,memberName);
+		if (typeof typeOrInstance[memberName] === "function")
+			return new ProxyMethod(typeOrInstance, memberName);
 
 		return new ProxyProperty(typeOrInstance, memberName);
 	};
@@ -664,14 +668,14 @@ module.exports = function ProxyMetadata(instanceOrType, memberName) {
 	"use strict";
 
 	if (!(this instanceof ProxyMetadata))
-        return new ProxyMetadata(instanceOrType,memberName);
+		return new ProxyMetadata(instanceOrType, memberName);
 
 	assert(instanceOrType);
 
 	this.__typename__ = "scarlet.lib.proxies.ProxyMetadata";
-	this.reflection ={};
+	this.reflection = {};
 
-	this.hasShadow = function(){
+	this.hasShadow = function() {
 		return object.has(instanceOrType, "__scarlet__");
 	};
 	this.ensureShadow = function() {
@@ -681,7 +685,7 @@ module.exports = function ProxyMetadata(instanceOrType, memberName) {
 		logger.debug(ProxyMetadata, "ensureShadow", "Shadow Object Created", [instanceOrType]);
 		return this;
 	};
-	
+
 	this.reflection.isAllowed = function() {
 		var result = memberName != "__scarlet__";
 		logger.debug(ProxyMetadata, "isAllowed", "Is Allowed For Proxy?", [result]);
@@ -725,11 +729,10 @@ module.exports = function ProxyMetadata(instanceOrType, memberName) {
 
 	return this;
 };
-
 },{"../extensions/logger":3,"../extensions/object":4,"assert":17}],13:[function(_dereq_,module,exports){
 var assert = _dereq_("assert");
 
-module.exports =  function ProxyMethod(methodThisContext,methodName) {
+module.exports = function ProxyMethod(methodThisContext, methodName) {
 	"use strict";
 
 	assert(methodName);
@@ -743,9 +746,9 @@ module.exports =  function ProxyMethod(methodThisContext,methodName) {
 		methodThisContext[methodName] = function() {
 			var args = Array.prototype.slice.call(arguments);
 			return whenCalled.call(methodThisContext,
-									methodName,
-									actualMethod,
-									args);
+				methodName,
+				actualMethod,
+				args);
 		};
 		return this;
 	};
@@ -758,7 +761,7 @@ module.exports =  function ProxyMethod(methodThisContext,methodName) {
 },{"assert":17}],14:[function(_dereq_,module,exports){
 var assert = _dereq_("assert");
 
-module.exports = function ProxyProperty(properyThisContext,propertyName) {
+module.exports = function ProxyProperty(properyThisContext, propertyName) {
 	"use strict";
 
 	assert(propertyName);
@@ -770,26 +773,33 @@ module.exports = function ProxyProperty(properyThisContext,propertyName) {
 	this.wrap = function(whenCalled) {
 		assert(whenCalled);
 		Object.defineProperty(
-			properyThisContext, 
-			propertyName, 
-			{
-				get: function() {return invokeWhenCalledForGet(whenCalled);},
-				set: function(value) {invokeWhenCalledForSet(whenCalled,value);}
+			properyThisContext,
+			propertyName, {
+				get: function() {
+					return invokeWhenCalledForGet(whenCalled);
+				},
+				set: function(value) {
+					invokeWhenCalledForSet(whenCalled, value);
+				}
 			});
 		return this;
 	};
 
 	var invokeWhenCalledForGet = function(whenCalled) {
 		return whenCalled.call(properyThisContext,
-								propertyName,
-								function() { return actualValue;});
+			propertyName,
+			function() {
+				return actualValue;
+			});
 	};
 
-	var invokeWhenCalledForSet = function(whenCalled,value) {	
+	var invokeWhenCalledForSet = function(whenCalled, value) {
 		return whenCalled.call(
-					properyThisContext,
-					propertyName,
-					function() { actualValue = value;});
+			properyThisContext,
+			propertyName,
+			function() {
+				actualValue = value;
+			});
 	};
 
 	this.unwrap = function() {
@@ -816,11 +826,11 @@ module.exports = function ProxyPrototype(type) {
 	self.whenCalled = null;
 	self.__typename__ = "scarlet.lib.proxies.ProxyPrototype";
 
-	self.wrap = function(whenCalled,replaceClassCallback) {
+	self.wrap = function(whenCalled, replaceClassCallback) {
 		assert(whenCalled);
 		self.whenCalled = whenCalled;
 		util.inherits(inheritor, type);
-		
+
 		if (replaceClassCallback)
 			replaceClassCallback(inheritor);
 		return self;
@@ -835,10 +845,10 @@ module.exports = function ProxyPrototype(type) {
 		var callArguments = Array.prototype.slice.call(arguments);
 		var proceed = buildProceed(thisContext);
 		return self.whenCalled.call(
-							type.name,
-							thisContext,
-							proceed,
-							callArguments);
+			type.name,
+			thisContext,
+			proceed,
+			callArguments);
 	};
 
 	var buildProceed = function(thisContext) {
@@ -851,11 +861,11 @@ module.exports = function ProxyPrototype(type) {
 	};
 
 	var initializeShadow = function(thisContext) {
-		if(proxyMetadata(thisContext).hasShadow())
+		if (proxyMetadata(thisContext).hasShadow())
 			return;
 
 		proxyMetadata(thisContext).ensureShadow();
-		if(!object.objectHasFunction(thisContext,inheritor))
+		if (!object.objectHasFunction(thisContext, inheritor))
 			proxyInstance(thisContext).wrap(self.whenCalled);
 	};
 };
@@ -900,9 +910,9 @@ For creating a new instance of Scarlet
 function Scarlet(pluginArr) {
 
 	"use strict";
-	
+
 	if (!(this instanceof Scarlet))
-        return new Scarlet(pluginArr);
+		return new Scarlet(pluginArr);
 
 	var interceptor = null;
 	var pluginManager = new PluginManager();
@@ -943,17 +953,17 @@ function Scarlet(pluginArr) {
 			// Invoke
 			var result = instance.myMethod(1,2);
 	*/
-	self.intercept = function(typeOrInstance,memberName) {
+	self.intercept = function(typeOrInstance, memberName) {
 		assert(typeOrInstance, "Please make sure you supply a typeOrInstance parameter. eg. scarlet.intercept(MyFunc, scarlet.type.asInstance());");
 
 		logger.info(Scarlet, "intercept", "For Type Or Instance", [typeOrInstance]);
 		interceptor = new Interceptor();
 		interceptor.observable = typeOrInstance;
-		interceptor.intercept(typeOrInstance, 
-								memberName,
-								function(observable) {
-									interceptor.observable = observable;
-								});
+		interceptor.intercept(typeOrInstance,
+			memberName,
+			function(observable) {
+				interceptor.observable = observable;
+			});
 		interceptor.using(self.beforeEventEmitterInterceptor);
 		return self;
 	};
@@ -1019,7 +1029,7 @@ function Scarlet(pluginArr) {
 
 	self.afterEventEmitterInterceptor = function(error, info, proceed) {
 		assert(interceptor);
-		if(error !== undefined && error !== null){
+		if (error !== undefined && error !== null) {
 			self.emit("error", {
 				info: info,
 				args: info.args,
@@ -1041,7 +1051,7 @@ function Scarlet(pluginArr) {
 				method: info.method,
 				self: info.context
 			});
-		} catch(err){
+		} catch (err) {
 			self.emit("error", {
 				info: info,
 				args: info.args,
@@ -1087,7 +1097,7 @@ function Scarlet(pluginArr) {
 		return self;
 	};
 
-	self.interceptQuery = function(proceed, info){
+	self.interceptQuery = function(proceed, info) {
 		return new ScarletTrace(proceed, info);
 	};
 
@@ -1102,20 +1112,19 @@ function Scarlet(pluginArr) {
 			}
 		}
 	};
-	
-	self.on("error",function(error){
+
+	self.on("error", function(error) {
 		logger.error(Scarlet, "Event", "error event", [error]);
 	});
-		
+
 	initializePlugins();
 
 	events.EventEmitter.call(self);
 }
 
-util.inherits(Scarlet,events.EventEmitter);
+util.inherits(Scarlet, events.EventEmitter);
 
 module.exports = Scarlet;
-
 },{"./extensions/logger":3,"./extensions/scarletTrace":5,"./interceptors/interceptor":6,"./plugins/plugin-manager":8,"assert":17,"events":20,"util":25}],17:[function(_dereq_,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
@@ -2074,8 +2083,8 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":18,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}],20:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/tchaplin/Documents/NodeDevelopment/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":18,"/Users/tchaplin/Documents/NodeDevelopment/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22,"inherits":21}],20:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2447,6 +2456,13 @@ process.browser = true;
 process.env = {};
 process.argv = [];
 
+function noop() {}
+
+process.on = noop;
+process.once = noop;
+process.off = noop;
+process.emit = noop;
+
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
 }
@@ -2684,11 +2700,11 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-}).call(this,_dereq_("c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js"))
-},{"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22}],24:[function(_dereq_,module,exports){
+}).call(this,_dereq_("/Users/tchaplin/Documents/NodeDevelopment/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"))
+},{"/Users/tchaplin/Documents/NodeDevelopment/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22}],24:[function(_dereq_,module,exports){
 module.exports=_dereq_(18)
 },{}],25:[function(_dereq_,module,exports){
 module.exports=_dereq_(19)
-},{"./support/isBuffer":24,"c:\\Disney\\scarlet\\node_modules\\gulp-browserify\\node_modules\\browserify\\node_modules\\insert-module-globals\\node_modules\\process\\browser.js":22,"inherits":21}]},{},[1])
+},{"./support/isBuffer":24,"/Users/tchaplin/Documents/NodeDevelopment/scarlet/node_modules/gulp-browserify/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22,"inherits":21}]},{},[1])
 (1)
 });

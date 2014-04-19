@@ -20,7 +20,8 @@ gulp.task("lint", function() {
   gulp.src(["./lib/**/*.js",
             "./tests/**/*.js"])
             .pipe(jshint())
-            .pipe(jshint.reporter("default"));
+            .pipe(jshint.reporter("default"))
+            .pipe(jshint.reporter('fail'));
 });
 
 gulp.task("catchErrorTest",function(){
@@ -56,20 +57,20 @@ gulp.task("browserify", function() {
 });
 
 gulp.task("bump", function(){
-  return gulp.src("./package.json")
-              .pipe(bump())
-              .pipe(gulp.dest("./"));
+    return gulp.src("./package.json")
+                .pipe(bump())
+                .pipe(gulp.dest("./"));
 });
 
 
 gulp.task("tag",["bump"] ,function () {
-  var version = require("./package.json").version;
-  gutil.log('Tagging:'+version);
-  
-  gulp.src('./')
-            .pipe(git.commit(version))
-            .pipe(git.tag(version, version))
-            //.pipe(git.push('origin', 'master', {args:'--tags'}))
-            .on("error", gutil.log);
+    var version = require("./package.json").version;
+    gutil.log('Tagging:'+version);
+
+    gulp.src("./package.json")
+        .pipe(git.commit(version));
+
+    git.tag(version, version);
+    git.push("origin","master",{args:"--tags"});
 });
 

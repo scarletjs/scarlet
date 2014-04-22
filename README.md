@@ -78,7 +78,7 @@ var Scarlet = require('scarlet');
 var scarlet = new Scarlet();
 
 Math.min = scarlet.intercept(Math.min)
-    .using(function(proceed, invocation){ 
+    .using(function(invocation, proceed){ 
         proceed(null, Math.max(invocation.args));
     }).proxy();
 

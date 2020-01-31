@@ -33,7 +33,7 @@ Math.min(1,2,3);
 
 ## Project Purpose
 
-Scarlet is designed to to be simple, easy and fast. It allows you to implement behaviours on **methods** and **properties** at runtime without having to change original source code. Why would you want to do this? Well it depends on your point of view. Scarlet can be used for writing all sorts of frameworks including logging, mocking, instrumentation, inversion of control containers and possibly many more. 
+Scarlet is designed to be simple, easy and fast. It allows you to implement behaviours on **methods** and **properties** at runtime without having to change original source code. Why would you want to do this? Well it depends on your point of view. Scarlet can be used for writing all sorts of frameworks including logging, mocking, instrumentation, inversion of control containers and possibly many more. 
 
 For more on aspect oriented programming please read [this](http://en.wikipedia.org/wiki/Aspect-oriented_programming).
 
